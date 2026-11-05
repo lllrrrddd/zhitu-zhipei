@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "http_status": 200,
+    "engine": "ai",
+    "name_matches_gt": true,
+    "gt_education_count": 2,
+    "parsed_education_count": 2,
+    "gt_work_count": 1,
+    "parsed_experience_count": 2,
+    "warnings": [
+      "AI 结果已通过字段和来源校验，请核对后保存。"
+    ],
+    "error": null,
+    "elapsed_seconds": 87.2
+  },
+  {
+    "id": 2,
+    "http_status": 200,
+    "engine": "ai",
+    "name_matches_gt": true,
+    "gt_education_count": 1,
+    "parsed_education_count": 2,
+    "gt_work_count": 3,
+    "parsed_experience_count": 0,
+    "warnings": [
+      "AI 结果已通过字段和来源校验，请核对后保存。"
+    ],
+    "error": null,
+    "elapsed_seconds": 101.5
+  }
+]

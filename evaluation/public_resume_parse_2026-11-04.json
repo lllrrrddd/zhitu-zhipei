@@ -1,0 +1,118 @@
+[
+  {
+    "id": 1,
+    "text_chars": 742,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 2,
+    "parsed_education_count": 2,
+    "education_school_label_found": 2,
+    "education_school_label_in_text": 2,
+    "education_school_label_total": 2,
+    "gt_work_count": 1,
+    "parsed_experience_count": 1,
+    "work_company_label_found": 1,
+    "work_company_label_in_text": 1,
+    "work_company_label_total": 1,
+    "parsed_name_matches_gt": true,
+    "warnings": [
+      "部分识别字段超过可保存长度，已截断，请核对。"
+    ],
+    "elapsed_seconds": 0.06
+  },
+  {
+    "id": 2,
+    "text_chars": 903,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 1,
+    "parsed_education_count": 1,
+    "education_school_label_found": 1,
+    "education_school_label_in_text": 1,
+    "education_school_label_total": 1,
+    "gt_work_count": 3,
+    "parsed_experience_count": 0,
+    "work_company_label_found": 0,
+    "work_company_label_in_text": 0,
+    "work_company_label_total": 2,
+    "parsed_name_matches_gt": true,
+    "warnings": [],
+    "elapsed_seconds": 0.05
+  },
+  {
+    "id": 3,
+    "text_chars": 1217,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 1,
+    "parsed_education_count": 1,
+    "education_school_label_found": 1,
+    "education_school_label_in_text": 1,
+    "education_school_label_total": 1,
+    "gt_work_count": 2,
+    "parsed_experience_count": 3,
+    "work_company_label_found": 2,
+    "work_company_label_in_text": 2,
+    "work_company_label_total": 2,
+    "parsed_name_matches_gt": true,
+    "warnings": [],
+    "elapsed_seconds": 0.2
+  },
+  {
+    "id": 100,
+    "text_chars": 686,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 3,
+    "parsed_education_count": 6,
+    "education_school_label_found": 3,
+    "education_school_label_in_text": 3,
+    "education_school_label_total": 3,
+    "gt_work_count": 1,
+    "parsed_experience_count": 0,
+    "work_company_label_found": 0,
+    "work_company_label_in_text": 1,
+    "work_company_label_total": 1,
+    "parsed_name_matches_gt": true,
+    "warnings": [
+      "部分识别字段超过可保存长度，已截断，请核对。"
+    ],
+    "elapsed_seconds": 0.05
+  },
+  {
+    "id": 500,
+    "text_chars": 654,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 1,
+    "parsed_education_count": 1,
+    "education_school_label_found": 0,
+    "education_school_label_in_text": 1,
+    "education_school_label_total": 1,
+    "gt_work_count": 2,
+    "parsed_experience_count": 1,
+    "work_company_label_found": 0,
+    "work_company_label_in_text": 2,
+    "work_company_label_total": 2,
+    "parsed_name_matches_gt": false,
+    "warnings": [
+      "未识别到姓名，请手动填写。"
+    ],
+    "elapsed_seconds": 0.03
+  },
+  {
+    "id": 1000,
+    "text_chars": 608,
+    "gt_name_found_in_text": true,
+    "gt_education_count": 1,
+    "parsed_education_count": 0,
+    "education_school_label_found": 0,
+    "education_school_label_in_text": 1,
+    "education_school_label_total": 1,
+    "gt_work_count": 1,
+    "parsed_experience_count": 1,
+    "work_company_label_found": 0,
+    "work_company_label_in_text": 1,
+    "work_company_label_total": 1,
+    "parsed_name_matches_gt": true,
+    "warnings": [
+      "发现教育标题但未识别到教育条目，请核对原文与版面顺序。"
+    ],
+    "elapsed_seconds": 0.03
+  }
+]

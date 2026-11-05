@@ -1,0 +1,397 @@
+{
+  "scope": "structured-fixture offline baseline; not end-to-end product accuracy",
+  "input_sha256": {
+    "profiles.json": "58ecdfe796b15ea943c27d1be1814f9950691fe8e38cc0fdea48380e4bf18a74",
+    "jobs.json": "281a4b0080e064a7ed51f628c291ddfb8526459230ae6b52329784133041a984",
+    "labels.json": "dfa2d429c2c7c828cada54881d95f0904cdbb708b06429af9526383c442d1e7c"
+  },
+  "code_sha256": {
+    "app/services/job/job_match.py": "bad5e09209240729bfd795a539d81764db302df9b32c0bb9cc7deeff83ac6510",
+    "app/services/job/job_match_batch.py": "78b126e53bffdb7d2403a19d4bcc492355e8c5b975d240b7aba751e8993cc346",
+    "app/services/match_scoring.py": "5bd3512b6d1a0b775fb401ce95fa9f3388a18199b73e4ff2805e1c22c4edee45"
+  },
+  "profile_count": 5,
+  "active_job_count": 12,
+  "excluded_past_deadline_count": 2,
+  "labels": "author provisional, not independently reviewed",
+  "runs": [
+    {
+      "profile_id": "P-CS",
+      "relevant_count": 4,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 1.0,
+      "hard_block_in_top_5": [],
+      "irrelevant_in_top_5": [
+        "J03"
+      ],
+      "top_10": [
+        {
+          "job_id": "J06",
+          "hard_gate": "met",
+          "reference_score": 70,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J04",
+          "hard_gate": "met",
+          "reference_score": 68,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J01",
+          "hard_gate": "met",
+          "reference_score": 62,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J05",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J03",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J11",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J07",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J08",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J09",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J10",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        }
+      ]
+    },
+    {
+      "profile_id": "P-MAT",
+      "relevant_count": 2,
+      "recall_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "ndcg_at_10": 0.7977,
+      "hard_block_in_top_5": [],
+      "irrelevant_in_top_5": [
+        "J06",
+        "J04",
+        "J05",
+        "J03"
+      ],
+      "top_10": [
+        {
+          "job_id": "J11",
+          "hard_gate": "met",
+          "reference_score": 82,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J06",
+          "hard_gate": "met",
+          "reference_score": 60,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J04",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J05",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J03",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J01",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J07",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J08",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J09",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J10",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        }
+      ]
+    },
+    {
+      "profile_id": "P-BIO",
+      "relevant_count": 1,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_10": 1.0,
+      "hard_block_in_top_5": [],
+      "irrelevant_in_top_5": [
+        "J06",
+        "J04",
+        "J05",
+        "J11"
+      ],
+      "top_10": [
+        {
+          "job_id": "J03",
+          "hard_gate": "met",
+          "reference_score": 82,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J06",
+          "hard_gate": "met",
+          "reference_score": 60,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J04",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J05",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J11",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J01",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J07",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J08",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J09",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J10",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        }
+      ]
+    },
+    {
+      "profile_id": "P-FIN",
+      "relevant_count": 0,
+      "recall_at_5": null,
+      "precision_at_5": 0.0,
+      "ndcg_at_10": null,
+      "hard_block_in_top_5": [],
+      "irrelevant_in_top_5": [
+        "J04",
+        "J06",
+        "J05",
+        "J03",
+        "J11"
+      ],
+      "top_10": [
+        {
+          "job_id": "J04",
+          "hard_gate": "met",
+          "reference_score": 68,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J06",
+          "hard_gate": "met",
+          "reference_score": 60,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J05",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J03",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J11",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J01",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J07",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J08",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J09",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J10",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        }
+      ]
+    },
+    {
+      "profile_id": "P-IC",
+      "relevant_count": 1,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "ndcg_at_10": 1.0,
+      "hard_block_in_top_5": [],
+      "irrelevant_in_top_5": [
+        "J06",
+        "J04",
+        "J05",
+        "J03"
+      ],
+      "top_10": [
+        {
+          "job_id": "J07",
+          "hard_gate": "met",
+          "reference_score": 72,
+          "provisional_relevant": true
+        },
+        {
+          "job_id": "J06",
+          "hard_gate": "met",
+          "reference_score": 60,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J04",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J05",
+          "hard_gate": "met",
+          "reference_score": 58,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J03",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J11",
+          "hard_gate": "met",
+          "reference_score": 54,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J01",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J08",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J09",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        },
+        {
+          "job_id": "J10",
+          "hard_gate": "met",
+          "reference_score": 52,
+          "provisional_relevant": false
+        }
+      ]
+    }
+  ]
+}

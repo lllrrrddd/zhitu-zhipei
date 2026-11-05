@@ -1,0 +1,13 @@
+samples/private/
+runtime/
+requirements/
+submission/
+source/SyntheticResumeData/
+.ruff_cache/
+evaluation/*.log
+source/ResumeForge/frontend/test-results/
+*.zip
+source/ResumeForge/backend/.venv/
+source/ResumeForge/backend/data/
+source/ResumeForge/frontend/node_modules/
+source/ResumeForge/frontend/dist/

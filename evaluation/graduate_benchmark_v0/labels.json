@@ -1,0 +1,11 @@
+{
+  "version": "0.1",
+  "review_status": "作者初标，待至少两名非编写者独立复核；不得当作已验证的推荐准确率。",
+  "labels": [
+    {"profile_id":"P-CS","relevant_job_ids":["J01","J04","J05","J06"],"requires_confirmation_job_ids":["J02"],"hard_block_job_ids":["J14"],"reason":"计算机与AI项目有直接证据；生物基因组算法岗的硕士放宽条件要向招聘方确认。"},
+    {"profile_id":"P-MAT","relevant_job_ids":["J09","J11"],"requires_confirmation_job_ids":[],"hard_block_job_ids":["J14"],"reason":"电池与材料研究有证据；高分子材料岗位的专门知识未提供，不能当作已匹配。"},
+    {"profile_id":"P-BIO","relevant_job_ids":["J03"],"requires_confirmation_job_ids":["J02"],"hard_block_job_ids":["J14"],"reason":"NGS和文献能力支持医学技术岗；基因组算法岗原则要求博士，硕士例外尚无确认。"},
+    {"profile_id":"P-FIN","relevant_job_ids":[],"archived_relevant_job_ids":["J12","J13"],"requires_confirmation_job_ids":[],"hard_block_job_ids":["J14"],"reason":"金融方向相近岗位的页面记载申请截止日已过，不能列为当前可投递推荐。"},
+    {"profile_id":"P-IC","relevant_job_ids":["J07"],"requires_confirmation_job_ids":["J08"],"hard_block_job_ids":["J14"],"reason":"数字设计与验证有直接证据；射频电路和仿真工具未见证据。"}
+  ]
+}

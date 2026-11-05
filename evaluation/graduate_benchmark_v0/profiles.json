@@ -1,0 +1,80 @@
+{
+  "version": "0.1",
+  "provenance": "团队为离线评测编写的虚构研究生画像；不对应真人。技能只在 evidence 中有明确文本时视为已确认。",
+  "profiles": [
+    {
+      "id": "P-CS",
+      "name": "计算机硕士样本",
+      "degree": "master",
+      "graduation_year": 2027,
+      "major": "计算机科学与技术",
+      "target_cities": ["上海", "南京", "东莞"],
+      "evidence": {
+        "Python": "研究项目中使用 Python 开发数据处理与推理服务。",
+        "PyTorch": "使用 PyTorch 完成文本分类模型训练。",
+        "RAG": "毕业课题搭建检索增强问答原型。",
+        "FastAPI": "使用 FastAPI 提供模型推理接口。",
+        "SQL": "在项目中编写 SQL 查询和数据清洗脚本。",
+        "Docker": "将服务打包为 Docker 镜像并部署测试。"
+      }
+    },
+    {
+      "id": "P-MAT",
+      "name": "材料硕士样本",
+      "degree": "master",
+      "graduation_year": 2027,
+      "major": "材料科学与工程",
+      "target_cities": ["北京", "东莞", "深圳"],
+      "evidence": {
+        "电池材料": "课题研究锂离子电池正极材料。",
+        "界面改性": "参与电极界面改性与循环性能实验。",
+        "XRD": "使用 XRD 分析晶体结构。",
+        "SEM": "使用 SEM 观察材料形貌。",
+        "Python": "用 Python 处理电化学测试数据。"
+      }
+    },
+    {
+      "id": "P-BIO",
+      "name": "生物硕士样本",
+      "degree": "master",
+      "graduation_year": 2027,
+      "major": "分子生物学",
+      "target_cities": ["南京", "上海"],
+      "evidence": {
+        "NGS": "课题中参与肿瘤样本 NGS 检测流程。",
+        "PCR": "独立完成 PCR 实验和数据记录。",
+        "文献检索": "每月检索英文文献并整理实验方案。",
+        "Python": "使用 Python 绘制实验数据图表。"
+      }
+    },
+    {
+      "id": "P-FIN",
+      "name": "金融硕士样本",
+      "degree": "master",
+      "graduation_year": 2027,
+      "major": "金融工程",
+      "target_cities": ["上海"],
+      "evidence": {
+        "Python": "使用 Python 构建收益率预测与回测脚本。",
+        "统计建模": "毕业论文比较时间序列与因子模型。",
+        "SQL": "在实习中使用 SQL 整理交易数据。",
+        "固收": "研究项目分析固收产品的收益与风险。"
+      }
+    },
+    {
+      "id": "P-IC",
+      "name": "集成电路硕士样本",
+      "degree": "master",
+      "graduation_year": 2027,
+      "major": "集成电路工程",
+      "target_cities": ["北京", "成都"],
+      "evidence": {
+        "Verilog": "课题使用 Verilog 实现数字信号处理模块。",
+        "UVM": "使用 UVM 编写模块级验证环境。",
+        "FPGA": "完成 FPGA 原型验证和板级调试。",
+        "Python": "使用 Python 编写仿真结果分析脚本。",
+        "VCS": "使用 VCS 运行回归仿真。"
+      }
+    }
+  ]
+}

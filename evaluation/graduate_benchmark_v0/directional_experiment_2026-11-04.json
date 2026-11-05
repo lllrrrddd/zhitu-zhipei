@@ -1,0 +1,1157 @@
+{
+  "scope": "structured-fixture experiment; no OCR, JD extraction, LLM or live opening check",
+  "results": [
+    {
+      "profile_id": "P-CS",
+      "directional_fits": [
+        {
+          "job_id": "J06",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "RAG",
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "RAG": [
+              {
+                "skill": "RAG",
+                "excerpt": "毕业课题搭建检索增强问答原型。"
+              }
+            ],
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "研究项目中使用 Python 开发数据处理与推理服务。"
+              }
+            ]
+          },
+          "rank_score": 9
+        },
+        {
+          "job_id": "J01",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116276.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "PyTorch"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "PyTorch": [
+              {
+                "skill": "PyTorch",
+                "excerpt": "使用 PyTorch 完成文本分类模型训练。"
+              }
+            ]
+          },
+          "rank_score": 8
+        },
+        {
+          "job_id": "J04",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119461.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "Python",
+            "SQL"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "研究项目中使用 Python 开发数据处理与推理服务。"
+              }
+            ],
+            "SQL": [
+              {
+                "skill": "SQL",
+                "excerpt": "在项目中编写 SQL 查询和数据清洗脚本。"
+              }
+            ]
+          },
+          "rank_score": 6
+        },
+        {
+          "job_id": "J05",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119460.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [
+            "Docker"
+          ],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "研究项目中使用 Python 开发数据处理与推理服务。"
+              }
+            ],
+            "Docker": [
+              {
+                "skill": "Docker",
+                "excerpt": "将服务打包为 Docker 镜像并部署测试。"
+              }
+            ]
+          },
+          "rank_score": 6
+        }
+      ],
+      "needs_review": [
+        {
+          "job_id": "J02",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119455.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "学历有放宽条款，须向招聘方确认",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J03",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119464.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        },
+        {
+          "job_id": "J07",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J08",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J09",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2436703.htm",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J10",
+          "source_url": "https://job.hust.edu.cn/extxjh/471788308195792.do",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J11",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118057.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "blocked": [
+        {
+          "job_id": "J14",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "blocked",
+          "reason": "学历低于明确底线，且没有放宽条款",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "expired": [
+        {
+          "job_id": "J12",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J13",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "message": "岗位开放状态尚未核实"
+    },
+    {
+      "profile_id": "P-MAT",
+      "directional_fits": [
+        {
+          "job_id": "J11",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118057.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "电池材料",
+            "界面改性"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "电池材料": [
+              {
+                "skill": "电池材料",
+                "excerpt": "课题研究锂离子电池正极材料。"
+              }
+            ],
+            "界面改性": [
+              {
+                "skill": "界面改性",
+                "excerpt": "参与电极界面改性与循环性能实验。"
+              }
+            ]
+          },
+          "rank_score": 12
+        },
+        {
+          "job_id": "J09",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2436703.htm",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "材料表征"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "材料表征": [
+              {
+                "skill": "XRD",
+                "excerpt": "使用 XRD 分析晶体结构。"
+              },
+              {
+                "skill": "SEM",
+                "excerpt": "使用 SEM 观察材料形貌。"
+              }
+            ]
+          },
+          "rank_score": 8
+        }
+      ],
+      "needs_review": [
+        {
+          "job_id": "J01",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116276.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J02",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119455.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "学历有放宽条款，须向招聘方确认",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J03",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119464.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J04",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119461.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "用 Python 处理电化学测试数据。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J05",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119460.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "用 Python 处理电化学测试数据。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J06",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "方向相近，但核心能力证据不足，需补充或核对",
+          "major_fit": true,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "用 Python 处理电化学测试数据。"
+              }
+            ]
+          },
+          "rank_score": 5
+        },
+        {
+          "job_id": "J07",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        },
+        {
+          "job_id": "J08",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        },
+        {
+          "job_id": "J10",
+          "source_url": "https://job.hust.edu.cn/extxjh/471788308195792.do",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "方向相近，但核心能力证据不足，需补充或核对",
+          "major_fit": true,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 4
+        }
+      ],
+      "blocked": [
+        {
+          "job_id": "J14",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "blocked",
+          "reason": "学历低于明确底线，且没有放宽条款",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "expired": [
+        {
+          "job_id": "J12",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J13",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "message": "岗位开放状态尚未核实"
+    },
+    {
+      "profile_id": "P-BIO",
+      "directional_fits": [
+        {
+          "job_id": "J03",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119464.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "NGS",
+            "文献检索"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "NGS": [
+              {
+                "skill": "NGS",
+                "excerpt": "课题中参与肿瘤样本 NGS 检测流程。"
+              }
+            ],
+            "文献检索": [
+              {
+                "skill": "文献检索",
+                "excerpt": "每月检索英文文献并整理实验方案。"
+              }
+            ]
+          },
+          "rank_score": 12
+        }
+      ],
+      "needs_review": [
+        {
+          "job_id": "J01",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116276.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        },
+        {
+          "job_id": "J02",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119455.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "学历有放宽条款，须向招聘方确认",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J04",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119461.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 绘制实验数据图表。"
+              }
+            ]
+          },
+          "rank_score": 2
+        },
+        {
+          "job_id": "J05",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119460.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 绘制实验数据图表。"
+              }
+            ]
+          },
+          "rank_score": 2
+        },
+        {
+          "job_id": "J06",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 绘制实验数据图表。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J07",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J08",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J09",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2436703.htm",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J10",
+          "source_url": "https://job.hust.edu.cn/extxjh/471788308195792.do",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J11",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118057.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "blocked": [
+        {
+          "job_id": "J14",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "blocked",
+          "reason": "学历低于明确底线，且没有放宽条款",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "expired": [
+        {
+          "job_id": "J12",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J13",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "message": "岗位开放状态尚未核实"
+    },
+    {
+      "profile_id": "P-FIN",
+      "directional_fits": [],
+      "needs_review": [
+        {
+          "job_id": "J01",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116276.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        },
+        {
+          "job_id": "J02",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119455.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "学历有放宽条款，须向招聘方确认",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J03",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119464.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J04",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119461.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python",
+            "SQL"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 构建收益率预测与回测脚本。"
+              }
+            ],
+            "SQL": [
+              {
+                "skill": "SQL",
+                "excerpt": "在实习中使用 SQL 整理交易数据。"
+              }
+            ]
+          },
+          "rank_score": 2
+        },
+        {
+          "job_id": "J05",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119460.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 构建收益率预测与回测脚本。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J06",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 构建收益率预测与回测脚本。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J07",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J08",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J09",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2436703.htm",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J10",
+          "source_url": "https://job.hust.edu.cn/extxjh/471788308195792.do",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J11",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118057.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "blocked": [
+        {
+          "job_id": "J14",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "blocked",
+          "reason": "学历低于明确底线，且没有放宽条款",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "expired": [
+        {
+          "job_id": "J12",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J13",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "message": "暂无有证据支持的方向匹配岗位"
+    },
+    {
+      "profile_id": "P-IC",
+      "directional_fits": [
+        {
+          "job_id": "J07",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "directional_fit",
+          "reason": "专业方向和已提供的能力证据有交集；投递状态仍须核实",
+          "major_fit": true,
+          "matched_core": [
+            "Verilog",
+            "VCS",
+            "数字电路"
+          ],
+          "matched_preferred": [
+            "FPGA"
+          ],
+          "matched_evidence": {
+            "Verilog": [
+              {
+                "skill": "Verilog",
+                "excerpt": "课题使用 Verilog 实现数字信号处理模块。"
+              }
+            ],
+            "VCS": [
+              {
+                "skill": "VCS",
+                "excerpt": "使用 VCS 运行回归仿真。"
+              }
+            ],
+            "数字电路": [
+              {
+                "skill": "Verilog",
+                "excerpt": "课题使用 Verilog 实现数字信号处理模块。"
+              },
+              {
+                "skill": "FPGA",
+                "excerpt": "完成 FPGA 原型验证和板级调试。"
+              }
+            ],
+            "FPGA": [
+              {
+                "skill": "FPGA",
+                "excerpt": "完成 FPGA 原型验证和板级调试。"
+              }
+            ]
+          },
+          "rank_score": 17
+        }
+      ],
+      "needs_review": [
+        {
+          "job_id": "J01",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116276.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J02",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119455.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "学历有放宽条款，须向招聘方确认",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J03",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119464.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J04",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119461.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 编写仿真结果分析脚本。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J05",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119460.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 编写仿真结果分析脚本。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J06",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [
+            "Python"
+          ],
+          "matched_preferred": [],
+          "matched_evidence": {
+            "Python": [
+              {
+                "skill": "Python",
+                "excerpt": "使用 Python 编写仿真结果分析脚本。"
+              }
+            ]
+          },
+          "rank_score": 1
+        },
+        {
+          "job_id": "J08",
+          "source_url": "https://www.onmicro.com.cn/xyzp/230.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "方向相近，但核心能力证据不足，需补充或核对",
+          "major_fit": true,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 4
+        },
+        {
+          "job_id": "J09",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2436703.htm",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J10",
+          "source_url": "https://job.hust.edu.cn/extxjh/471788308195792.do",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J11",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118057.html",
+          "application_status": "unknown",
+          "status": "review",
+          "reason": "未确认专业方向对应关系，不能仅凭通用技能推荐",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 1
+        }
+      ],
+      "blocked": [
+        {
+          "job_id": "J14",
+          "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119468.html",
+          "application_status": "unknown",
+          "status": "blocked",
+          "reason": "学历低于明确底线，且没有放宽条款",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "expired": [
+        {
+          "job_id": "J12",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        },
+        {
+          "job_id": "J13",
+          "source_url": "https://job.hust.edu.cn/zpinfo1/2454473.htm",
+          "application_status": "past_reported_deadline",
+          "status": "expired",
+          "reason": "来源页面记载的截止日已过或岗位已关闭；请重新核对",
+          "major_fit": false,
+          "matched_core": [],
+          "matched_preferred": [],
+          "matched_evidence": {},
+          "rank_score": 0
+        }
+      ],
+      "message": "岗位开放状态尚未核实"
+    }
+  ]
+}
