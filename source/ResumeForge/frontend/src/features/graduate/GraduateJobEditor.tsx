@@ -64,9 +64,16 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
   const [sourceFragments, setSourceFragments] = useState<Record<string, string>>({});
   const textVersion = useRef(0);
 
-  const edit = <T,>(setter: (value: T) => void, value: T) => {
+  const edit = <T,>(setter: (value: T) => void, value: T, sourceField?: string) => {
     textVersion.current += 1;
     setter(value);
+    if (sourceField) {
+      setSourceFragments((previous) => {
+        const next = { ...previous };
+        delete next[sourceField];
+        return next;
+      });
+    }
     setConfirmed(false);
     setError("");
   };
@@ -129,6 +136,8 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
       source_url: sourceUrl.trim(),
       source_checked_at: localDate(),
       application_status: applicationStatus,
+      raw_text: rawText.trim() || undefined,
+      source_fragments: Object.keys(sourceFragments).length ? sourceFragments : undefined,
     });
     textVersion.current += 1;
     setTitle("");
@@ -223,7 +232,7 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
             label:
               degree === "unknown" ? t("graduate.degree.unknown") : t(`graduate.degree.${degree}`),
           }))}
-          onChange={(value) => edit(setDegreeFloor, value)}
+          onChange={(value) => edit(setDegreeFloor, value, "degree_floor")}
         />
         <InputNumber
           aria-label={t("graduate.jobYear")}
@@ -232,7 +241,7 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
           min={2020}
           max={2100}
           style={{ width: 160 }}
-          onChange={(value) => edit(setGraduationYear, value)}
+          onChange={(value) => edit(setGraduationYear, value, "graduation_year")}
         />
       </Space>
       <Checkbox
@@ -246,14 +255,14 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
         placeholder={t("graduate.jobMajors")}
         value={majors}
         maxLength={500}
-        onChange={(event) => edit(setMajors, event.target.value)}
+        onChange={(event) => edit(setMajors, event.target.value, "preferred_majors")}
       />
       <Input
         aria-label={t("graduate.jobSkills")}
         placeholder={t("graduate.jobSkills")}
         value={skills}
         maxLength={500}
-        onChange={(event) => edit(setSkills, event.target.value)}
+        onChange={(event) => edit(setSkills, event.target.value, "core_skills")}
       />
       <Input
         aria-label={t("graduate.jobSource")}
@@ -272,7 +281,7 @@ export default function GraduateJobEditor({ onAdd }: { onAdd: (job: NewJob) => v
             label: t(`graduate.jobStatus.${status}`),
           }),
         )}
-        onChange={(value) => edit(setApplicationStatus, value)}
+        onChange={(value) => edit(setApplicationStatus, value, "application_status")}
       />
       <Checkbox checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)}>
         {t("graduate.jobConfirm")}

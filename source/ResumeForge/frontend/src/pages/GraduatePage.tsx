@@ -14,6 +14,7 @@ import {
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getGraduateDemo, rankGraduateJobs } from "../api/graduate";
+import { createJob, listJobs } from "../api/jobs";
 import { getProfile } from "../api/profile";
 import type {
   GraduateDecision,
@@ -23,6 +24,7 @@ import type {
 } from "../features/graduate/types";
 import GraduateJobEditor from "../features/graduate/GraduateJobEditor";
 import GraduateDecisionGroup from "../features/graduate/GraduateDecisionGroup";
+import { graduateJobPayload } from "../features/graduate/graduateJobPayload";
 import { profileToGraduate } from "../features/graduate/profileToGraduate";
 import { useApi } from "../hooks/useApi";
 import { t } from "../i18n";
@@ -61,6 +63,8 @@ export default function GraduatePage() {
   const [ranking, setRanking] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [customJobs, setCustomJobs] = useState<GraduateJob[]>([]);
+  const [savedJobIds, setSavedJobIds] = useState<Record<string, number>>({});
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const nextJobId = useRef(1);
   const requestVersion = useRef(0);
   const draft = customDraft ?? demo?.profiles[0] ?? null;
@@ -85,6 +89,26 @@ export default function GraduatePage() {
     setResult(null);
     setPreviousResult(null);
     setMovements([]);
+  };
+
+  const saveJob = async (job: GraduateJob) => {
+    if (!job.id.startsWith("CUSTOM-") || savedJobIds[job.id] || savingJobId) return;
+    setSavingJobId(job.id);
+    setFeedback("");
+    try {
+      const existing = await listJobs({ keyword: job.title, page_size: 100 });
+      const sourceUrl = job.detail_source_url ?? job.source_url;
+      const found = existing.items.find(
+        (item) =>
+          item.source_url === sourceUrl && item.title === job.title && item.company === job.company,
+      );
+      const saved = found ?? (await createJob(graduateJobPayload(job)));
+      setSavedJobIds((previous) => ({ ...previous, [job.id]: saved.id }));
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : t("graduate.saveFailed"));
+    } finally {
+      setSavingJobId(null);
+    }
   };
 
   const changeDraft = (change: Partial<GraduateProfile>) => {
@@ -409,24 +433,36 @@ export default function GraduatePage() {
             items={result.directional_fits}
             jobs={jobs}
             profile={draft}
+            onSaveJob={(job) => void saveJob(job)}
+            savedJobIds={savedJobIds}
+            savingJobId={savingJobId}
           />
           <GraduateDecisionGroup
             titleKey="graduate.reviewTitle"
             items={result.needs_review}
             jobs={jobs}
             profile={draft}
+            onSaveJob={(job) => void saveJob(job)}
+            savedJobIds={savedJobIds}
+            savingJobId={savingJobId}
           />
           <GraduateDecisionGroup
             titleKey="graduate.blockedTitle"
             items={result.blocked}
             jobs={jobs}
             profile={draft}
+            onSaveJob={(job) => void saveJob(job)}
+            savedJobIds={savedJobIds}
+            savingJobId={savingJobId}
           />
           <GraduateDecisionGroup
             titleKey="graduate.expiredTitle"
             items={result.expired}
             jobs={jobs}
             profile={draft}
+            onSaveJob={(job) => void saveJob(job)}
+            savedJobIds={savedJobIds}
+            savingJobId={savingJobId}
           />
         </Space>
       )}

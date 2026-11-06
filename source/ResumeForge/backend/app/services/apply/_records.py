@@ -21,7 +21,7 @@ from ...models.apply import (
     ApplyTask,
     ApplyTaskItem,
 )
-from ...models.job import JOB_STATUS_APPLIED, JOB_STATUS_OPEN, Job
+from ...models.job import JOB_STATUS_APPLIED, JOB_STATUS_OPEN, JOB_STATUS_UNVERIFIED, Job
 from ...models.profile import utcnow
 from ...schemas.apply import (
     ApplyFailureCountOut,
@@ -55,11 +55,11 @@ def _as_task_status(value: str) -> TaskStatus:
 
 
 def write_back_job_status(db: Session, job_id: int | None) -> None:
-    """投递成功 → 岗位状态置为「已投递」；只在岗位仍是「开放中」时回写，不覆盖用户手改。"""
+    """投递成功 → 岗位状态置为「已投递」；不覆盖用户手改的关闭状态。"""
     if job_id is None:
         return
     job = db.get(Job, job_id)
-    if job is not None and job.status in (JOB_STATUS_OPEN, ""):
+    if job is not None and job.status in (JOB_STATUS_UNVERIFIED, JOB_STATUS_OPEN, ""):
         job.status = JOB_STATUS_APPLIED
         job.updated_at = utcnow()
 

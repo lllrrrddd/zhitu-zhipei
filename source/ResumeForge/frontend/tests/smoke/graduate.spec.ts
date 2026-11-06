@@ -39,6 +39,14 @@ test("graduate demo confirms facts and shows a source-backed ranking", async ({ 
   );
   await page.getByText("查看针对本岗位的简历表达建议").first().click();
   await expect(page.getByText(/定向简历可优先呈现这段经历/).first()).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "本人具体负责什么（必填）" })
+    .first()
+    .fill("实现数据处理流程");
+  await page.getByRole("textbox", { name: "使用的方法或工具（必填）" }).first().fill("Python");
+  await page.getByRole("checkbox", { name: "我确认以上内容是本人真实经历" }).first().check();
+  await page.getByRole("button", { name: "生成可复制的表达草稿" }).first().click();
+  await expect(page.getByText(/我负责实现数据处理流程，使用Python/).first()).toBeVisible();
   await page.getByRole("button", { name: "采纳建议并下载记录" }).first().click();
   await expect(page.getByText("请先填写理由。")).toBeVisible();
   await page.getByRole("textbox", { name: "采纳或拒绝的理由" }).first().fill("依据与项目经历一致");
@@ -103,6 +111,8 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
   await page.getByRole("checkbox", { name: /我已核对以上画像/ }).check();
   await page.getByRole("button", { name: "根据确认的信息排序" }).click();
   await expect(page.getByText("测试单位 · 算法工程师测试岗 · 上海")).toHaveCount(2);
+  await page.getByText("逐项核对岗位条件与简历证据").last().click();
+  await expect(page.getByText(/画像依据：/).last()).toBeVisible();
   await expect(page.getByText(/条件核查记录：20\d{2}-\d{2}-\d{2}/)).toHaveCount(2);
   await expect(
     page.getByRole("link", { name: "打开招聘页面：测试单位 · 算法工程师测试岗 · 上海" }),
@@ -115,6 +125,11 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
     .screenshot({
       path: test.info().outputPath("graduate-custom-job.png"),
     });
+  await page.getByRole("button", { name: "保存到岗位库" }).click();
+  const savedLink = page.getByRole("link", { name: "打开已保存岗位，继续分析或制作简历" });
+  await expect(savedLink).toHaveAttribute("href", /\/jobs\?job_id=\d+/);
+  await savedLink.click();
+  await expect(page.getByText("待核实").first()).toBeVisible();
 });
 
 test("pasted posting becomes a confirmed review draft before ranking", async ({ page }) => {
@@ -139,4 +154,11 @@ test("pasted posting becomes a confirmed review draft before ranking", async ({ 
   await page.getByRole("checkbox", { name: /我已核对以上画像/ }).check();
   await page.getByRole("button", { name: "根据确认的信息排序" }).click();
   await expect(page.getByText("测试单位 · 算法工程师测试岗 · 上海")).toHaveCount(2);
+  const customResult = page
+    .getByRole("link", { name: "打开招聘页面：测试单位 · 算法工程师测试岗 · 上海" })
+    .last()
+    .locator("..");
+  await customResult.getByText("逐项核对岗位条件与简历证据").click();
+  await customResult.getByText("查看本次粘贴的招聘原文").click();
+  await expect(customResult.getByText(/公司名称：测试单位[\s\S]*熟悉 PyTorch，2027届毕业生/)).toBeVisible();
 });

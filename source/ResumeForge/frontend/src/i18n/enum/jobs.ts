@@ -29,6 +29,7 @@ export const JOB_TYPE_LABEL_KEYS: Record<string, MessageKey> = {
  * 因此下拉可以直接按本表条目渲染。
  */
 export const JOB_STATUS_LABEL_KEYS: Record<string, MessageKey> = {
+  待核实: "enumsJobs.status.unverified", // i18n-ok: 后端协议值（中文枚举），仅作查表键
   开放中: "enumsJobs.status.open", // i18n-ok: 后端协议值（中文枚举），仅作查表键
   已截止: "enumsJobs.status.closed",
   已投递: "enumsJobs.status.applied", // i18n-ok: 后端协议值（中文枚举），仅作查表键

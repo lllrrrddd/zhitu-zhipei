@@ -46,6 +46,25 @@ const graduate = {
     "Conditions checked on {date}; opening status still needs verification",
   "graduate.matched": "Matched job skills: {skills}",
   "graduate.aliasEvidence": "{skill}: {excerpt}",
+  "graduate.checkRequirements": "Review each job requirement and resume evidence",
+  "graduate.checkHint":
+    "These are the entered job summary and confirmed profile for this ranking. Missing evidence means it was not provided, not that you lack the skill. Check the original posting.",
+  "graduate.check.yes": "Evidence found",
+  "graduate.check.no": "Does not meet requirement",
+  "graduate.check.review": "Needs review",
+  "graduate.checkEvidence": "Profile evidence: {evidence}",
+  "graduate.jdSource": "Posting excerpt to check: {source}",
+  "graduate.checkNoEvidence": "Not provided in the current profile",
+  "graduate.checkNotEvaluated":
+    "This job was grouped by degree or deadline first; other skills were not evaluated",
+  "graduate.preferredSkill": "Preferred skill",
+  "graduate.originalPosting": "View the pasted job posting",
+  "graduate.summaryOnly":
+    "Only a structured summary is available; check the original posting for complete terms.",
+  "graduate.saveJob": "Save to job library",
+  "graduate.saveFailed": "Could not save this job. Try again.",
+  "graduate.openSavedJob": "Open saved job to analyze or create a resume",
+  "graduate.viewJobResumes": "View resumes for this job",
   "graduate.count": "{count} jobs",
   "graduate.changedTitle": "{count} job decisions changed after updating the profile",
   "graduate.changedItem": "{job}: {before} → {after}",
@@ -65,6 +84,17 @@ const graduate = {
   "graduate.resumeAdviceTitle": "Resume advice for this job",
   "graduate.resumeAdvice":
     "This job asks for {skill}. Your confirmed evidence says: “{excerpt}”. Put this experience early in a tailored resume and add only work and results you can verify.",
+  "graduate.researchTitle": "Describe research or project experience",
+  "graduate.researchHint":
+    "Confirmed evidence: “{excerpt}”. Enter only work you personally did and can verify; review the draft before using it.",
+  "graduate.researchContribution": "Your specific contribution (required)",
+  "graduate.researchMethod": "Method or tool used (required)",
+  "graduate.researchOutcomeField": "Verifiable result (optional)",
+  "graduate.researchConfirm": "I confirm these details are true about my work",
+  "graduate.researchCreate": "Create a copyable draft",
+  "graduate.researchDraft":
+    "For {skill}, I was responsible for {contribution}, using {method}{outcome}.",
+  "graduate.researchOutcome": ", achieving {outcome}",
   "graduate.feedbackHint":
     "Explain why you accept or reject this advice, then download the feedback record. It stays on your device; review it for personal information before sharing.",
   "graduate.feedbackReason": "Reason for accepting or rejecting",

@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   rankGraduateJobs: vi.fn(),
   parseGraduateJobText: vi.fn(),
   getProfile: vi.fn(),
+  listJobs: vi.fn(),
+  createJob: vi.fn(),
 }));
 
 vi.mock("../api/graduate", () => ({
@@ -18,6 +20,7 @@ vi.mock("../api/graduate", () => ({
   parseGraduateJobText: mocks.parseGraduateJobText,
 }));
 vi.mock("../api/profile", () => ({ getProfile: mocks.getProfile }));
+vi.mock("../api/jobs", () => ({ listJobs: mocks.listJobs, createJob: mocks.createJob }));
 
 const profile = {
   id: "P-TEST",
@@ -50,6 +53,8 @@ beforeEach(() => {
     notice: "Demo",
   });
   mocks.getProfile.mockReset().mockResolvedValue({ educations: [] });
+  mocks.listJobs.mockReset().mockResolvedValue({ items: [], total: 0 });
+  mocks.createJob.mockReset().mockResolvedValue({ id: 42 });
   mocks.parseGraduateJobText.mockReset().mockResolvedValue({
     company: "Draft Employer",
     title: "Draft Engineer",
@@ -118,6 +123,101 @@ describe("GraduatePage", () => {
         t("graduate.resumeAdvice", { skill: "Python", excerpt: "Built a Python service" }),
       ),
     ).toBeVisible();
+    fireEvent.click(screen.getByText(t("graduate.checkRequirements")));
+    expect(screen.getByText(t("graduate.checkHint"))).toBeVisible();
+    expect(screen.getByText(t("graduate.summaryOnly"))).toBeVisible();
+    expect(screen.queryByRole("button", { name: t("graduate.saveJob") })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.researchContribution") }), {
+      target: { value: "implemented the data pipeline" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.researchMethod") }), {
+      target: { value: "Python" },
+    });
+    const createDraft = screen.getByRole("button", { name: t("graduate.researchCreate") });
+    expect(createDraft).toBeDisabled();
+    fireEvent.click(screen.getByRole("checkbox", { name: t("graduate.researchConfirm") }));
+    fireEvent.click(createDraft);
+    expect(
+      screen.getByText(
+        t("graduate.researchDraft", {
+          skill: "Python",
+          contribution: "implemented the data pipeline",
+          method: "Python",
+          outcome: "",
+        }),
+      ),
+    ).toBeVisible();
+  });
+
+  it("saves a checked custom job as unverified and links to existing job and resume flows", async () => {
+    mocks.rankGraduateJobs.mockImplementation(
+      (_profile: unknown, jobs: Array<{ id: string; source_url: string }>) => {
+        const custom = jobs.find((item) => item.id.startsWith("CUSTOM-"));
+        return Promise.resolve({
+          profile_id: profile.id,
+          directional_fits: [],
+          needs_review: custom
+            ? [
+                {
+                  job_id: custom.id,
+                  source_url: custom.source_url,
+                  application_status: "unknown",
+                  status: "review",
+                  reason: "Check requirements",
+                  major_fit: false,
+                  matched_core: [],
+                  matched_preferred: [],
+                  matched_evidence: {},
+                  rank_score: 0,
+                },
+              ]
+            : [],
+          blocked: [],
+          expired: [],
+          message: "Opening unverified",
+        });
+      },
+    );
+    render(
+      <MemoryRouter>
+        <GraduatePage />
+      </MemoryRouter>,
+    );
+    await screen.findAllByText(profile.name);
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.jobCompany") }), {
+      target: { value: "New Employer" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.jobTitle") }), {
+      target: { value: "AI Engineer" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.jobCity") }), {
+      target: { value: "Shanghai" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: t("graduate.jobSource") }), {
+      target: { value: "https://example.org/jobs/2" },
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: t("graduate.jobConfirm") }));
+    fireEvent.click(screen.getByRole("button", { name: t("graduate.jobAdd") }));
+    fireEvent.click(screen.getByRole("checkbox", { name: t("graduate.confirm") }));
+    fireEvent.click(screen.getByRole("button", { name: t("graduate.rank") }));
+    const save = await screen.findByRole("button", { name: t("graduate.saveJob") });
+    fireEvent.click(save);
+    await waitFor(() => expect(mocks.createJob).toHaveBeenCalledOnce());
+    expect(mocks.createJob.mock.calls[0][0]).toMatchObject({
+      title: "AI Engineer",
+      company: "New Employer",
+      status: "待核实",
+      source_url: "https://example.org/jobs/2",
+    });
+    expect(await screen.findByRole("link", { name: t("graduate.openSavedJob") })).toHaveAttribute(
+      "href",
+      "/jobs?job_id=42",
+    );
+    expect(screen.getByRole("link", { name: t("graduate.viewJobResumes") })).toHaveAttribute(
+      "href",
+      "/resumes?job_id=42",
+    );
   });
 
   it("shows which job changed after the user confirms new evidence", async () => {

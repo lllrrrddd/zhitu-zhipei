@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-import { Card, Space, Typography } from "antd";
+import { Button, Card, Space, Typography } from "antd";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { t } from "../../i18n";
 import type { MessageKey } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
 import GraduateAdviceFeedback from "./GraduateAdviceFeedback";
+import GraduateRequirementChecklist from "./GraduateRequirementChecklist";
+import GraduateResearchAdvice from "./GraduateResearchAdvice";
 import type { GraduateDecision, GraduateJob, GraduateProfile } from "./types";
 
 const { Paragraph, Text } = Typography;
@@ -33,11 +36,17 @@ export default function GraduateDecisionGroup({
   items,
   jobs,
   profile,
+  onSaveJob,
+  savedJobIds,
+  savingJobId,
 }: {
   titleKey: MessageKey;
   items: GraduateDecision[];
   jobs: GraduateJob[];
   profile: GraduateProfile;
+  onSaveJob: (job: GraduateJob) => void;
+  savedJobIds: Record<string, number>;
+  savingJobId: string | null;
 }) {
   useLocale();
   const byId = useMemo(() => new Map(jobs.map((job) => [job.id, job])), [jobs]);
@@ -76,6 +85,7 @@ export default function GraduateDecisionGroup({
                 <Text strong>{jobName}</Text>
               )}
               <Paragraph style={{ marginBottom: 4 }}>{item.reason}</Paragraph>
+              {job && <GraduateRequirementChecklist decision={item} job={job} profile={profile} />}
               {question && (
                 <Paragraph type="warning" style={{ marginBottom: 4 }}>
                   {question}
@@ -114,7 +124,31 @@ export default function GraduateDecisionGroup({
                     skill={supportedCore}
                     excerpt={adviceEvidence.excerpt}
                   />
+                  <GraduateResearchAdvice skill={supportedCore} excerpt={adviceEvidence.excerpt} />
                 </details>
+              )}
+              {job?.id.startsWith("CUSTOM-") && (
+                <div style={{ marginTop: 8 }}>
+                  {savedJobIds[job.id] ? (
+                    <Space wrap>
+                      <Link to={`/jobs?job_id=${savedJobIds[job.id]}`}>
+                        {t("graduate.openSavedJob")}
+                      </Link>
+                      <Link to={`/resumes?job_id=${savedJobIds[job.id]}`}>
+                        {t("graduate.viewJobResumes")}
+                      </Link>
+                    </Space>
+                  ) : (
+                    <Button
+                      size="small"
+                      loading={savingJobId === job.id}
+                      disabled={savingJobId !== null}
+                      onClick={() => onSaveJob(job)}
+                    >
+                      {t("graduate.saveJob")}
+                    </Button>
+                  )}
+                </div>
               )}
               <Typography.Link href={item.source_url} target="_blank" rel="noopener noreferrer">
                 {t("graduate.source")}

@@ -48,6 +48,23 @@ def test_job_crud_and_keywords(client):
     assert client.get(f"/api/jobs/{job['id']}").status_code == 404
 
 
+def test_unverified_job_can_be_saved_without_claiming_it_is_open(client):
+    response = client.post(
+        "/api/jobs",
+        json={
+            "title": "研究助理",
+            "company": "示例单位",
+            "source_url": "https://example.org/recruit/1",
+            "status": "待核实",
+            "note": "投递状态未核实",
+        },
+    )
+    assert response.status_code == 201
+    job_id = response.json()["id"]
+    assert response.json()["status"] == "待核实"
+    assert client.get(f"/api/jobs/{job_id}").json()["status"] == "待核实"
+
+
 def test_parse_job_text_does_not_create_job(client):
     response = client.post("/api/jobs/parse-text", json={"text": SAMPLE_JOB_TEXT})
 

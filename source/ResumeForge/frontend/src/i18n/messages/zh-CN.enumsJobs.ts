@@ -15,6 +15,7 @@ const enumsJobs = {
   "enumsJobs.jobType.experienced": "社招",
   "enumsJobs.jobType.other": "其他",
 
+  "enumsJobs.status.unverified": "待核实",
   "enumsJobs.status.open": "开放中",
   "enumsJobs.status.closed": "已截止",
   "enumsJobs.status.applied": "已投递",

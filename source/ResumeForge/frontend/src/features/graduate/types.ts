@@ -27,6 +27,9 @@ export interface GraduateJob {
   detail_source_url?: string;
   posted_date?: string | null;
   application_status: "unknown" | "past_reported_deadline" | "verified_closed";
+  /** Only kept in this page for a user-pasted posting; never sent to /graduate/recommend. */
+  raw_text?: string;
+  source_fragments?: Record<string, string>;
 }
 
 export interface GraduateJobDraft {

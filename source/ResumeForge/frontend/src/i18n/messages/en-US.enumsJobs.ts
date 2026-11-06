@@ -13,6 +13,7 @@ const enumsJobs = {
   "enumsJobs.jobType.experienced": "Experienced hire",
   "enumsJobs.jobType.other": "Other",
 
+  "enumsJobs.status.unverified": "Unverified",
   "enumsJobs.status.open": "Open",
   "enumsJobs.status.closed": "Closed",
   "enumsJobs.status.applied": "Applied",
