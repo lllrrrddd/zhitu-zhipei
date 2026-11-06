@@ -118,6 +118,32 @@ def test_ambiguous_degree_stays_unknown_and_request_is_bounded() -> None:
     assert client.post("/api/graduate/parse-draft", json={"text": "x" * 20001}).status_code == 422
 
 
+def test_preferred_degree_and_year_do_not_become_hard_requirements() -> None:
+    client = TestClient(app)
+    text = (
+        "公司名称：示例科技\n岗位名称：算法工程师\n"
+        "学历要求：博士优先\n招聘对象：2027届毕业生优先\n"
+        "专业要求：计算机科学与技术\n来源：https://example.org/job/preferred"
+    )
+    draft = client.post("/api/graduate/parse-draft", json={"text": text}).json()
+    assert draft["degree_floor"] == "unknown"
+    assert draft["graduation_year"] is None
+    assert any("学历优先条件" in warning for warning in draft["warnings"])
+    assert any("毕业届别优先条件" in warning for warning in draft["warnings"])
+
+
+def test_required_year_survives_unrelated_degree_preference() -> None:
+    client = TestClient(app)
+    text = (
+        "公司名称：示例科技\n岗位名称：算法工程师\n"
+        "招聘对象：2027届毕业生，博士优先\n"
+        "学历要求：硕士及以上\n来源：https://example.org/job/required"
+    )
+    draft = client.post("/api/graduate/parse-draft", json={"text": text}).json()
+    assert draft["degree_floor"] == "master"
+    assert draft["graduation_year"] == 2027
+
+
 def test_past_deadline_is_separated_from_unknown_opening_status() -> None:
     client = TestClient(app)
     text = (

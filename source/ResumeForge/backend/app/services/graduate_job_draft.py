@@ -11,6 +11,7 @@ from .job_text_parser import parse_job_text
 
 DEGREE_WORDS = {"bachelor": "本科", "master": "硕士", "doctor": "博士"}
 GRADUATION_YEAR = re.compile(r"(?<!\d)(20\d{2})(?:届|年毕业)")
+PREFERENCE = re.compile(r"优先|加分|优待")
 DEADLINE_DATE = re.compile(r"(?<!\d)(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})日?")
 SOURCE_URL = re.compile(r"https://[^\s<>\"']+")
 
@@ -41,6 +42,16 @@ def _major_candidates(lines: list[str]) -> tuple[list[str], str]:
     return [], ""
 
 
+def _required_graduation_year(lines: list[str]) -> tuple[int | None, bool]:
+    years: set[int] = set()
+    for line in lines:
+        for clause in re.split(r"[，,；;。]", line):
+            for match in GRADUATION_YEAR.finditer(clause):
+                if not PREFERENCE.search(clause):
+                    years.add(int(match.group(1)))
+    return (next(iter(years)) if len(years) == 1 else None, len(years) > 1)
+
+
 def parse_graduate_job_draft(text: str, *, today: date | None = None) -> GraduateJobDraft:
     """Reuse the upstream parser, preserving unknown and ambiguous job facts."""
     lines = [line.strip() for line in text.splitlines() if line.strip()]
@@ -55,19 +66,27 @@ def parse_graduate_job_draft(text: str, *, today: date | None = None) -> Graduat
         degree for degree, word in DEGREE_WORDS.items() if any(word in line for line in degree_lines)
     }
     degree_floor = next(iter(degree_hits)) if len(degree_hits) == 1 else "unknown"
+    if degree_floor != "unknown" and all(
+        PREFERENCE.search(line) and not re.search(r"(?:及|以)上|不低于", line)
+        for line in degree_lines
+    ):
+        degree_floor = "unknown"
     if degree_lines:
         source_fragments["degree_floor"] = degree_lines[0][:500]
     if degree_floor == "unknown":
         warnings.append("学历底线缺失或存在多个候选，请人工核对。")
+        if any(PREFERENCE.search(line) for line in degree_lines):
+            warnings.append("原文含学历优先条件，未将其当作最低学历要求。")
 
-    years = {int(year) for year in GRADUATION_YEAR.findall(text)}
-    graduation_year = next(iter(years)) if len(years) == 1 else None
+    graduation_year, conflicting_years = _required_graduation_year(lines)
     if graduation_year:
         source_fragments["graduation_year"] = next(
             line[:500] for line in lines if str(graduation_year) in line
         )
-    elif len(years) > 1:
+    elif conflicting_years:
         warnings.append("出现多个毕业届别，已留空供人工核对。")
+    elif GRADUATION_YEAR.search(text):
+        warnings.append("原文含毕业届别优先条件，未将其当作硬性届别要求。")
 
     majors, major_line = _major_candidates(lines)
     if major_line:
