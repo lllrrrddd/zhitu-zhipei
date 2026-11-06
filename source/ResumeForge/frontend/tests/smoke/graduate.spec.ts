@@ -16,6 +16,23 @@ test("graduate demo confirms facts and shows a source-backed ranking", async ({ 
 
   await expect(page.getByText("岗位开放状态尚未核实")).toBeVisible();
   await expect(page.getByText(/中国科学院东莞材料所 · AI应用研发工程师/)).toBeVisible();
+  const detailLink = page.getByRole("link", {
+    name: /打开招聘页面：中国科学院东莞材料所 · AI应用研发工程师/,
+  });
+  await expect(detailLink).toHaveAttribute(
+    "href",
+    "https://campus.51job.com/dimst2027/m/jobs.html",
+  );
+  await page
+    .context()
+    .route("https://campus.51job.com/**", (route) =>
+      route.fulfill({ contentType: "text/html", body: "招聘页面测试替身" }),
+    );
+  const popupReady = page.waitForEvent("popup");
+  await detailLink.click();
+  const postingPage = await popupReady;
+  await expect(postingPage).toHaveURL("https://campus.51job.com/dimst2027/m/jobs.html");
+  await postingPage.close();
   await expect(page.getByRole("link", { name: "核对岗位来源" }).first()).toHaveAttribute(
     "href",
     /^https:\/\//,
@@ -80,11 +97,17 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
   await page.getByRole("checkbox", { name: "我已核对这些岗位条件来自所填来源页面" }).check();
   await page.getByRole("button", { name: "加入待比较岗位" }).click();
   await expect(page.getByText("测试单位 · 算法工程师测试岗 · 上海").first()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "打开招聘页面：测试单位 · 算法工程师测试岗 · 上海" }),
+  ).toHaveAttribute("href", "https://example.org/jobs/test");
   await page.getByRole("checkbox", { name: /我已核对以上画像/ }).check();
   await page.getByRole("button", { name: "根据确认的信息排序" }).click();
   await expect(page.getByText("测试单位 · 算法工程师测试岗 · 上海")).toHaveCount(2);
   await expect(page.getByText(/条件核查记录：20\d{2}-\d{2}-\d{2}/)).toHaveCount(2);
-  await expect(page.locator('a[href="https://example.org/jobs/test"]')).toHaveCount(2);
+  await expect(
+    page.getByRole("link", { name: "打开招聘页面：测试单位 · 算法工程师测试岗 · 上海" }),
+  ).toHaveCount(2);
+  await expect(page.locator('a[href="https://example.org/jobs/test"]')).toHaveCount(4);
   await page
     .locator('a[href="https://example.org/jobs/test"]')
     .last()

@@ -47,6 +47,7 @@ export default function GraduateDecisionGroup({
       <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
         {items.map((item) => {
           const job = byId.get(item.job_id);
+          const jobName = job ? `${job.company} · ${job.title} · ${job.city}` : item.job_id;
           const question = nextQuestion(item, job, profile);
           const evidenceRows = [
             ...new Map(
@@ -61,9 +62,19 @@ export default function GraduateDecisionGroup({
           const adviceEvidence = supportedCore ? item.matched_evidence[supportedCore][0] : null;
           return (
             <div key={item.job_id}>
-              <Text strong>
-                {job ? `${job.company} · ${job.title} · ${job.city}` : item.job_id}
-              </Text>
+              {job ? (
+                <Typography.Link
+                  strong
+                  href={job.detail_source_url ?? item.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t("graduate.openPosting", { job: jobName })}
+                >
+                  {jobName}
+                </Typography.Link>
+              ) : (
+                <Text strong>{jobName}</Text>
+              )}
               <Paragraph style={{ marginBottom: 4 }}>{item.reason}</Paragraph>
               {question && (
                 <Paragraph type="warning" style={{ marginBottom: 4 }}>

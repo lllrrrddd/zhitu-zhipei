@@ -39,7 +39,8 @@ const graduate = {
   "graduate.expiredTitle": "Reported deadline passed",
   "graduate.empty": "No job in this set has enough evidence for a directional fit.",
   "graduate.unverified":
-    "Directional fit does not mean the job is still open. Check the source before applying.",
+    "Select a job name to open its posting. Directional fit does not mean the job is still open; check before applying.",
+  "graduate.openPosting": "Open job posting: {job}",
   "graduate.source": "Check job source",
   "graduate.sourceCheckedAt":
     "Conditions checked on {date}; opening status still needs verification",

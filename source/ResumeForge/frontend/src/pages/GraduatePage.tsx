@@ -344,9 +344,16 @@ export default function GraduatePage() {
         <Paragraph type="secondary">{t("graduate.jobEditorHint")}</Paragraph>
         {customJobs.map((job) => (
           <Space key={job.id} wrap style={{ display: "flex", marginBottom: 8 }}>
-            <Text>
+            <Typography.Link
+              href={job.detail_source_url ?? job.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("graduate.openPosting", {
+                job: `${job.company} · ${job.title} · ${job.city}`,
+              })}
+            >
               {job.company} · {job.title} · {job.city}
-            </Text>
+            </Typography.Link>
             <Typography.Link href={job.source_url} target="_blank" rel="noopener noreferrer">
               {t("graduate.source")}
             </Typography.Link>
