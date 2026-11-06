@@ -2,7 +2,7 @@
 import type { Profile } from "../../types";
 import type { GraduateDegree, GraduateProfile } from "./types";
 
-function degreeOf(raw: string): GraduateDegree | null {
+export function degreeOf(raw: string): GraduateDegree | null {
   const value = (raw || "").toLowerCase();
   if (/\u535a\u58eb|phd|doctor/.test(value)) return "doctor";
   if (/\u7855\u58eb|\u7814\u7a76\u751f|master/.test(value)) return "master";

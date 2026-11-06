@@ -1,0 +1,238 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+.career-workbench {
+  max-width: 1240px;
+  margin-inline: auto;
+  display: grid;
+  gap: 20px;
+}
+
+.career-hero {
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 14px;
+  background:
+    linear-gradient(120deg, rgba(31, 130, 116, 0.12), transparent 70%), var(--rf-surface-alt);
+}
+
+.career-hero > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rf-text-description);
+}
+
+.career-hero h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(24px, 3.3vw, 36px);
+  line-height: 1.25;
+}
+
+.career-hero p,
+.career-help,
+.career-results-header p {
+  margin: 0;
+  color: var(--rf-text-description);
+}
+
+.career-start-grid,
+.career-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.career-start-grid {
+  grid-template-columns: minmax(0, 1.16fr) minmax(0, 1fr);
+}
+
+.career-panel,
+.career-result-card {
+  min-width: 0;
+}
+
+.career-drop .ant-upload-drag {
+  background: var(--rf-surface-alt);
+}
+
+.career-drop strong,
+.career-drop span {
+  display: block;
+}
+
+.career-drop span,
+.career-source-list small,
+.career-help {
+  font-size: 13px;
+}
+
+.career-drop .career-drop-icon {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.career-action-row,
+.career-feedback,
+.career-panel .career-help {
+  margin-top: 12px;
+}
+
+.career-disclosure {
+  margin-top: 12px;
+}
+
+.career-disclosure summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.career-disclosure .ant-input-textarea + .ant-btn,
+.career-disclosure textarea + .ant-btn {
+  margin-top: 8px;
+}
+
+.career-market-heading,
+.career-result-footer,
+.career-source-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.career-market-heading > strong {
+  font-size: 18px;
+}
+
+.career-source-list {
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+}
+
+.career-source-list li {
+  border-top: 1px solid var(--rf-border-subtle);
+  padding: 9px 0;
+}
+
+.career-source-list small,
+.career-check-result small {
+  display: block;
+  color: var(--rf-text-description);
+}
+
+.career-source-status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.career-source-status .ant-tag,
+.career-result-badges .ant-tag {
+  margin-inline-end: 0;
+}
+
+.career-check-result a {
+  display: block;
+  margin-block: 4px;
+}
+
+.career-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+.career-profile-grid label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.career-profile-grid .ant-select,
+.career-profile-grid .ant-input-number,
+.career-full-width {
+  width: 100%;
+}
+
+.career-results {
+  scroll-margin-top: 12px;
+}
+
+.career-results-header {
+  margin-bottom: 12px;
+}
+
+.career-results-header h2 {
+  margin: 0 0 4px;
+}
+
+.career-result-card .ant-card-body,
+.career-result-card article {
+  height: 100%;
+}
+
+.career-result-card article {
+  display: flex;
+  flex-direction: column;
+  overflow-wrap: anywhere;
+}
+
+.career-result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.career-result-card h3 {
+  margin: 10px 0 4px;
+  font-size: 17px;
+}
+
+.career-reasons,
+.career-verify {
+  margin-top: 12px;
+}
+
+.career-reasons p,
+.career-verify p,
+.career-check-result p {
+  margin: 4px 0;
+}
+
+.career-reasons blockquote {
+  border-inline-start: 2px solid var(--rf-border-strong);
+  margin: 8px 0;
+  padding: 4px 8px;
+  color: var(--rf-text-description);
+  background: var(--rf-surface-alt);
+}
+
+.career-jd-excerpt {
+  white-space: pre-wrap;
+  color: var(--rf-text-description);
+}
+
+.career-result-footer {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+@media (max-width: 1000px) {
+  .career-start-grid,
+  .career-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .career-profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .career-profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

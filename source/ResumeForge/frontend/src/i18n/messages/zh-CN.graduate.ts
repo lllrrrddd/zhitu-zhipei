@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 const graduate = {
-  "graduate.title": "智能选岗",
+  "graduate.title": "手动核对岗位",
   "graduate.intro":
-    "先核对画像，再查看岗位方向、硬门槛和证据。当前岗位样本来自企业官网；点击匹配结果可打开招聘原文，开放状态以官网为准。",
+    "对照招聘原文，检查岗位要求和简历里的经历。这里使用已收录的官网样本和你手动添加的岗位。",
   "graduate.checkedDate": "岗位摘要最近整理于 {date}；投递状态需要重新核实。",
   "graduate.demoLabel": "虚构演示画像",
   "graduate.loadSaved": "加载我的资料",

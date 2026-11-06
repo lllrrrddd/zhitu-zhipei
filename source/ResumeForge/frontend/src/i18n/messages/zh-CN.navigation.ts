@@ -8,9 +8,10 @@
  */
 const navigation = {
   // ── 导航入口名（NAVIGATION_ITEMS 的 labelKey）──────────────
-  "navigation.item.home": "首页",
-  "navigation.item.jobs": "岗位广场",
-  "navigation.item.graduate": "智能选岗",
+  "navigation.item.home": "找岗位",
+  "navigation.item.jobs": "已保存岗位",
+  "navigation.item.graduate": "手动核对岗位",
+  "navigation.item.workspace": "求职总览",
   "navigation.item.resumes": "简历中心",
   "navigation.item.apply": "投递台",
   "navigation.item.webform": "网申填表",
@@ -31,7 +32,7 @@ const navigation = {
   "navigation.page.claimsDrill": "事实核对",
 
   /** 「我的空间」菜单的触发按钮文字，同时用作它的无障碍名。 */
-  "navigation.mySpace.label": "我的空间",
+  "navigation.mySpace.label": "更多工具",
   /** 侧栏与移动端抽屉里的使用指南入口。 */
   "navigation.guide.open": "使用指南",
 
@@ -43,7 +44,7 @@ const navigation = {
   "navigation.a11y.skipToMain": "跳到主要内容",
 
   /** 侧栏品牌区与页头。 */
-  "navigation.shell.title": "智能选岗",
+  "navigation.shell.title": "职途智配",
   "navigation.shell.brandCaption": "就业智能体原型",
   "navigation.shell.versionTooltip": "当前版本",
   "navigation.shell.scrollTop": "回到当前页面顶部",

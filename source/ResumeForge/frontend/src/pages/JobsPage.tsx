@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /** 岗位广场：搜索筛选、手动添加、详情与生成简历入口。 */
-import { App } from "antd";
+import { App, Button } from "antd";
 import type { TableRowSelection } from "antd/es/table/interface";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -331,7 +331,7 @@ export default function JobsPage() {
           <h1>{t("pagesMisc.jobsPage.heading")}</h1>
           <p>{t("pagesMisc.jobsPage.intro")}</p>
         </div>
-        <span>{t("pagesMisc.jobsPage.count", { count: jobs?.total ?? 0 })}</span>
+        <Button onClick={() => navigate("/")}>{t("pagesMisc.jobsPage.find")}</Button>
       </div>
       <JobFilterBar
         keyword={keyword}

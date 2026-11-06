@@ -59,6 +59,7 @@ from .api import (
     user_files,
     webform,
 )
+from .api import career as career_api
 from .api import (
     font_builtin as font_builtin_api,
 )
@@ -104,6 +105,7 @@ ROUTERS = (
     # 通用 AI 任务（0068）：独立前缀 /api/ai-tasks，不与其他前缀抢路径。
     ai_tasks.router,
     graduate_api.router,
+    career_api.router,
     jobs.router,
     jobs_analysis.router,
     resumes.router,

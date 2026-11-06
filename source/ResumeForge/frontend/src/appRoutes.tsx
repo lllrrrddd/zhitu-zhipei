@@ -17,6 +17,7 @@ import {
   AnalyticsPage,
   ApplyPage,
   AssistantPage,
+  CareerPage,
   ClaimsPage,
   DrillPage,
   FavoritesPage,
@@ -43,9 +44,11 @@ import {
  */
 export const APP_ROOT_ROUTE: ReactElement = (
   <Route element={<AppShell />}>
-    <Route path="/" element={<HomePage />} />
+    <Route path="/" element={<CareerPage />} />
+    <Route path="/workspace" element={<HomePage />} />
     <Route path="/jobs" element={<JobsPage />} />
-    <Route path="/graduate" element={<GraduatePage />} />
+    <Route path="/graduate" element={<Navigate to="/" replace />} />
+    <Route path="/graduate/advanced" element={<GraduatePage />} />
     <Route path="/resumes" element={<ResumesPage />} />
     <Route path="/apply" element={<ApplyPage />} />
     <Route path="/webform" element={<WebFormPage />} />

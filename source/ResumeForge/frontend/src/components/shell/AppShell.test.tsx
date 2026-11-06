@@ -28,6 +28,7 @@ import { PRIMARY_NAVIGATION_ITEMS } from "../navigation/navigationConfig";
  */
 const registryMock = vi.hoisted(() => {
   const pageNames = [
+    "CareerPage",
     "HomePage",
     "JobsPage",
     "GraduatePage",
@@ -171,7 +172,7 @@ afterEach(() => {
 describe("AppShell · 空闲预热（A04）", () => {
   it("预热失败：不产生未处理 rejection，也不往控制台写错误", async () => {
     const failure = new Error("chunk load failed");
-    registryMock.failures.set("HomePage", failure);
+    registryMock.failures.set("CareerPage", failure);
     const unhandled: unknown[] = [];
     const onUnhandled = (reason: unknown) => unhandled.push(reason);
     const nodeProcess = (
@@ -191,7 +192,7 @@ describe("AppShell · 空闲预热（A04）", () => {
       await warmAll();
 
       // 失败的那一个真的被尝试过（否则这条用例什么都没证明）。
-      expect(registryMock.preloadCalls.get("HomePage")).toBe(1);
+      expect(registryMock.preloadCalls.get("CareerPage")).toBe(1);
       expect(unhandled).toEqual([]);
       const mentionsFailure = [...consoleError.mock.calls, ...consoleWarn.mock.calls].some((args) =>
         args.some((arg) => String(arg).includes(failure.message)),
@@ -205,7 +206,7 @@ describe("AppShell · 空闲预热（A04）", () => {
   it("预热成功后悬停/点击导航复用同一份加载，不重复加载 chunk", async () => {
     renderShell();
     await warmAll();
-    // 18 个页面各预热一次。
+    // 页面各预热一次。
     for (const name of registryMock.pageNames) {
       expect(registryMock.preloadCalls.get(name)).toBe(1);
       expect(registryMock.loads.get(name)).toBe(1);
@@ -219,8 +220,8 @@ describe("AppShell · 空闲预热（A04）", () => {
     });
 
     // 调用可以重复（悬停 + 点击各一次），但底层加载只有一次。
-    expect(registryMock.preloadCalls.get("HomePage")).toBe(3);
-    expect(registryMock.loads.get("HomePage")).toBe(1);
+    expect(registryMock.preloadCalls.get("CareerPage")).toBe(3);
+    expect(registryMock.loads.get("CareerPage")).toBe(1);
     expect(screen.getAllByText(t(home.labelKey)).length).toBeGreaterThan(0);
   });
 });

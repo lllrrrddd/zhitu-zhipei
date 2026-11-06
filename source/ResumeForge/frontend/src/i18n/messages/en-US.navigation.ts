@@ -6,9 +6,10 @@
  */
 const navigation = {
   // ── Navigation entries (labelKey values on NAVIGATION_ITEMS) ──────────
-  "navigation.item.home": "Home",
-  "navigation.item.jobs": "Job board",
-  "navigation.item.graduate": "Graduate fit",
+  "navigation.item.home": "Find jobs",
+  "navigation.item.jobs": "Saved jobs",
+  "navigation.item.graduate": "Review jobs manually",
+  "navigation.item.workspace": "Career overview",
   "navigation.item.resumes": "Resume Center",
   "navigation.item.apply": "Apply desk",
   "navigation.item.webform": "Web form",
@@ -29,7 +30,7 @@ const navigation = {
   "navigation.page.claimsDrill": "Fact check",
 
   /** Trigger label for the "My space" menu, also its accessible name. */
-  "navigation.mySpace.label": "My space",
+  "navigation.mySpace.label": "More tools",
   /** User guide entry in the sidebar and the mobile drawer. */
   "navigation.guide.open": "User guide",
 
@@ -41,7 +42,7 @@ const navigation = {
   "navigation.a11y.skipToMain": "Skip to main content",
 
   /** Sidebar brand area and header. */
-  "navigation.shell.title": "Graduate job fit",
+  "navigation.shell.title": "Zhitu Zhipei",
   "navigation.shell.brandCaption": "Career agent demo",
   "navigation.shell.versionTooltip": "Current version",
   "navigation.shell.scrollTop": "Back to top",

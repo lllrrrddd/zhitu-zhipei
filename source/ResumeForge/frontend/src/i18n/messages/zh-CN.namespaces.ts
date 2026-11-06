@@ -22,6 +22,7 @@ import delivery from "./zh-CN.delivery";
 import fontDownload from "./zh-CN.fontDownload";
 import fonts from "./zh-CN.fonts";
 import graduate from "./zh-CN.graduate";
+import career from "./zh-CN.career";
 import optimizer from "./zh-CN.optimizer";
 import outline from "./zh-CN.outline";
 import pagination from "./zh-CN.pagination";
@@ -188,6 +189,7 @@ const namespaces = {
   /** 简历字体（内置思源黑体按需下载）与工作台「版式」页签。 */
   ...fonts,
   ...graduate,
+  ...career,
   /** 字符级加粗（右键菜单）与制作台实时预览（R4 / R5）。 */
   ...rich,
   /** 字体下载/取消/删除/样张 · 板块顺序 · 精确模式字族说明。 */

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 const graduate = {
-  "graduate.title": "Find matching jobs",
+  "graduate.title": "Review jobs manually",
   "graduate.intro":
     "Confirm your profile, then compare job directions, eligibility and evidence. The current job set links to company careers pages; check their current status there.",
   "graduate.checkedDate":

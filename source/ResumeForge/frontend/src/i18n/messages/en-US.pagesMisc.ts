@@ -8,10 +8,10 @@
  * of that page are here.
  */
 const pagesMisc = {
-  "pagesMisc.jobsPage.heading": "Job board",
+  "pagesMisc.jobsPage.heading": "Saved jobs",
   "pagesMisc.jobsPage.intro":
-    "Open a job to review its requirements. Jobs tagged 'Company website' link to the original posting. Check current availability before applying.",
-  "pagesMisc.jobsPage.count": "{count} jobs in this list",
+    "Review jobs you saved or added. Select a job to see details or use the company link to open the original posting.",
+  "pagesMisc.jobsPage.find": "Find jobs",
   // ── Apply desk (ApplyPage) ─────────────────────────────────────
   "pagesMisc.applyPage.title": "Apply desk",
   "pagesMisc.applyPage.subtitle":

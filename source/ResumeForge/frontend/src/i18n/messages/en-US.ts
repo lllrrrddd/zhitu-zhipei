@@ -14,6 +14,7 @@ import delivery from "./en-US.delivery";
 import fontDownload from "./en-US.fontDownload";
 import fonts from "./en-US.fonts";
 import graduate from "./en-US.graduate";
+import career from "./en-US.career";
 import optimizer from "./en-US.optimizer";
 import outline from "./en-US.outline";
 import pagination from "./en-US.pagination";
@@ -183,6 +184,7 @@ const enUS = {
   ...fontDownload,
   ...fonts,
   ...graduate,
+  ...career,
   ...optimizer,
   ...outline,
   ...pagination,

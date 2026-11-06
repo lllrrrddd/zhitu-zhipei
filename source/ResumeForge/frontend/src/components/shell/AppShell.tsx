@@ -9,7 +9,6 @@ import { Button, Layout, Menu, Tooltip, Typography } from "antd";
 import AppHeaderActions from "../../components/AppHeaderActions";
 import AnnouncementBar from "../../components/common/AnnouncementBar";
 import BackgroundTaskBar from "../../components/BackgroundTaskBar";
-import { useUpdateAnnouncement } from "../../features/announcements/useUpdateAnnouncement";
 import StarPromptModal from "../../components/StarPromptModal";
 import PageSkeleton from "../../components/common/PageSkeleton";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -45,6 +44,7 @@ import {
   AnalyticsPage,
   ApplyPage,
   AssistantPage,
+  CareerPage,
   ClaimsPage,
   DrillPage,
   FavoritesPage,
@@ -63,7 +63,7 @@ import {
   WebFormPage,
 } from "../../pages/registry";
 import { UserGuideModal } from "../../pages/modals";
-import { consumeFirstVisitGuide, setUserGuideVisible } from "../../utils/userGuide";
+import { setUserGuideVisible } from "../../utils/userGuide";
 // 侧栏使用本项目标识；从 src/assets 导入以便 Vite 按部署 base 重写路径。
 import brandIcon from "../../assets/zt-zhipei-mark.svg";
 // 投投宣传图（透明底抠图）：GitHub Star 提示弹窗用。
@@ -95,9 +95,6 @@ export default function AppShell() {
     return () => registerTaskNavigate(null);
   }, [navigate]);
   const [guideOpen, setGuideOpen] = useState(false);
-  // 本次会话是否由「首次访问」自动弹出的：只有这一种打开先给「快速开始」首屏；
-  // 关闭后归位，侧栏「使用指南」重开一律直接进完整 8 步视图。
-  const [guideOpenedAutomatically, setGuideOpenedAutomatically] = useState(false);
   // GitHub Star 提示：点页头 GitHub 图标时随直跳弹一次轻提示（不做持久化，用户要求每次都提醒）。
   const [starModalOpen, setStarModalOpen] = useState(false);
   const [floatingAssistantOpen, setFloatingAssistantOpen] = useState(false);
@@ -110,8 +107,6 @@ export default function AppShell() {
   useShortcut("assistant", () => setFloatingAssistantOpen((open) => !open));
   useShortcut("newJob", () => location.pathname === "/jobs" && triggerJobCreate());
   useAppShortcuts(() => setFloatingAssistantOpen(true));
-  // 公告条唯一的真实来源（更新可用 / 安装包已下载）；失败静默，不留痕。
-  useUpdateAnnouncement();
   const { hiddenKeys } = useNavigationVisibility();
   // 侧栏折叠：窄档由断点强制（shell.collapsed）；宽档才允许用户手动收起，偏好本地持久化。
   const sider = useSiderCollapse();
@@ -124,9 +119,10 @@ export default function AppShell() {
   );
   const preloaders = useMemo<Record<string, () => Promise<unknown>>>(
     () => ({
-      "/": HomePage.preload,
+      "/": CareerPage.preload,
+      "/workspace": HomePage.preload,
       "/jobs": JobsPage.preload,
-      "/graduate": GraduatePage.preload,
+      "/graduate/advanced": GraduatePage.preload,
       "/profile": ProfilePage.preload,
       "/claims": ClaimsPage.preload,
       "/claims/drill": DrillPage.preload,
@@ -218,17 +214,6 @@ export default function AppShell() {
     };
   }, [preloaders]);
 
-  // StrictMode 下 consume 会写两次 localStorage 标记，因此必须在 effect 中原子
-  // 消费而不是渲染期求值（渲染期求值会被双调用打断原子性）。按书面理由豁免。
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    if (consumeFirstVisitGuide()) {
-      setGuideOpenedAutomatically(true);
-      setGuideOpen(true);
-    }
-  }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
   // 引导开关状态同步给首页的「近期提醒」启动弹窗：欢迎在前、提醒在后，两个不叠。
   useEffect(() => {
     setUserGuideVisible(guideOpen);
@@ -270,15 +255,17 @@ export default function AppShell() {
         {/* 快捷键：唯一的 keydown 监听挂载点；动作由各页面用 useShortcut 自己认领。 */}
         <ShortcutProvider />
         <GlobalOverlays />
-        <TouTouOrb
-          isWebform={location.pathname === "/webform"}
-          onOpen={() => {
-            // 同上：悬浮助手卡自己在 Suspense 里取模块，这里只是提前热一下，失败不该冒泡。
-            void AssistantPage.preload().catch(() => {});
-            setFloatingAssistantOpen(true);
-          }}
-          onOpenClipboard={() => setClipboardOpen(true)}
-        />
+        {location.pathname !== "/" && (
+          <TouTouOrb
+            isWebform={location.pathname === "/webform"}
+            onOpen={() => {
+              // 同上：悬浮助手卡自己在 Suspense 里取模块，这里只是提前热一下，失败不该冒泡。
+              void AssistantPage.preload().catch(() => {});
+              setFloatingAssistantOpen(true);
+            }}
+            onOpenClipboard={() => setClipboardOpen(true)}
+          />
+        )}
         <TouTouAssistantCard
           open={floatingAssistantOpen}
           onClose={() => setFloatingAssistantOpen(false)}
@@ -407,6 +394,7 @@ export default function AppShell() {
               </Typography.Text>
               <AppHeaderActions
                 hiddenKeys={hiddenKeys}
+                simple={location.pathname === "/"}
                 onStarClick={() => setStarModalOpen(true)}
               />
             </Header>
@@ -438,11 +426,7 @@ export default function AppShell() {
               open
               // 首次自动弹出先给「快速开始」首屏；侧栏「使用指南」重开时不带该 prop，
               // 直接进完整 8 步视图。
-              initialQuickStart={guideOpenedAutomatically}
-              onClose={() => {
-                setGuideOpen(false);
-                setGuideOpenedAutomatically(false);
-              }}
+              onClose={() => setGuideOpen(false)}
               onNavigate={navigateFromGuide}
             />
           </Suspense>

@@ -201,7 +201,10 @@ def remove_photo(photo_id: int, db: Session = Depends(get_db)):
     response_model_exclude_none=True,
 )
 async def parse_profile_text_draft(
-    payload: ProfileTextParseRequest, request: Request, db: Session = Depends(get_db)
+    payload: ProfileTextParseRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    local_only: bool = False,
 ):
     """把用户粘贴的个人资料（或截图、文档）拆成可编辑草稿，不写入数据库。"""
     try:
@@ -224,6 +227,18 @@ async def parse_profile_text_draft(
     # 字段锚定也仍然对着原文，比图片那条"让模型自己抄录再核对"的路子强。
     source_text = "\n\n".join(part for part in (payload.text, documents.text) if part.strip())
     local_draft = parse_profile_text(source_text)
+    if local_only:
+        if not source_text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail="这份简历没有可读取的文字。请上传文字版 PDF 或 Word，或直接粘贴简历内容。",
+            )
+        return _with_catalog_draft(
+            finalize_recognition_result(
+                local_draft, has_images=has_images, document_warnings=documents.warnings
+            ),
+            source_text,
+        )
     config = get_llm_config(db)
     if not llm_is_configured(config):
         return _with_catalog_draft(

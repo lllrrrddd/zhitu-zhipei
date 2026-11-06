@@ -6,10 +6,10 @@
  * 两段（底部的打开方式提示），其余三个页面的文案全部在本包。
  */
 const pagesMisc = {
-  "pagesMisc.jobsPage.heading": "岗位广场",
+  "pagesMisc.jobsPage.heading": "已保存岗位",
   "pagesMisc.jobsPage.intro":
-    "点击岗位名称查看要求；带“企业官网”标签的岗位可跳转到招聘原文。投递前请在官网核实是否仍开放。",
-  "pagesMisc.jobsPage.count": "当前共 {count} 个岗位",
+    "在这里查看已保存和手动添加的岗位。点击岗位名称看详情，点击“企业官网”打开招聘原文。",
+  "pagesMisc.jobsPage.find": "去找岗位",
   // ── 投递台（ApplyPage） ─────────────────────────────────────────
   "pagesMisc.applyPage.title": "投递台",
   "pagesMisc.applyPage.subtitle":

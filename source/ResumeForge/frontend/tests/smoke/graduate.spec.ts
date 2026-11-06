@@ -5,8 +5,8 @@ test("graduate demo confirms facts and opens an official company posting", async
   await page.addInitScript(() => {
     localStorage.setItem("resumeforge.user-guide.seen", "1");
   });
-  await page.goto("/graduate");
-  await expect(page.getByRole("heading", { name: "智能选岗" })).toBeVisible();
+  await page.goto("/graduate/advanced");
+  await expect(page.getByRole("heading", { name: "手动核对岗位" })).toBeVisible();
   await expect(page.getByText("计算机硕士样本").first()).toBeVisible();
   await expect(page.getByText(/岗位摘要最近整理于/)).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("graduate-profile.png") });
@@ -68,7 +68,7 @@ test("newly confirmed project evidence explains a changed job decision", async (
   await page.addInitScript(() => {
     localStorage.setItem("resumeforge.user-guide.seen", "1");
   });
-  await page.goto("/graduate");
+  await page.goto("/graduate/advanced");
   await expect(page.getByText("计算机硕士样本").first()).toBeVisible();
   await page.getByRole("combobox", { name: "虚构演示画像" }).click();
   await page.getByText("集成电路硕士样本", { exact: true }).last().click();
@@ -94,7 +94,7 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("resumeforge.user-guide.seen", "1");
   });
-  await page.goto("/graduate");
+  await page.goto("/graduate/advanced");
   await expect(page.getByText("计算机硕士样本").first()).toBeVisible();
   await page.getByRole("textbox", { name: "招聘单位" }).fill("测试单位");
   await page.getByRole("textbox", { name: "岗位名称" }).fill("算法工程师测试岗");
@@ -179,7 +179,7 @@ test("pasted posting becomes a confirmed review draft before ranking", async ({ 
   await page.addInitScript(() => {
     localStorage.setItem("resumeforge.user-guide.seen", "1");
   });
-  await page.goto("/graduate");
+  await page.goto("/graduate/advanced");
   await expect(page.getByText("计算机硕士样本").first()).toBeVisible();
   await page
     .getByRole("textbox", { name: "粘贴招聘原文，先提取候选岗位字段" })

@@ -21,11 +21,12 @@ import { useLocale } from "../i18n/i18nContext";
 
 interface Props {
   hiddenKeys: readonly string[];
+  simple?: boolean;
   /** 点击 GitHub 图标时顺便弹「点个 Star」提示。 */
   onStarClick: () => void;
 }
 
-export default function AppHeaderActions({ hiddenKeys, onStarClick }: Props) {
+export default function AppHeaderActions({ hiddenKeys, onStarClick, simple = false }: Props) {
   useLocale();
   return (
     <div className="app-header-actions">
@@ -34,10 +35,14 @@ export default function AppHeaderActions({ hiddenKeys, onStarClick }: Props) {
       {/* 模型切换放在数据集与头像的**左侧**：先说明"用哪套模型"，再说"在哪份数据里"。
           「我的空间」不在这里，而是走 AppHeaderContext 的 beforeAvatar 插槽——视觉顺序
           要的是 `[数据集][我的空间][头像]`，而它们是两个 flex 容器，`order` 跨不过去。 */}
-      <ModelProfileSelect />
+      {!simple && <ModelProfileSelect />}
       {/* A2：职业场景是"本窗口的引导建议"，与数据集（在哪份数据里）语义分开、并排但成组。 */}
-      <ScenarioSelector />
-      <AppHeaderContext beforeAvatar={<MySpaceMenu hiddenKeys={hiddenKeys} />} />
+      {!simple && <ScenarioSelector />}
+      {simple ? (
+        <MySpaceMenu hiddenKeys={hiddenKeys} />
+      ) : (
+        <AppHeaderContext beforeAvatar={<MySpaceMenu hiddenKeys={hiddenKeys} />} />
+      )}
       {/* 有任务在跑时才出现：平时页头不该多一个空按钮。 */}
       <BackgroundTasksIndicator />
       <span className="app-header-divider" aria-hidden="true" />

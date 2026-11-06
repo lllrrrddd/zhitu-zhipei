@@ -70,6 +70,7 @@ export function lazyPage<Props extends object = Record<string, never>>(
 }
 
 export const HomePage = lazyPage(() => import("./HomePage"));
+export const CareerPage = lazyPage(() => import("./CareerPage"));
 export const JobsPage = lazyPage(() => import("./JobsPage"));
 export const GraduatePage = lazyPage(() => import("./GraduatePage"));
 export const ProfilePage = lazyPage(() => import("./ProfilePage"));

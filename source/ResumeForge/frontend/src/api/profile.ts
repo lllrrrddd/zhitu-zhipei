@@ -30,8 +30,10 @@ export function parseProfileText(
   onProgress?: (percent: number) => void,
   /** 取消信号：「取消识别」用它真的掐掉请求（不是只改界面）。 */
   signal?: AbortSignal,
+  options?: { localOnly?: boolean },
 ): Promise<ProfileTextParseResult> {
-  return uploadWithProgress("/profile/parse-text", JSON.stringify(payload), {
+  const path = options?.localOnly ? "/profile/parse-text?local_only=true" : "/profile/parse-text";
+  return uploadWithProgress(path, JSON.stringify(payload), {
     budget: "recognition",
     onProgress,
     signal,
