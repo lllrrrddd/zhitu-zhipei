@@ -25,7 +25,7 @@ export function graduateJobPayload(job: GraduateJob): JobPayload {
     posted_at: job.posted_date ?? "",
     status: closed ? "已截止" : "待核实",
     note: [
-      "由研究生选岗实验台保存；条件为用户核对的摘要，投递前请重查招聘原文。",
+      "由智能选岗保存；条件为用户核对的摘要，投递前请重查招聘原文。",
       `来源：${job.source_url}`,
       job.source_checked_at ? `条件核查日期：${job.source_checked_at}` : "",
       job.application_status === "verified_closed" ? "用户记录：已核实关闭" : "",
@@ -34,6 +34,6 @@ export function graduateJobPayload(job: GraduateJob): JobPayload {
       .filter(Boolean)
       .join("\n"),
     recognition_source: job.raw_text ? "粘贴文本识别" : "手动填写",
-    origin_source: "研究生选岗实验台",
+    origin_source: "智能选岗",
   };
 }

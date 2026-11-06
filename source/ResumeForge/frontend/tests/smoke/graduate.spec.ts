@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
-test("graduate demo confirms facts and shows a source-backed ranking", async ({ page }) => {
+test("graduate demo confirms facts and opens an official company posting", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("resumeforge.user-guide.seen", "1");
   });
   await page.goto("/graduate");
-  await expect(page.getByRole("heading", { name: "研究生选岗实验台" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "智能选岗" })).toBeVisible();
   await expect(page.getByText("计算机硕士样本").first()).toBeVisible();
   await expect(page.getByText(/岗位摘要最近整理于/)).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("graduate-profile.png") });
@@ -15,27 +15,29 @@ test("graduate demo confirms facts and shows a source-backed ranking", async ({ 
   await page.getByRole("button", { name: "根据确认的信息排序" }).click();
 
   await expect(page.getByText("岗位开放状态尚未核实")).toBeVisible();
-  await expect(page.getByText(/中国科学院东莞材料所 · AI应用研发工程师/)).toBeVisible();
+  await expect(page.getByText(/腾讯 · 游戏 AI 智能体算法工程师/)).toBeVisible();
   const detailLink = page.getByRole("link", {
-    name: /打开招聘页面：中国科学院东莞材料所 · AI应用研发工程师/,
+    name: /打开招聘页面：腾讯 · 游戏 AI 智能体算法工程师/,
   });
   await expect(detailLink).toHaveAttribute(
     "href",
-    "https://campus.51job.com/dimst2027/m/jobs.html",
+    "https://careers.tencent.com/jobdesc.html?postId=2091705378583789568",
   );
   await page
     .context()
-    .route("https://campus.51job.com/**", (route) =>
+    .route("https://careers.tencent.com/**", (route) =>
       route.fulfill({ contentType: "text/html", body: "招聘页面测试替身" }),
     );
   const popupReady = page.waitForEvent("popup");
   await detailLink.click();
   const postingPage = await popupReady;
-  await expect(postingPage).toHaveURL("https://campus.51job.com/dimst2027/m/jobs.html");
+  await expect(postingPage).toHaveURL(
+    "https://careers.tencent.com/jobdesc.html?postId=2091705378583789568",
+  );
   await postingPage.close();
-  await expect(page.getByRole("link", { name: "核对岗位来源" }).first()).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "前往企业官网招聘页" }).first()).toHaveAttribute(
     "href",
-    /^https:\/\//,
+    /^https:\/\/careers\.tencent\.com\//,
   );
   await page.getByText("查看针对本岗位的简历表达建议").first().click();
   await expect(page.getByText(/定向简历可优先呈现这段经历/).first()).toBeVisible();
@@ -58,7 +60,7 @@ test("graduate demo confirms facts and shows a source-backed ranking", async ({ 
   expect(feedback.reason).toBe("依据与项目经历一致");
   expect(feedback.source_url).toMatch(/^https:\/\//);
   expect(feedback.evidence_excerpt).toBeTruthy();
-  await page.getByText(/中国科学院东莞材料所 · AI应用研发工程师/).scrollIntoViewIfNeeded();
+  await page.getByText(/腾讯 · 游戏 AI 智能体算法工程师/).scrollIntoViewIfNeeded();
   await page.screenshot({ path: test.info().outputPath("graduate-ranking.png") });
 });
 
@@ -113,7 +115,7 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
   await expect(page.getByText("测试单位 · 算法工程师测试岗 · 上海")).toHaveCount(2);
   await page.getByText("逐项核对岗位条件与简历证据").last().click();
   await expect(page.getByText(/画像依据：/).last()).toBeVisible();
-  await expect(page.getByText(/条件核查记录：20\d{2}-\d{2}-\d{2}/)).toHaveCount(2);
+  await expect(page.getByText(/条件核查记录：20\d{2}-\d{2}-\d{2}/).last()).toBeVisible();
   await expect(
     page.getByRole("link", { name: "打开招聘页面：测试单位 · 算法工程师测试岗 · 上海" }),
   ).toHaveCount(2);
@@ -128,8 +130,49 @@ test("a manually verified posting joins the live ranking", async ({ page }) => {
   await page.getByRole("button", { name: "保存到岗位库" }).click();
   const savedLink = page.getByRole("link", { name: "打开已保存岗位，继续分析或制作简历" });
   await expect(savedLink).toHaveAttribute("href", /\/jobs\?job_id=\d+/);
+  const savedJobId = new URL(
+    (await savedLink.getAttribute("href"))!,
+    "http://localhost",
+  ).searchParams.get("job_id");
   await savedLink.click();
   await expect(page.getByText("待核实").first()).toBeVisible();
+  await page.request.delete(`/api/jobs/${savedJobId}`);
+  await page.request.delete(`/api/trash/job/${savedJobId}`);
+});
+
+test("seeded company jobs appear in Jobs and link to the original posting", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("resumeforge.user-guide.seen", "1");
+  });
+  await page.goto("/jobs");
+  const search = page.getByPlaceholder("搜索岗位 / 公司 / 城市 / 描述 / 备注");
+  await search.fill("游戏 AI 智能体算法工程师");
+  await search.press("Enter");
+  const jobButton = page.getByRole("button", { name: "游戏 AI 智能体算法工程师-小游戏/休闲游戏方向" });
+  await expect(jobButton).toBeVisible();
+  const jobRow = page.getByRole("row").filter({ has: jobButton });
+  await expect(jobRow.getByRole("link", { name: "企业官网 ↗" })).toHaveAttribute(
+    "href",
+    "https://careers.tencent.com/jobdesc.html?postId=2091705378583789568",
+  );
+  await jobButton.click();
+  const postingLink = page.getByRole("link", { name: "前往企业官网招聘页" });
+  await expect(postingLink).toHaveAttribute(
+    "href",
+    "https://careers.tencent.com/jobdesc.html?postId=2091705378583789568",
+  );
+  await page
+    .context()
+    .route("https://careers.tencent.com/**", (route) =>
+      route.fulfill({ contentType: "text/html", body: "招聘页面测试替身" }),
+    );
+  const popupReady = page.waitForEvent("popup");
+  await postingLink.click();
+  const postingPage = await popupReady;
+  await expect(postingPage).toHaveURL(
+    "https://careers.tencent.com/jobdesc.html?postId=2091705378583789568",
+  );
+  await postingPage.close();
 });
 
 test("pasted posting becomes a confirmed review draft before ranking", async ({ page }) => {
@@ -160,5 +203,7 @@ test("pasted posting becomes a confirmed review draft before ranking", async ({ 
     .locator("..");
   await customResult.getByText("逐项核对岗位条件与简历证据").click();
   await customResult.getByText("查看本次粘贴的招聘原文").click();
-  await expect(customResult.getByText(/公司名称：测试单位[\s\S]*熟悉 PyTorch，2027届毕业生/)).toBeVisible();
+  await expect(
+    customResult.getByText(/公司名称：测试单位[\s\S]*熟悉 PyTorch，2027届毕业生/),
+  ).toBeVisible();
 });

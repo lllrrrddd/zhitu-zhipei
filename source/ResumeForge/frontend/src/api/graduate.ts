@@ -9,7 +9,7 @@ import type {
 } from "../features/graduate/types";
 
 export function getGraduateDemo(): Promise<GraduateDemo> {
-  return request("/graduate/demo");
+  return request("/graduate/official");
 }
 
 export function parseGraduateJobText(text: string): Promise<GraduateJobDraft> {

@@ -131,7 +131,22 @@ export default function JobTable({
               >
                 {job.title}
               </Button>
-              {jobSourceKind(job) === "collected" ? (
+              {job.origin_source === "企业官网" ? (
+                <Tag color="blue" style={{ marginInlineEnd: 0 }}>
+                  {/^https?:\/\//i.test(job.source_url) ? (
+                    <a
+                      className="job-official-source-link"
+                      href={job.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t("jobTable.source.official")} ↗
+                    </a>
+                  ) : (
+                    t("jobTable.source.official")
+                  )}
+                </Tag>
+              ) : jobSourceKind(job) === "collected" ? (
                 <Tag color="purple" style={{ marginInlineEnd: 0 }}>
                   {t(JOB_SOURCE_LABEL_KEYS.collected)}
                 </Tag>

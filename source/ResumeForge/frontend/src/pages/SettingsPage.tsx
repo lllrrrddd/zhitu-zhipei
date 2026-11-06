@@ -8,7 +8,7 @@
  *
  * 默认停留在 `model`：多数人进设置页是为了改模型或看用量，切页签不改变任何已存设置。
  */
-import { Tabs, Typography } from "antd";
+import { Alert, Tabs, Typography } from "antd";
 import { useEffect, useState } from "react";
 import type { ComponentProps } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -249,6 +249,14 @@ export default function SettingsPage() {
           <Typography.Text type="secondary">{t("settings.page.subtitle")}</Typography.Text>
         </div>
       </div>
+
+      <Alert
+        type="info"
+        showIcon
+        title={t("settings.page.guideTitle")}
+        description={t("settings.page.guideBody")}
+        style={{ marginBottom: 16 }}
+      />
 
       {/* 设置项按"你改的是什么"分页，而不是全部平铺一页：功能变多之后一整页排下来找起来
           很费劲（想改数据备份得先翻过整套模型参数）。六页的分法与顺序见 SettingsPanels

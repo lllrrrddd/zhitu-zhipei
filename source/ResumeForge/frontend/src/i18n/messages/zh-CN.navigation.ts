@@ -10,7 +10,7 @@ const navigation = {
   // ── 导航入口名（NAVIGATION_ITEMS 的 labelKey）──────────────
   "navigation.item.home": "首页",
   "navigation.item.jobs": "岗位广场",
-  "navigation.item.graduate": "研究生选岗",
+  "navigation.item.graduate": "智能选岗",
   "navigation.item.resumes": "简历中心",
   "navigation.item.apply": "投递台",
   "navigation.item.webform": "网申填表",
@@ -43,7 +43,7 @@ const navigation = {
   "navigation.a11y.skipToMain": "跳到主要内容",
 
   /** 侧栏品牌区与页头。 */
-  "navigation.shell.title": "研究生选岗",
+  "navigation.shell.title": "智能选岗",
   "navigation.shell.brandCaption": "就业智能体原型",
   "navigation.shell.versionTooltip": "当前版本",
   "navigation.shell.scrollTop": "回到当前页面顶部",

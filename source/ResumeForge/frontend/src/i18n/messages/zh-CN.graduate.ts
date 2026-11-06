@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 const graduate = {
-  "graduate.title": "研究生选岗实验台",
+  "graduate.title": "智能选岗",
   "graduate.intro":
-    "先核对画像，再查看岗位方向、硬门槛和证据。可录入已核对的招聘信息；演示岗位的开放状态尚未实时确认。",
+    "先核对画像，再查看岗位方向、硬门槛和证据。当前岗位样本来自企业官网；点击匹配结果可打开招聘原文，开放状态以官网为准。",
   "graduate.checkedDate": "岗位摘要最近整理于 {date}；投递状态需要重新核实。",
   "graduate.demoLabel": "虚构演示画像",
   "graduate.loadSaved": "加载我的资料",
@@ -40,6 +40,7 @@ const graduate = {
   "graduate.unverified": "点击岗位名称可打开招聘页面；方向匹配不代表岗位仍开放，投递前请核实。",
   "graduate.openPosting": "打开招聘页面：{job}",
   "graduate.source": "核对岗位来源",
+  "graduate.officialPosting": "前往企业官网招聘页",
   "graduate.sourceCheckedAt": "条件核查记录：{date}；开放状态仍需另行核实",
   "graduate.matched": "命中的岗位能力：{skills}",
   "graduate.aliasEvidence": "{skill}：{excerpt}",

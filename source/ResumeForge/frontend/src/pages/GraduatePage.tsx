@@ -247,13 +247,13 @@ export default function GraduatePage() {
             <Paragraph>
               <Text strong>{draft.name}</Text>
             </Paragraph>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-              <label>
+            <div className="graduate-profile-fields">
+              <label className="graduate-profile-field">
                 <Text>{t("graduate.degree")}</Text>
                 <Select
                   aria-label={t("graduate.degree")}
                   value={draft.degree}
-                  style={{ display: "block", width: 150 }}
+                  style={{ width: "100%" }}
                   options={(["bachelor", "master", "doctor"] as const).map((degree) => ({
                     value: degree,
                     label: t(`graduate.degree.${degree}`),
@@ -261,33 +261,33 @@ export default function GraduatePage() {
                   onChange={(degree) => changeDraft({ degree })}
                 />
               </label>
-              <label>
+              <label className="graduate-profile-field">
                 <Text>{t("graduate.year")}</Text>
                 <InputNumber
                   aria-label={t("graduate.year")}
                   value={draft.graduation_year || null}
                   min={2020}
                   max={2100}
-                  style={{ display: "block", width: 150 }}
+                  style={{ width: "100%" }}
                   onChange={(year) => changeDraft({ graduation_year: year ?? 0 })}
                 />
               </label>
-              <label>
+              <label className="graduate-profile-field">
                 <Text>{t("graduate.major")}</Text>
                 <Input
                   aria-label={t("graduate.major")}
                   value={draft.major}
-                  style={{ width: 250 }}
+                  style={{ width: "100%" }}
                   maxLength={120}
                   onChange={(event) => changeDraft({ major: event.target.value })}
                 />
               </label>
-              <label>
+              <label className="graduate-profile-field">
                 <Text>{t("graduate.cities")}</Text>
                 <Input
                   aria-label={t("graduate.cities")}
                   value={citiesText ?? draft.target_cities.join(", ")}
-                  style={{ width: 260 }}
+                  style={{ width: "100%" }}
                   maxLength={320}
                   onChange={(event) => {
                     requestVersion.current += 1;

@@ -6,7 +6,7 @@
  * 执行采用**轮询**模型：`useTaskPolling` 按 1.5s 拉取批次详情，任务进入终态后自动停止。
  */
 import { SettingOutlined } from "@ant-design/icons";
-import { App, Button, Space, Tabs, Typography } from "antd";
+import { Alert, App, Button, Space, Tabs, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -130,6 +130,14 @@ export default function ApplyPage() {
           {t("pagesMisc.applyPage.action.settings")}
         </Button>
       </div>
+
+      <Alert
+        type="info"
+        showIcon
+        title={t("pagesMisc.applyPage.guideTitle")}
+        description={t("pagesMisc.applyPage.guideBody")}
+        style={{ marginBottom: 16 }}
+      />
 
       <CurrentSiteBar refreshKey={collectRefreshKey} />
 

@@ -12,6 +12,8 @@
 const settingsPage = {
   "settings.page.title": "设置",
   "settings.page.subtitle": "配置简历生成、岗位需求解读和求职助手等 AI 功能使用的模型服务",
+  "settings.page.guideTitle": "这里管理模型服务和本地数据",
+  "settings.page.guideBody": "导入简历、查看企业岗位和按已确认事实选岗无需修改这些设置。只有使用 AI 生成简历、岗位解读或求职助手时，才需要在“AI 模型”里检查连接；模型用量是本机调用记录，不是待办任务。",
   "settings.tab.model": "AI 模型",
   "settings.tab.assistant": "助手与 AI 行为",
   "settings.tab.appearance": "外观与交互",

@@ -26,6 +26,19 @@ def get_demo() -> dict:
     }
 
 
+@router.get("/official")
+def get_official_jobs() -> dict:
+    """Fictional profiles paired with verified company recruitment page summaries."""
+    job_set = json.loads((DEMO_DIR / "official_jobs.json").read_text(encoding="utf-8"))
+    return {
+        "profiles": json.loads((DEMO_DIR / "profiles.json").read_text(encoding="utf-8"))["profiles"],
+        "jobs": job_set["jobs"],
+        "summaries": job_set["summaries"],
+        "checked_date": job_set["checked_date"],
+        "notice": "画像为虚构资料；岗位链接指向企业官网，是否仍可申请请在官网核对。",
+    }
+
+
 @router.post("/recommend")
 def rank_graduate_jobs(payload: GraduateRankRequest) -> dict:
     """Rank supplied confirmed facts without storing the profile or calling a model."""

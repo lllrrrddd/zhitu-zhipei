@@ -199,6 +199,18 @@ export default function JobDetailDrawer({
             {job.source_url && (
               <Button
                 icon={<LinkOutlined />}
+                href={job.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {job.origin_source === "企业官网"
+                  ? t("jobDetail.action.officialPosting")
+                  : t("jobDetail.action.originalPosting")}
+              </Button>
+            )}
+            {job.source_url && (
+              <Button
+                icon={<LinkOutlined />}
                 loading={webFormLoading}
                 disabled={webFormLoading}
                 onClick={() => onOpenWebForm(job)}

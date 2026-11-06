@@ -12,6 +12,9 @@
 const resumesPage = {
   "resumesPage.page.newResume": "New resume",
   "resumesPage.page.importResume": "Import and recognize resume",
+  "resumesPage.page.emptyTitle": "No tailored resumes saved yet",
+  "resumesPage.page.emptyGuide": "Import a resume and review your profile, then choose a real job in Jobs to generate or write a tailored resume. Saved versions will appear here.",
+  "resumesPage.page.openJobs": "Browse jobs",
   "resumesPage.page.deliveryArchive": "Delivery archive",
   "resumesPage.page.jobFilterTag": "Filtered by job: {job}",
   "resumesPage.page.clearFilter": "Clear filter",

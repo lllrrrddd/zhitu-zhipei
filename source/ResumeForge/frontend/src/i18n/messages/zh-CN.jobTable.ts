@@ -10,6 +10,7 @@
 const jobTable = {
   "jobTable.column.favorite": "收藏",
   "jobTable.column.title": "岗位",
+  "jobTable.source.official": "企业官网",
   "jobTable.column.company": "公司",
   "jobTable.column.location": "城市",
   "jobTable.column.salary": "薪资",

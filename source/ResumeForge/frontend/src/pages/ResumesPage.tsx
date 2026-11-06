@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 /** 简历中心：生成历史列表、收藏、预览与导出。 */
 import { UndoOutlined } from "@ant-design/icons";
-import { App, Button, Select, Space, Tag, Tooltip } from "antd";
+import { Alert, App, Button, Select, Space, Tag, Tooltip } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -385,7 +385,25 @@ export default function ResumesPage() {
         </Tooltip>
       </Space>
       {/* A2 场景建议卡：只提供入口，不调用模型、不按场景过滤任何已有简历。 */}
-      <ResumeScenarioSuggestion />
+      {!loading && !error && data?.total === 0 ? (
+        <Alert
+          type="info"
+          showIcon
+          title={t("resumesPage.page.emptyTitle")}
+          description={t("resumesPage.page.emptyGuide")}
+          action={
+            <Space wrap>
+              <Button onClick={() => navigate("/profile?import=1")}>
+                {t("resumesPage.page.importResume")}
+              </Button>
+              <Button onClick={() => navigate("/jobs")}>{t("resumesPage.page.openJobs")}</Button>
+            </Space>
+          }
+          style={{ marginBottom: 16 }}
+        />
+      ) : (
+        <ResumeScenarioSuggestion />
+      )}
       {batch.selecting && (
         <ResumeBatchToolbar
           count={batch.selectedCount}

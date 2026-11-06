@@ -12,7 +12,7 @@ import {
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Input, Select, Space, Tooltip } from "antd";
+import { Button, Input, Select, Tooltip } from "antd";
 import { useState } from "react";
 import { t } from "../../i18n";
 import { JOB_STATUS_LABEL_KEYS, JOB_TYPE_LABEL_KEYS } from "../../i18n/enum/jobs";
@@ -96,8 +96,8 @@ export function JobFilterBar({
   }));
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <Space wrap className="jobs-filter-bar">
+    <div className="jobs-filter-bar">
+      <div className="jobs-filter-controls">
         <Input.Search
           className="jobs-search-input"
           placeholder={t("jobsPage.filter.searchPlaceholder")}
@@ -160,6 +160,8 @@ export function JobFilterBar({
             label: t(option.labelKey),
           }))}
         />
+      </div>
+      <div className="jobs-filter-actions">
         {/* 进入选择模式的入口在行右键菜单的「批量选择」（R8）；退出选择已挪到
             BatchToolbar 的「全选全部岗位」右侧（用户要求，两行各归其位）。 */}
         {/* 开始分析在面板里确认（设置视图有「开始分析」按钮）；分析一律走后台任务，
@@ -231,7 +233,7 @@ export function JobFilterBar({
             {t("jobsPage.filter.sortReset")}
           </Button>
         </Tooltip>
-      </Space>
+      </div>
     </div>
   );
 }

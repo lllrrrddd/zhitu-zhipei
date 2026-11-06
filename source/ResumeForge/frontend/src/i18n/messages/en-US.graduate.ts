@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 const graduate = {
-  "graduate.title": "Graduate job fit lab",
+  "graduate.title": "Find matching jobs",
   "graduate.intro":
-    "Confirm your profile before comparing job directions, eligibility and evidence. Add jobs you have checked; demo openings are unverified.",
+    "Confirm your profile, then compare job directions, eligibility and evidence. The current job set links to company careers pages; check their current status there.",
   "graduate.checkedDate":
     "Job summaries were last collected on {date}; check current openings again.",
   "graduate.demoLabel": "Fictional demo profile",
@@ -42,6 +42,7 @@ const graduate = {
     "Select a job name to open its posting. Directional fit does not mean the job is still open; check before applying.",
   "graduate.openPosting": "Open job posting: {job}",
   "graduate.source": "Check job source",
+  "graduate.officialPosting": "Open company careers posting",
   "graduate.sourceCheckedAt":
     "Conditions checked on {date}; opening status still needs verification",
   "graduate.matched": "Matched job skills: {skills}",

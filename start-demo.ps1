@@ -74,6 +74,10 @@ try {
     if (-not $ready) {
         throw "启动未就绪。请检查 $runtimeDir 下的 backend.err.log 和 frontend.err.log。"
     }
+    & $python (Join-Path $projectRoot 'scripts/seed_official_jobs.py') $BackendPort (Join-Path $runtimeDir 'data/official-seed-state.json')
+    if ($LASTEXITCODE -ne 0) {
+        throw '企业官网岗位样本导入失败，请检查后端日志。'
+    }
     @{ backend_pid = $backend.Id; frontend_pid = $frontend.Id; backend_port = $BackendPort; frontend_port = $FrontendPort } |
         ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding utf8
     $url = "http://127.0.0.1:$FrontendPort/graduate"

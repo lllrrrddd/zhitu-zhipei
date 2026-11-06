@@ -151,7 +151,7 @@ export default function GraduateDecisionGroup({
                 </div>
               )}
               <Typography.Link href={item.source_url} target="_blank" rel="noopener noreferrer">
-                {t("graduate.source")}
+                {job?.id.startsWith("O") ? t("graduate.officialPosting") : t("graduate.source")}
               </Typography.Link>
               {job?.source_checked_at && (
                 <Text type="secondary" style={{ marginLeft: 8 }}>

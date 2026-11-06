@@ -646,6 +646,12 @@ export default function WebFormPage() {
 
   return (
     <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+      <Alert
+        type="info"
+        showIcon
+        title={t("webFormPage.guide.title")}
+        description={t("webFormPage.guide.body")}
+      />
       {/* 安全说明保留：就绪前只保留标题这一行红线；完整说明在控制项展开后一起出现。 */}
       {controlsExpanded ? (
         <Alert

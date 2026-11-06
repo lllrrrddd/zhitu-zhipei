@@ -1,6 +1,65 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 .jobs-filter-bar {
   width: 100%;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 10px;
+  background: var(--rf-surface-alt);
+}
+
+.jobs-filter-controls,
+.jobs-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.jobs-filter-actions {
+  padding-top: 12px;
+  border-top: 1px solid var(--rf-border-subtle);
+}
+
+.jobs-page-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.jobs-page-intro h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.jobs-page-intro p {
+  margin: 0;
+  color: var(--rf-text-description);
+}
+
+.graduate-profile-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.graduate-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.job-official-source-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* 备选岗位卡片网格：antd Card 自身不带下间距，裸堆会一张贴一张；用 grid gap 拉开。 */
@@ -12,14 +71,10 @@
 /* 搜索框可伸缩：260 是舒适宽，160 是"还能看清关键词"的下限。
    真正参与收缩的是它外面的 .ant-space-item——.jobs-search-input 自己不是 flex 项，
    只写 flex 会静默失效（这是 768–991 把筛选行挤成两行的直接原因）。 */
-.jobs-filter-bar > .ant-space-item:has(> .jobs-search-input) {
+.jobs-search-input {
   flex: 1 1 200px;
   min-width: 160px;
   max-width: 260px;
-}
-
-.jobs-search-input {
-  width: 100%;
 }
 
 .table-text-link {

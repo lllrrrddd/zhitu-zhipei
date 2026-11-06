@@ -2,7 +2,9 @@
 """The graduate demo and rank endpoint preserve uncertainty and input limits."""
 
 from app.main import app
+from app.schemas.graduate import GraduateJob
 from fastapi.testclient import TestClient
+from urllib.parse import urlsplit
 
 
 def test_demo_can_be_ranked_without_author_labels() -> None:
@@ -24,6 +26,22 @@ def test_demo_can_be_ranked_without_author_labels() -> None:
     assert result["directional_fits"] == []
     assert {item["job_id"] for item in result["expired"]} == {"J12", "J13"}
     assert {item["job_id"] for item in result["blocked"]} == {"J14"}
+
+
+def test_official_catalog_links_to_company_recruitment_pages() -> None:
+    response = TestClient(app).get("/api/graduate/official")
+    assert response.status_code == 200
+    catalog = response.json()
+    assert len(catalog["jobs"]) == 20
+    assert set(catalog["summaries"]) == {job["id"] for job in catalog["jobs"]}
+    assert len({job["id"] for job in catalog["jobs"]}) == 20
+    assert {urlsplit(job["source_url"]).hostname for job in catalog["jobs"]} == {
+        "www.onmicro.com.cn",
+        "careers.tencent.com",
+        "career.huawei.com",
+    }
+    assert all(job["application_status"] == "unknown" for job in catalog["jobs"])
+    assert all(GraduateJob.model_validate(job) for job in catalog["jobs"])
 
 
 def test_user_supplied_evidence_can_change_a_review_into_directional_fit() -> None:

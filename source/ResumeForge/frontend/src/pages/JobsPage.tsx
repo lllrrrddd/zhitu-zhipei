@@ -326,6 +326,13 @@ export default function JobsPage() {
 
   return (
     <div>
+      <div className="jobs-page-intro">
+        <div>
+          <h1>{t("pagesMisc.jobsPage.heading")}</h1>
+          <p>{t("pagesMisc.jobsPage.intro")}</p>
+        </div>
+        <span>{t("pagesMisc.jobsPage.count", { count: jobs?.total ?? 0 })}</span>
+      </div>
       <JobFilterBar
         keyword={keyword}
         setKeyword={setKeyword}

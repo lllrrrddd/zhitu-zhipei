@@ -4,6 +4,8 @@ const settingsPage = {
   "settings.page.title": "Settings",
   "settings.page.subtitle":
     "Configure the model service used by Resume generation, Job analysis and the career assistant",
+  "settings.page.guideTitle": "Model service and local data settings",
+  "settings.page.guideBody": "You can import resumes, browse company jobs and rank confirmed facts without changing these settings. Check the AI model connection only for AI resume generation, job analysis or the assistant. Usage counts record local model calls, not pending tasks.",
   "settings.tab.model": "AI models",
   "settings.tab.assistant": "Assistant & AI behavior",
   "settings.tab.appearance": "Appearance & interaction",

@@ -9,6 +9,8 @@
  * wording.
  */
 const webFormPage = {
+  "webFormPage.guide.title": "Choose a specific company posting first",
+  "webFormPage.guide.body": "Open a company careers posting from Graduate Job Fit or Jobs. If it has an application form, enter its URL here and start the dedicated browser. The read button and fill history remain empty until a form is open. Some companies accept applications by email instead.",
   "webFormPage.notice.title":
     "This feature only fills your data into the page; it never submits for you",
   "webFormPage.notice.body":

@@ -6,10 +6,17 @@
  * 两段（底部的打开方式提示），其余三个页面的文案全部在本包。
  */
 const pagesMisc = {
+  "pagesMisc.jobsPage.heading": "岗位广场",
+  "pagesMisc.jobsPage.intro":
+    "点击岗位名称查看要求；带“企业官网”标签的岗位可跳转到招聘原文。投递前请在官网核实是否仍开放。",
+  "pagesMisc.jobsPage.count": "当前共 {count} 个岗位",
   // ── 投递台（ApplyPage） ─────────────────────────────────────────
   "pagesMisc.applyPage.title": "投递台",
   "pagesMisc.applyPage.subtitle":
     "采集岗位 → 判断匹配度 → 显式确认 → 自动投递。所有对招聘网站的动作都由你显式发起，登录在你自己的浏览器窗口里完成。",
+  "pagesMisc.applyPage.guideTitle": "这里是招聘网站自动投递的高级工具",
+  "pagesMisc.applyPage.guideBody":
+    "企业官网岗位请从“智能选岗”或“岗位广场”点击官网链接，由本人在官网申请；它们不会自动进入此队列。未添加受支持招聘网站岗位时，队列和记录为空是正常的。",
   "pagesMisc.applyPage.action.settings": "投递设置",
   "pagesMisc.applyPage.progress.loading": "正在读取任务进度…",
   "pagesMisc.applyPage.progress.notFound": "任务记录不存在，可能已被清理。",

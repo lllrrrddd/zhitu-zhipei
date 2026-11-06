@@ -8,10 +8,17 @@
  * of that page are here.
  */
 const pagesMisc = {
+  "pagesMisc.jobsPage.heading": "Job board",
+  "pagesMisc.jobsPage.intro":
+    "Open a job to review its requirements. Jobs tagged 'Company website' link to the original posting. Check current availability before applying.",
+  "pagesMisc.jobsPage.count": "{count} jobs in this list",
   // ── Apply desk (ApplyPage) ─────────────────────────────────────
   "pagesMisc.applyPage.title": "Apply desk",
   "pagesMisc.applyPage.subtitle":
     "Collect jobs → judge the match → confirm each one → apply automatically. Every action on a job site starts with you, and you sign in inside your own browser window.",
+  "pagesMisc.applyPage.guideTitle": "Advanced auto-apply tool for supported job boards",
+  "pagesMisc.applyPage.guideBody":
+    "For company careers postings, use the official link in Graduate Job Fit or Jobs and apply on the company site. These jobs do not enter this queue automatically. An empty queue is expected until you add a supported job-board posting.",
   "pagesMisc.applyPage.action.settings": "Apply settings",
   "pagesMisc.applyPage.progress.loading": "Loading the task progress…",
   "pagesMisc.applyPage.progress.notFound":

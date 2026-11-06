@@ -12,6 +12,7 @@
 const jobTable = {
   "jobTable.column.favorite": "Favorite",
   "jobTable.column.title": "Job",
+  "jobTable.source.official": "Company careers",
   "jobTable.column.company": "Company",
   "jobTable.column.location": "City",
   "jobTable.column.salary": "Salary",

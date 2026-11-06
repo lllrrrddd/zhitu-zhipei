@@ -12,6 +12,9 @@ const resumesPage = {
   // ── 筛选工具栏 ──────────────────────────────────────────
   "resumesPage.page.newResume": "新建简历",
   "resumesPage.page.importResume": "导入简历并识别",
+  "resumesPage.page.emptyTitle": "还没有保存的岗位版简历",
+  "resumesPage.page.emptyGuide": "先导入简历并核对个人资料，再到岗位广场选一个真实岗位生成或手写岗位版简历；保存后会出现在这里。",
+  "resumesPage.page.openJobs": "去岗位广场",
   "resumesPage.page.deliveryArchive": "交付存档",
   "resumesPage.page.jobFilterTag": "按岗位筛选：{job}",
   "resumesPage.page.clearFilter": "清除筛选",
