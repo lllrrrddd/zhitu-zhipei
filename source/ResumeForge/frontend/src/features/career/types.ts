@@ -72,3 +72,16 @@ export interface PostingCheck {
   checked_at: string | null;
   jobs: MarketJob[];
 }
+
+export interface CareerMaterialResult {
+  name: string;
+  method: "document_text" | "image_ocr" | "mixed";
+  text: string;
+  warnings: string[];
+  findings: {
+    label: string;
+    value: string;
+    status: "text_found" | "needs_review";
+    excerpt: string;
+  }[];
+}

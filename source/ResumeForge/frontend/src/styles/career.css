@@ -215,6 +215,57 @@
   color: var(--rf-text-description);
 }
 
+#career-material-check {
+  scroll-margin-top: 20px;
+}
+
+.career-material-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.career-material-fields label {
+  display: grid;
+  gap: 6px;
+}
+
+#career-material-check > .ant-card-body > .ant-checkbox-wrapper,
+#career-material-check > .ant-card-body > .ant-btn {
+  display: flex;
+  margin-top: 12px;
+}
+
+.career-material-result {
+  margin-top: 18px;
+}
+
+.career-material-result ul {
+  list-style: none;
+  padding: 0;
+}
+
+.career-material-result li {
+  border-top: 1px solid var(--rf-border-subtle);
+  padding: 10px 0;
+}
+
+.career-material-review-select {
+  display: block;
+  min-width: 230px;
+  max-width: 100%;
+  margin-top: 8px;
+}
+
+.career-material-result blockquote,
+.career-material-result pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--rf-text-description);
+  margin: 6px 0;
+}
+
 .career-result-footer {
   margin-top: auto;
   padding-top: 12px;
@@ -233,6 +284,10 @@
 
 @media (max-width: 560px) {
   .career-profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .career-material-fields {
     grid-template-columns: minmax(0, 1fr);
   }
 }

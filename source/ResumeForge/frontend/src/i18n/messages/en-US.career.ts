@@ -99,6 +99,54 @@ const career = {
   "career.result.saved": "View saved job",
   "career.result.failed": "Could not find jobs. Try again.",
   "career.result.saveFailed": "Could not save the job. Try again.",
+  "career.diagnosis.title": "Improve this resume for the role",
+  "career.diagnosis.advice":
+    "The employer mentions {skill}. Describe your real contribution, method and verifiable result without adding invented experience.",
+  "career.diagnosis.noEvidence":
+    "This profile lacks supporting experience. Add a real project or internship before drafting an edit.",
+  "career.diagnosis.accept": "Use in this search and rerank",
+  "career.diagnosis.reject": "Do not use",
+  "career.diagnosis.scope":
+    "This changes only the profile used for this search, not the original resume file.",
+  "career.interview.start": "Start five-round interview",
+  "career.interview.failed":
+    "Could not start the interview. Check the model settings and try again.",
+  "career.interview.modelNotice":
+    "The interview sends this profile and job text to the configured model. An external provider receives the data if one is configured.",
+  "career.material.jump": "Review supporting documents ↓",
+  "career.material.title": "4. Review supporting documents",
+  "career.material.intro":
+    "Upload a certificate or other document. The app finds matching text; you must check the original document yourself.",
+  "career.material.name": "Name",
+  "career.material.school": "School",
+  "career.material.degree": "Degree",
+  "career.material.major": "Major",
+  "career.material.year": "Graduation year",
+  "career.material.optional": "Optional comparison value",
+  "career.material.unknown": "Not entered",
+  "career.material.autoFields":
+    "From the profile above: degree {degree}, major {major}, graduation year {year}. Correct the profile above if needed.",
+  "career.material.choose": "Choose PDF, Word or image",
+  "career.material.invalid": "Choose a PDF, DOCX, PNG or JPEG up to 2 MB.",
+  "career.material.ocrConsent":
+    "For images or scanned PDFs, allow the configured model to transcribe text. External providers receive the image.",
+  "career.material.check": "Read and compare",
+  "career.material.failed": "Could not read the document. Try a clearer file.",
+  "career.material.result": "Read {file}",
+  "career.material.method.document_text": "Extracted from the document text layer without a model.",
+  "career.material.method.image_ocr": "The model transcribed the image. Check for errors.",
+  "career.material.method.mixed": "Read text and scanned pages. Check for errors.",
+  "career.material.found": "Text found",
+  "career.material.notFound": "Not found; review needed",
+  "career.material.scope":
+    "Matching words do not prove the field is correct or the document is authentic. Compare the original and the extracted text yourself. This step does not save the file or result.",
+  "career.material.readText": "Read extracted text",
+  "career.material.reviewField": "Human review for {field}",
+  "career.material.pending": "Not reviewed yet",
+  "career.material.confirmSame": "Matches the original after review",
+  "career.material.confirmDifferent": "Differs from the original after review",
+  "career.material.reviewed": "Human reviewed {reviewed} of {total} fields.",
+  "career.material.export": "Download review record",
 } as const;
 
 export default career;

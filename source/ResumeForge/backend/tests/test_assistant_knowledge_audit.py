@@ -48,6 +48,7 @@ README_MD = REPO_ROOT / "README.md"
 # 的表格行完全一致、且每个 key 都真实存在于 FEATURES——于是"加了功能、写了 README、
 # 却没登记给助手"会直接变红，而不是等用户问到才发现助手答"没有这个功能"。
 README_FEATURE_KEYS: dict[str, tuple[str, ...]] = {
+    "研究生求职入口": ("career_home",),
     "研究生选岗": ("graduate_fit",),
     "岗位管理": ("job_manage",),
     "备选岗位": ("candidate_jobs",),
@@ -114,7 +115,7 @@ README_FEATURE_KEYS: dict[str, tuple[str, ...]] = {
     "多格式导出": ("export_formats", "watermark", "redact", "resume_exact_preview"),
     "导出交付包": ("export_bundle_delivery",),
     "离线分享包": ("share_package", "review_annotations"),
-    "首页": ("home_shortcuts", "home_todo"),
+    "求职总览": ("home_shortcuts", "home_todo"),
     "界面细节": ("ui_details", "navigation_visibility"),
     "全局搜索": ("global_search",),
     "防虚构校验": ("consistency_check",),
@@ -181,7 +182,7 @@ DOMAIN_READ_TOOLS = {
 GUIDE_TITLE_DOMAINS = {
     "配置 AI": "设置",
     "完善资料": "我的资料",
-    "导入岗位与投递": "岗位广场",
+    "导入岗位与投递": "已保存岗位",
     "跟进求职进度": "求职进度",
     "制作简历": "简历中心",
     "求职助手": "求职助手",

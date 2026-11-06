@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-import { ExportOutlined, StarOutlined } from "@ant-design/icons";
+import { ExportOutlined, MessageOutlined, StarOutlined } from "@ant-design/icons";
 import { Alert, App, Button, Card, Empty, Space, Tag } from "antd";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createInterview } from "../../api/interview";
 import { createJob, listJobs } from "../../api/jobs";
 import { t } from "../../i18n";
 import { formatDateTime } from "../../utils/format";
-import type { CareerMatches, MatchedJob } from "./types";
+import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
+import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
 
 const KIND_LABELS = {
   campus: "career.result.campus",
@@ -21,9 +23,19 @@ const NOTE_LABELS = {
   experience_check: "career.result.experience_check",
 } as const;
 
-function ResultCard({ match }: { match: MatchedJob }) {
+function ResultCard({
+  match,
+  profile,
+  onAcceptAdvice,
+}: {
+  match: MatchedJob;
+  profile: CareerProfile;
+  onAcceptAdvice: (draft: string) => void;
+}) {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [startingInterview, setStartingInterview] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const { job } = match;
   const visibleCities = job.cities.slice(0, 3).join("、") || t("career.result.cityUnknown");
@@ -57,6 +69,39 @@ function ResultCard({ match }: { match: MatchedJob }) {
       message.error(error instanceof Error ? error.message : t("career.result.saveFailed"));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function startInterview() {
+    if (startingInterview) return;
+    setStartingInterview(true);
+    try {
+      const resumeText = [
+        `学历：${profile.degree}；毕业年份：${profile.graduation_year ?? "待确认"}`,
+        `专业：${profile.major}；目标岗位：${profile.direction}`,
+        `意向城市：${profile.cities.join("、")}`,
+        `已确认技能：${profile.skills.join("、")}`,
+        ...profile.experience.map((line) => `经历：${line}`),
+      ].join("\n");
+      const session = await createInterview({
+        title: `${job.company} · ${job.title} · 五轮求职训练`.slice(0, 128),
+        job_material: {
+          name: `${job.company} · ${job.title}`.slice(0, 256),
+          text: `招聘原文：${job.url}\n岗位职责：${job.responsibilities}\n任职要求：${job.requirements}`,
+        },
+        resume_material: { name: "本人确认的求职画像", text: resumeText },
+        interview_type: "综合面",
+        difficulty: "中级",
+        interviewer_style: "温和引导",
+        rounds: 5,
+        rounds_min: null,
+        focus: `围绕${job.title}的岗位要求和候选人实际经历提问，不编造经历。`.slice(0, 255),
+      });
+      navigate(`/interview?session_id=${session.id}`);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : t("career.interview.failed"));
+    } finally {
+      setStartingInterview(false);
     }
   }
 
@@ -106,6 +151,24 @@ function ResultCard({ match }: { match: MatchedJob }) {
           <summary>{t("career.result.requirements")}</summary>
           <p className="career-jd-excerpt">{job.requirements}</p>
         </details>
+        <details className="career-disclosure">
+          <summary>{t("career.diagnosis.title")}</summary>
+          {match.matched_skills.length > 0 && match.evidence ? (
+            <>
+              <p className="career-help">
+                {t("career.diagnosis.advice", { skill: match.matched_skills[0] })}
+              </p>
+              <GraduateResearchAdvice
+                skill={match.matched_skills[0]}
+                excerpt={match.evidence}
+                onAccept={onAcceptAdvice}
+              />
+              <p className="career-help">{t("career.diagnosis.scope")}</p>
+            </>
+          ) : (
+            <p className="career-help">{t("career.diagnosis.noEvidence")}</p>
+          )}
+        </details>
         <div className="career-result-footer">
           <Space wrap>
             <Button
@@ -124,6 +187,13 @@ function ResultCard({ match }: { match: MatchedJob }) {
             ) : (
               <Link to={"/jobs?job_id=" + savedId}>{t("career.result.saved")}</Link>
             )}
+            <Button
+              icon={<MessageOutlined />}
+              loading={startingInterview}
+              onClick={() => void startInterview()}
+            >
+              {t("career.interview.start")}
+            </Button>
           </Space>
           <small className="career-help">{formatDateTime(match.checked_at)}</small>
         </div>
@@ -132,7 +202,15 @@ function ResultCard({ match }: { match: MatchedJob }) {
   );
 }
 
-export default function CareerResults({ result }: { result: CareerMatches }) {
+export default function CareerResults({
+  result,
+  profile,
+  onAcceptAdvice,
+}: {
+  result: CareerMatches;
+  profile: CareerProfile;
+  onAcceptAdvice: (draft: string) => void;
+}) {
   return (
     <>
       <header className="career-results-header">
@@ -153,6 +231,10 @@ export default function CareerResults({ result }: { result: CareerMatches }) {
             )}
           </span>
         )}
+        {result.matches.length > 0 && (
+          <p className="career-help">{t("career.interview.modelNotice")}</p>
+        )}
+        <a href="#career-material-check">{t("career.material.jump")}</a>
       </header>
       {result.market.count === 0 ? (
         <Alert type="warning" title={t("career.result.noSources")} showIcon />
@@ -163,7 +245,12 @@ export default function CareerResults({ result }: { result: CareerMatches }) {
       ) : (
         <div className="career-results-grid">
           {result.matches.map((match) => (
-            <ResultCard key={match.job.id} match={match} />
+            <ResultCard
+              key={match.job.id}
+              match={match}
+              profile={profile}
+              onAcceptAdvice={onAcceptAdvice}
+            />
           ))}
         </div>
       )}

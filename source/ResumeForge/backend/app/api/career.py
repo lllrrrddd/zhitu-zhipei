@@ -1,15 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 """Public posting discovery and resume-based job search."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from ..database import get_db
 from ..schemas.job_market import (
     CareerMatches,
+    CareerMaterialRequest,
+    CareerMaterialResult,
     CareerProfile,
     MarketSummary,
     PostingCheck,
     PostingCheckRequest,
 )
+from ..services.career_material_check import inspect_material
 from ..services.job_market_catalog import (
     check_posting,
     read_market,
@@ -17,6 +22,8 @@ from ..services.job_market_catalog import (
     summarize_market,
 )
 from ..services.job_market_match import match_market
+from ..services.llm.base import LLMError
+from .interview_shared import _require_provider
 
 router = APIRouter(prefix="/api/career", tags=["career"])
 
@@ -41,3 +48,13 @@ async def find_matches(profile: CareerProfile) -> CareerMatches:
 @router.post("/check", response_model=PostingCheck)
 async def verify_posting(payload: PostingCheckRequest) -> PostingCheck:
     return await check_posting(payload.url)
+
+
+@router.post("/material/check", response_model=CareerMaterialResult)
+async def check_material(payload: CareerMaterialRequest, db: Session = Depends(get_db)):
+    try:
+        return await inspect_material(payload, lambda: _require_provider(db)[0])
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LLMError as exc:
+        raise HTTPException(status_code=502, detail="图片文字识别失败，请换清晰图片重试") from exc

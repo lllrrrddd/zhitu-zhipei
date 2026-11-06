@@ -100,3 +100,37 @@ class PostingCheck(BaseModel):
     status: Literal["found", "cached", "not_found", "unsupported"]
     checked_at: datetime | None = None
     jobs: list[MarketJob] = Field(default_factory=list)
+
+
+class CareerMaterialFile(BaseModel):
+    name: str = Field(min_length=1, max_length=256)
+    mime_type: str = Field(default="", max_length=100)
+    data: str = Field(min_length=20, max_length=3_000_000)
+
+
+class CareerExpectedField(BaseModel):
+    label: str = Field(min_length=1, max_length=40)
+    value: str = Field(min_length=1, max_length=120)
+
+
+class CareerMaterialRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file: CareerMaterialFile
+    expected: list[CareerExpectedField] = Field(default_factory=list, max_length=8)
+    allow_ocr: bool = False
+
+
+class CareerMaterialFinding(BaseModel):
+    label: str
+    value: str
+    status: Literal["text_found", "needs_review"]
+    excerpt: str = ""
+
+
+class CareerMaterialResult(BaseModel):
+    name: str
+    method: Literal["document_text", "image_ocr", "mixed"]
+    text: str
+    warnings: list[str]
+    findings: list[CareerMaterialFinding]

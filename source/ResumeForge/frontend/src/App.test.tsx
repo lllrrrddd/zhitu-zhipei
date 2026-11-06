@@ -8,6 +8,7 @@ import { APP_NAME_KEY, GITHUB_REPO } from "./config";
 import { t } from "./i18n";
 
 vi.mock("./pages/HomePage", () => ({ default: () => <div>首页内容</div> }));
+vi.mock("./pages/CareerPage", () => ({ default: () => <div>找岗位内容</div> }));
 vi.mock("./pages/JobsPage", () => ({ default: () => <div>岗位广场内容</div> }));
 vi.mock("./pages/ProfilePage", () => ({ default: () => <div>我的资料内容</div> }));
 vi.mock("./pages/ResumesPage", () => ({ default: () => <div>简历中心内容</div> }));
@@ -32,14 +33,17 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
-describe("first-visit guide", () => {
-  it("opens automatically once and remains available from the sidebar", async () => {
+describe("guide entry", () => {
+  it("opens from the sidebar and can be reopened", async () => {
     const firstRender = render(
       <MemoryRouter>
         <App />
       </MemoryRouter>,
     );
 
+    await screen.findByText("找岗位内容");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
     expect(await screen.findByRole("dialog", { name: "欢迎使用职途智配" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "稍后查看" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
@@ -51,7 +55,7 @@ describe("first-visit guide", () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText("首页内容");
+    await screen.findByText("找岗位内容");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
@@ -67,7 +71,7 @@ describe("application navigation", () => {
         <App />
       </MemoryRouter>,
     );
-    await screen.findByText("首页内容");
+    await screen.findByText("找岗位内容");
 
     const skip = screen.getByRole("link", { name: "跳到主要内容" });
     fireEvent.click(skip);
@@ -87,11 +91,11 @@ describe("application navigation", () => {
     fireEvent.click(toggle);
     const drawer = await screen.findByRole("dialog", { name: "功能导航" });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    fireEvent.click(within(drawer).getByRole("menuitem", { name: "岗位广场" }));
+    fireEvent.click(within(drawer).getByRole("menuitem", { name: "已保存岗位" }));
     expect(await screen.findByText("岗位广场内容")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "功能导航" })).toBeNull());
     expect(screen.getByRole("main")).toHaveFocus();
-    expect(document.title).toBe(`岗位广场 · ${t(APP_NAME_KEY)}`);
+    expect(document.title).toBe(`已保存岗位 · ${t(APP_NAME_KEY)}`);
   });
 
   it("shows the app version next to the brand name, matching package.json", async () => {
@@ -114,36 +118,37 @@ describe("application navigation", () => {
     expect(await screen.findByText("当前版本")).toBeInTheDocument();
   });
 
-  it("opens private pages from the top-level 我的空间 menu", async () => {
+  it("opens private pages from the top-level 更多工具 menu", async () => {
     window.localStorage.setItem("resumeforge.user-guide.seen", "1");
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/workspace"]}>
         <App />
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: /我的空间/ }));
+    await screen.findByText("首页内容");
+    fireEvent.click(await screen.findByRole("button", { name: /更多工具/ }));
     fireEvent.click(await screen.findByText("收藏夹"));
     expect(await screen.findByText("收藏夹内容")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /我的空间/ }));
+    fireEvent.click(screen.getByRole("button", { name: /更多工具/ }));
     fireEvent.click(screen.getByText("求职助手"));
     expect(await screen.findByText("求职助手内容")).toBeInTheDocument();
   });
 
-  it("「我的空间」在头像左侧：顺序是 [数据集][我的空间][头像]", async () => {
+  it("「更多工具」在头像左侧：顺序是 [数据集][更多工具][头像]", async () => {
     window.localStorage.setItem("resumeforge.user-guide.seen", "1");
     const { container } = render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/workspace"]}>
         <App />
       </MemoryRouter>,
     );
     await screen.findByText("首页内容");
 
-    // 钉的是**关系**而不是"存在"：以前「我的空间」是 `.app-header-actions` 的直接子节点，
+    // 钉的是**关系**而不是"存在"：以前菜单是 `.app-header-actions` 的直接子节点，
     // 头像在它右边的另一个容器里。现在它走 `AppHeaderContext` 的 `beforeAvatar` 插槽，
     // 必须与头像同容器、且在头像之前——否则"移到头像左侧"这件事就没做到。
-    const space = await screen.findByRole("button", { name: /我的空间/ });
+    const space = await screen.findByRole("button", { name: /更多工具/ });
     const avatar = await screen.findByRole("button", { name: "进入我的资料" });
     const context = container.querySelector(".app-header-context");
     expect(context).not.toBeNull();

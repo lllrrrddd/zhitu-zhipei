@@ -119,10 +119,10 @@ function makeDetail(overrides: Partial<InterviewDetail> = {}): InterviewDetail {
   };
 }
 
-function renderPage() {
+function renderPage(entry = "/interview") {
   return render(
     <AntdApp>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[entry]}>
         <InterviewPage />
       </MemoryRouter>
     </AntdApp>,
@@ -147,6 +147,16 @@ afterEach(() => {
 });
 
 describe("InterviewPage：自动轮数提交契约", () => {
+  it("从岗位推荐带会话编号进入时直接恢复已创建的五轮面试", async () => {
+    apiMocks.getInterview.mockResolvedValue(
+      makeDetail({ rounds: 5, job_id: null, resume_id: null }),
+    );
+    renderPage("/interview?session_id=7");
+
+    await waitFor(() => expect(apiMocks.getInterview).toHaveBeenCalledWith(7));
+    expect(await screen.findByText("第 1 / 5 轮")).toBeInTheDocument();
+  });
+
   it("选「自动」：rounds_min 提交 8（最早可收尾轮数），rounds 提交硬性保险 12", async () => {
     apiMocks.createInterview.mockResolvedValue(makeDetail({ rounds: 12, rounds_min: 8 }));
     renderPage();

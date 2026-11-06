@@ -62,6 +62,7 @@ export default function InterviewPage() {
   // 岗位详情「模拟面试」深链带来的预填（RF-11）：进页面就把关联岗位选好。
   const [searchParams] = useSearchParams();
   const linkedJobId = parseLinkedJobId(searchParams.get("job_id"));
+  const linkedSessionId = parseLinkedJobId(searchParams.get("session_id"));
   const [sessions, setSessions] = useState<InterviewBrief[]>([]);
   const batch = useBatchSelection<number>();
   const [loadingList, setLoadingList] = useState(true);
@@ -113,6 +114,27 @@ export default function InterviewPage() {
       cancelled = true;
     };
   }, [fetchSessions]);
+
+  // A session started from a matched job opens directly in the existing interview room.
+  useEffect(() => {
+    if (linkedSessionId === undefined) return;
+    let cancelled = false;
+    void getInterview(linkedSessionId)
+      .then((session) => {
+        if (!cancelled) {
+          setActive(session);
+          setReady(false);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          message.error(error instanceof Error ? error.message : t("interview.toast.openFailed"));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [linkedSessionId, message]);
 
   // 新消息进来后滚到底部，用户不用自己找。
   // 依赖里有 `pendingAnswer`：用户刚发的那条是本地气泡，消息数没变但它确实新增了一行。

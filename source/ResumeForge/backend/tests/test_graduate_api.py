@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """The graduate demo and rank endpoint preserve uncertainty and input limits."""
 
+from urllib.parse import urlsplit
+
 from app.main import app
 from app.schemas.graduate import GraduateJob
 from fastapi.testclient import TestClient
-from urllib.parse import urlsplit
 
 
 def test_demo_can_be_ranked_without_author_labels() -> None:

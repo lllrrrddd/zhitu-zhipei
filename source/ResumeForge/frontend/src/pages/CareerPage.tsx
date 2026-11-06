@@ -3,6 +3,7 @@ import { Alert } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { findCareerMatches, getCareerMarket, refreshCareerMarket } from "../api/career";
 import CareerProfileForm from "../features/career/CareerProfileForm";
+import CareerMaterialCheck from "../features/career/CareerMaterialCheck";
 import CareerResults from "../features/career/CareerResults";
 import CareerResumePanel from "../features/career/CareerResumePanel";
 import CareerSourcePanel from "../features/career/CareerSourcePanel";
@@ -86,6 +87,31 @@ export default function CareerPage() {
     }
   }
 
+  async function acceptAdvice(line: string) {
+    if (searching || !draft || !line.trim()) return;
+    const updated = {
+      ...draft,
+      experience: [
+        ...draft.experience.filter((item) => item !== line.trim()).slice(-11),
+        line.trim(),
+      ],
+    };
+    setDraft(updated);
+    setDraftVersion((value) => value + 1);
+    setSearching(true);
+    setSearchError("");
+    try {
+      const matches = await findCareerMatches(updated);
+      setMarket(matches.market);
+      setResult(matches);
+    } catch (error) {
+      setSearchError(error instanceof Error ? error.message : t("career.result.failed"));
+      setResult(null);
+    } finally {
+      setSearching(false);
+    }
+  }
+
   return (
     <div className="career-workbench">
       <header className="career-hero">
@@ -116,10 +142,17 @@ export default function CareerPage() {
         />
       )}
       {searchError && <Alert type="error" showIcon title={searchError} />}
-      {result && (
-        <section className="career-results" ref={resultSection}>
-          <CareerResults result={result} />
-        </section>
+      {result && draft && (
+        <>
+          <section className="career-results" ref={resultSection}>
+            <CareerResults
+              result={result}
+              profile={draft}
+              onAcceptAdvice={(line) => void acceptAdvice(line)}
+            />
+          </section>
+          <CareerMaterialCheck key={draftVersion} profile={draft} />
+        </>
       )}
     </div>
   );

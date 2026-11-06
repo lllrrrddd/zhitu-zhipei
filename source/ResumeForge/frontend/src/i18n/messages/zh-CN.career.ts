@@ -93,6 +93,52 @@ const career = {
   "career.result.saved": "查看已保存岗位",
   "career.result.failed": "查找岗位失败，请重试。",
   "career.result.saveFailed": "保存岗位失败，请重试。",
+  "career.diagnosis.title": "对这条岗位改进简历",
+  "career.diagnosis.advice":
+    "岗位提到 {skill}。请把已有经历中的个人贡献、方法和可证明结果写清楚，不能补造经历。",
+  "career.diagnosis.noEvidence":
+    "当前画像中没有足够的经历证据。先补充真实项目或实习内容，再生成修改建议。",
+  "career.diagnosis.accept": "采纳到本次画像并重排",
+  "career.diagnosis.reject": "暂不采纳",
+  "career.diagnosis.scope": "采纳只修改本次查找使用的画像，不会改动原简历文件。",
+  "career.interview.start": "开始五轮面试",
+  "career.interview.failed": "面试启动失败，请检查模型设置后重试。",
+  "career.interview.modelNotice":
+    "面试会将这份求职画像和岗位内容发送给当前配置的模型；若配置了外部模型，资料会发送到该服务商。",
+  "career.material.jump": "继续核对就业材料 ↓",
+  "career.material.title": "4. 核对就业材料",
+  "career.material.intro":
+    "上传证书、学历证明或其他材料。系统只查找可见文字与已填资料是否出现相同字样，结论需本人对照原件确认。",
+  "career.material.name": "姓名",
+  "career.material.school": "学校",
+  "career.material.degree": "学历",
+  "career.material.major": "专业",
+  "career.material.year": "毕业年份",
+  "career.material.optional": "选填，用于和材料文字对照",
+  "career.material.unknown": "未填写",
+  "career.material.autoFields":
+    "从上方资料带入：学历 {degree} · 专业 {major} · 毕业年份 {year}。需要更正请先修改上方资料。",
+  "career.material.choose": "选择材料 PDF、Word 或图片",
+  "career.material.invalid": "请选择 2 MB 以内的 PDF、DOCX、PNG 或 JPEG。",
+  "career.material.ocrConsent":
+    "若材料是图片或扫描 PDF，同意用当前配置的模型抄录文字；外部模型会收到图像。",
+  "career.material.check": "读取并核对",
+  "career.material.failed": "材料读取失败，请换清晰文件重试。",
+  "career.material.result": "已读取 {file}",
+  "career.material.method.document_text": "从文档文字层提取，无须模型。",
+  "career.material.method.image_ocr": "图片文字由模型抄录，请核对错漏。",
+  "career.material.method.mixed": "同时读取文字层和扫描页，请核对错漏。",
+  "career.material.found": "文本中找到",
+  "career.material.notFound": "未找到，待核对",
+  "career.material.scope":
+    "找到相同字样不表示字段一致或材料真实。请查看原件与识别全文，再由本人确认。文件和结果不会在此步骤保存。",
+  "career.material.readText": "查看识别全文",
+  "career.material.reviewField": "{field}人工核对结果",
+  "career.material.pending": "尚未人工核对",
+  "career.material.confirmSame": "对照原件后确认一致",
+  "career.material.confirmDifferent": "对照原件后发现不一致",
+  "career.material.reviewed": "已人工核对 {reviewed} / {total} 项。",
+  "career.material.export": "下载本次核对记录",
 } as const;
 
 export default career;

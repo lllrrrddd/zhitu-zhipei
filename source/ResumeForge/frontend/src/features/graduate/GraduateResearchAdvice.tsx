@@ -7,9 +7,11 @@ import { useLocale } from "../../i18n/i18nContext";
 export default function GraduateResearchAdvice({
   skill,
   excerpt,
+  onAccept,
 }: {
   skill: string;
   excerpt: string;
+  onAccept?: (draft: string) => void;
 }) {
   useLocale();
   const [contribution, setContribution] = useState("");
@@ -67,9 +69,19 @@ export default function GraduateResearchAdvice({
         {t("graduate.researchCreate")}
       </Button>
       {draft && (
-        <Typography.Paragraph copyable style={{ marginBottom: 0 }}>
-          {draft}
-        </Typography.Paragraph>
+        <>
+          <Typography.Paragraph copyable style={{ marginBottom: 0 }}>
+            {draft}
+          </Typography.Paragraph>
+          {onAccept && (
+            <Space wrap>
+              <Button type="primary" onClick={() => onAccept(draft)}>
+                {t("career.diagnosis.accept")}
+              </Button>
+              <Button onClick={() => setDraft("")}>{t("career.diagnosis.reject")}</Button>
+            </Space>
+          )}
+        </>
       )}
     </Space>
   );

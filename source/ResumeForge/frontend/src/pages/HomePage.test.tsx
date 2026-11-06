@@ -118,7 +118,7 @@ describe("HomePage", () => {
   it("renders the updated quick entries", async () => {
     renderPage();
 
-    expect(await screen.findByText("岗位广场")).toBeInTheDocument();
+    expect(await screen.findByText("已保存岗位")).toBeInTheDocument();
     expect(screen.getByText("简历中心")).toBeInTheDocument();
     expect(screen.getByText("投递台")).toBeInTheDocument();
     expect(screen.getByText("求职进度")).toBeInTheDocument();
@@ -126,7 +126,7 @@ describe("HomePage", () => {
     expect(screen.getByText("求职统计")).toBeInTheDocument();
     expect(screen.getByText("设置")).toBeInTheDocument();
 
-    expect(screen.getByRole("link", { name: /岗位广场/ })).toHaveAttribute("href", "/jobs");
+    expect(screen.getByRole("link", { name: /已保存岗位/ })).toHaveAttribute("href", "/jobs");
     expect(screen.getByRole("link", { name: /简历中心/ })).toHaveAttribute("href", "/resumes");
     expect(screen.getByRole("link", { name: /投递台/ })).toHaveAttribute("href", "/apply");
     expect(screen.getByRole("link", { name: /求职进度/ })).toHaveAttribute("href", "/tracker");
@@ -147,7 +147,7 @@ describe("HomePage", () => {
 
   it("hides the first-delivery panel once everything is done (sample-data shape)", async () => {
     renderPage();
-    await screen.findByText("岗位广场");
+    await screen.findByText("已保存岗位");
     expect(screen.queryByText("从零到第一份可交付简历")).toBeNull();
   });
 
@@ -336,7 +336,7 @@ describe("HomePage", () => {
 
     // 取消勾选全部默认 7 项。
     for (const label of [
-      "岗位广场",
+      "已保存岗位",
       "简历中心",
       "投递台",
       "求职进度",

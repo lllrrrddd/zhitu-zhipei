@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import type {
   CareerMatches,
+  CareerMaterialResult,
   CareerProfile,
   MarketSummary,
   PostingCheck,
@@ -30,6 +31,18 @@ export function checkCareerPosting(url: string): Promise<PostingCheck> {
   return request("/career/check", {
     method: "POST",
     body: JSON.stringify({ url }),
+    budget: "analysis",
+  });
+}
+
+export function checkCareerMaterial(payload: {
+  file: { name: string; mime_type: string; data: string };
+  expected: { label: string; value: string }[];
+  allow_ocr: boolean;
+}): Promise<CareerMaterialResult> {
+  return request("/career/material/check", {
+    method: "POST",
+    body: JSON.stringify(payload),
     budget: "analysis",
   });
 }
