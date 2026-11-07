@@ -9,6 +9,7 @@ import { App as AntdApp } from "antd";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { onDroppedResume } from "../features/career/resumeDropHandoff";
 import GlobalFileDrop from "./GlobalFileDrop";
 
 const apiMocks = vi.hoisted(() => ({
@@ -64,6 +65,30 @@ describe("GlobalFileDrop", () => {
     expect(await screen.findByText(/不支持的文件类型「\.txt」/)).toBeInTheDocument();
     expect(apiMocks.importDataset).not.toHaveBeenCalled();
     expect(apiMocks.createManualResume).not.toHaveBeenCalled();
+  });
+
+  it.each(["example.pdf", "example.docx"])("hands %s to resume recognition", (name) => {
+    renderDrop();
+    const file = dropFile(name);
+    const received = vi.fn();
+    const unsubscribe = onDroppedResume(received);
+    expect(received).toHaveBeenCalledWith(file);
+    expect(document.querySelector(".ant-message-warning")).toBeNull();
+    unsubscribe();
+  });
+
+  it("does not dispatch twice from the career upload area", () => {
+    renderDrop();
+    const upload = document.createElement("div");
+    upload.className = "career-drop";
+    document.body.append(upload);
+    const received = vi.fn();
+    const unsubscribe = onDroppedResume(received);
+    fireEvent.drop(upload, {
+      dataTransfer: { files: [new File(["test"], "example.pdf")], types: ["Files"] },
+    });
+    expect(received).not.toHaveBeenCalled();
+    unsubscribe();
   });
 
   it(".zip 走数据集导入的二次确认", async () => {

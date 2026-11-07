@@ -10,7 +10,8 @@
 const globalFileDrop = {
   /** 拖文件到窗口任意位置时出现的整屏遮罩。 */
   "globalFileDrop.dragOverlay.title": "松开即可导入",
-  "globalFileDrop.dragOverlay.hint": "支持 .zip 数据集备份、.csv 岗位表格、.json 简历内容",
+  "globalFileDrop.dragOverlay.hint":
+    "支持 PDF、DOCX 简历，以及 .zip 备份、.csv 岗位表格、.json 简历内容",
 
   /** `.zip`：导入备份包，新增一份数据集，当前正在使用的数据不受影响。 */
   "globalFileDrop.zipImport.title": "导入备份包为新数据集？",
@@ -41,7 +42,7 @@ const globalFileDrop = {
   "globalFileDrop.fileInfo.multiple":
     "一次拖入一个文件；岗位 CSV 支持多选，请到岗位页使用「导入 CSV」",
   "globalFileDrop.fileInfo.unsupported":
-    "不支持的文件类型「{extension}」：可以拖入 {formats}（.zip 数据集备份、.csv 岗位表格、.json 简历内容）",
+    "不支持的文件类型「{extension}」：可以拖入 {formats}（PDF/DOCX 简历、.zip 备份、.csv 岗位表格、.json 简历内容）",
 
   /** 文件名去掉扩展名后为空时，新建简历的默认标题。 */
   "globalFileDrop.resume.defaultTitle": "导入的简历",

@@ -9,7 +9,7 @@
 const globalFileDrop = {
   "globalFileDrop.dragOverlay.title": "Drop to import",
   "globalFileDrop.dragOverlay.hint":
-    "Supports .zip dataset backups, .csv job tables and .json resume content",
+    "Supports PDF and DOCX resumes, .zip backups, .csv job tables and .json resume content",
 
   "globalFileDrop.zipImport.title": "Import this backup as a new dataset?",
   "globalFileDrop.zipImport.content":
@@ -35,7 +35,7 @@ const globalFileDrop = {
   "globalFileDrop.fileInfo.multiple":
     "Drop one file at a time. To select several job CSVs, use Import CSV on the Jobs page",
   "globalFileDrop.fileInfo.unsupported":
-    "Unsupported file type “{extension}”. You can drop {formats} (.zip for a dataset backup, .csv for a job table and .json for resume content)",
+    "Unsupported file type “{extension}”. You can drop {formats} (PDF/DOCX resumes, .zip backups, .csv job tables and .json resume content)",
 
   "globalFileDrop.resume.defaultTitle": "Imported resume",
 } as const;

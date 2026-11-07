@@ -8,7 +8,8 @@
  * - `.zip` → 数据集备份导入（新增一份数据集，当前数据不受影响）；
  * - `.csv` → 岗位表导入（CSV 的解析与预览在前端岗位页，这里只把人带过去）；
  * - `.json` → 新建一份手写简历（内容必须是简历结构）；
- * - 其它类型 → 明确说不支持，并列出可用的三种。
+ * - `.pdf`/`.docx` → career-page resume recognition;
+ * - 其它类型 → 明确说不支持，并列出可用格式。
  *
  * 只在拖拽**文件**时显示遮罩：拖选中的文字、拖页面内的元素都不会触发。
  */
@@ -18,11 +19,12 @@ import { useNavigate } from "react-router-dom";
 import { createManualResume } from "../api/resumes";
 import { importDataset } from "../api/settings";
 import { describeImportIssues } from "../features/settings/datasetImportFeedback";
+import { queueDroppedResume } from "../features/career/resumeDropHandoff";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import { getSnapshot } from "../i18n/localeStore";
 
-const ACCEPTED = [".zip", ".csv", ".json"] as const;
+const ACCEPTED = [".pdf", ".docx", ".zip", ".csv", ".json"] as const;
 
 function extensionOf(name: string): string {
   const index = name.lastIndexOf(".");
@@ -111,6 +113,11 @@ export default function GlobalFileDrop() {
       }
       const file = files[0];
       const extension = extensionOf(file.name);
+      if (extension === ".pdf" || extension === ".docx") {
+        queueDroppedResume(file);
+        navigate("/");
+        return;
+      }
       if (extension === ".zip") {
         importZip(file);
         return;
@@ -161,6 +168,7 @@ export default function GlobalFileDrop() {
       event.preventDefault();
       depth.current = 0;
       setDragging(false);
+      if (event.target instanceof Element && event.target.closest(".career-drop")) return;
       handleFiles(Array.from(event.dataTransfer?.files ?? []));
     };
 

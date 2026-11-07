@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { InboxOutlined } from "@ant-design/icons";
 import { Alert, Button, Card, Input, Upload } from "antd";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getGraduateDemo } from "../../api/graduate";
 import { getProfile, parseProfileText } from "../../api/profile";
 import { t } from "../../i18n";
@@ -14,6 +14,7 @@ import {
   resumeToCareerProfile,
 } from "./profileFromResume";
 import type { CareerProfile } from "./types";
+import { onDroppedResume } from "./resumeDropHandoff";
 
 export default function CareerResumePanel({
   onLoad,
@@ -115,6 +116,8 @@ export default function CareerResumePanel({
       t("career.resume.read", { file: file.name }),
     );
   }
+
+  useEffect(() => onDroppedResume(importFile));
 
   return (
     <Card className="career-panel" title={t("career.resume.title")}>
