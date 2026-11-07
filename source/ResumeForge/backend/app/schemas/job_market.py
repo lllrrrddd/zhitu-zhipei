@@ -9,8 +9,16 @@ from pydantic import BaseModel, ConfigDict, Field
 from .graduate import JobDegreeFloor
 
 SourceId = Literal[
-    "huawei", "tencent", "bosch", "syngenta", "lesaffre", "avery_dennison",
-    "nielsen_iq", "eurofins", "vitol", "yili",
+    "huawei",
+    "tencent",
+    "bosch",
+    "syngenta",
+    "lesaffre",
+    "avery_dennison",
+    "nielsen_iq",
+    "eurofins",
+    "vitol",
+    "yili",
 ]
 SourceStatus = Literal["idle", "updated", "partial", "failed"]
 Skill = Annotated[str, Field(min_length=1, max_length=80)]
@@ -87,6 +95,33 @@ class CareerProfile(BaseModel):
     experience: list[Excerpt] = Field(default_factory=list, max_length=12)
 
 
+class ScorePart(BaseModel):
+    """匹配分的一个组成项：界面直接画成横条，用户能看出分数从哪来。"""
+
+    key: Literal["direction", "skills", "city", "entry"]
+    value: int = Field(ge=0, le=100)
+    weight: int = Field(ge=0, le=100)
+
+
+class MatchGap(BaseModel):
+    """差距/待核实项。
+
+    ``key`` 交给前端做文案映射，``values`` 只带具体名词（缺哪几项能力、岗位要求什么学历），
+    不在后端拼中文句子——多语言文案由界面负责。
+    """
+
+    key: Literal[
+        "degree_unspecified",
+        "degree_unconfirmed",
+        "experience_required",
+        "missing_skills",
+        "city_mismatch",
+        "no_evidence",
+        "graduation_check",
+    ]
+    values: list[str] = Field(default_factory=list)
+
+
 class MatchedJob(BaseModel):
     job: MarketJob
     checked_at: datetime
@@ -101,6 +136,13 @@ class MatchedJob(BaseModel):
         Literal["degree_unspecified", "degree_unconfirmed", "graduation_check", "experience_check"]
     ]
     check_skills: list[str]
+    # 规则匹配度：0–100，只由下面四项组成，权重固定，可复算。不是录取概率。
+    score: int = Field(default=0, ge=0, le=100)
+    score_parts: list[ScorePart] = Field(default_factory=list)
+    gaps: list[MatchGap] = Field(default_factory=list)
+    # 本地向量模型的语义相近度（0–100）。只在入选名单上计算，用于同分排序；
+    # 不参与 score，避免"同一个分数在不同条目上口径不同"。没有模型时为 null。
+    relatedness: int | None = Field(default=None, ge=0, le=100)
 
 
 class CareerMatches(BaseModel):

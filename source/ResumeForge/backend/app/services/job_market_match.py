@@ -9,7 +9,15 @@ from datetime import datetime
 from pypinyin import lazy_pinyin
 
 from ..schemas.graduate import JobDegreeFloor
-from ..schemas.job_market import CareerMatches, CareerProfile, MarketJob, MarketSnapshot, MatchedJob
+from ..schemas.job_market import (
+    CareerMatches,
+    CareerProfile,
+    MarketJob,
+    MarketSnapshot,
+    MatchedJob,
+    MatchGap,
+    ScorePart,
+)
 from .job_market_catalog import is_current, summarize_market
 from .job_market_embeddings import semantic_scores
 
@@ -26,8 +34,17 @@ _EXPERIENCE = re.compile(
 _PREFERENCE = re.compile(r"优先|preferred|desirable|a plus", re.I)
 _GENERIC_SKILLS = {"python", "sql", "excel", "linux", "git", "office", "英语"}
 _CHEMISTRY_HINTS = (
-    "应用化学", "化学工程", "化学分析", "化学类", "物理化学", "电化学",
-    "化工技术", "化工研发", "chemistry", "chemical", "chemist",
+    "应用化学",
+    "化学工程",
+    "化学分析",
+    "化学类",
+    "物理化学",
+    "电化学",
+    "化工技术",
+    "化工研发",
+    "chemistry",
+    "chemical",
+    "chemist",
 )
 _MATERIAL_TITLE_HINTS = ("材料", "电池", "高分子", "material", "materials", "battery", "polymer")
 _FOOD_HINTS = ("食品", "乳品", "营养", "food science", "food technology", "nutrition")
@@ -115,8 +132,15 @@ _DIRECTIONS = (
     ("市场", "销售", "商务", "营销", "客户经理", "产品运营", "marketing", "sales"),
     ("法学", "法务", "律师", "legal"),
     (
-        "食品", "食品科学", "食品研发", "食品工程", "食品安全",
-        "food science", "food safety", "food technology", "baking",
+        "食品",
+        "食品科学",
+        "食品研发",
+        "食品工程",
+        "食品安全",
+        "food science",
+        "food safety",
+        "food technology",
+        "baking",
     ),
 )
 _SKILL_TERMS: dict[str, tuple[str, ...]] = {
@@ -201,7 +225,7 @@ def _degree_floor(requirements: str) -> JobDegreeFloor:
 
 def _requires_experience(requirements: str) -> bool:
     for match in _EXPERIENCE.finditer(requirements):
-        preceding = requirements[max(0, match.start() - 25):match.start()]
+        preceding = requirements[max(0, match.start() - 25) : match.start()]
         if re.match(r"1\s*year", match.group(), re.I) and re.search(
             r"fresh\s+(?:graduates?\s+)?or\s*$", preceding, re.I
         ):
@@ -218,6 +242,78 @@ def _city_key(city: str) -> str:
 class _Candidate:
     match: MatchedJob
     score: float
+
+
+# 分数口径：四项加权（权重合计 100），再按经验门槛扣分。权重固定、不随结果变化，
+# 因此同一个画像 + 同一个岗位在任何时候都能算出同一个分数。
+_SCORE_WEIGHTS = {"direction": 40, "skills": 30, "city": 10, "entry": 20}
+# 岗位明确要求工作经验时额外扣分：毕业生投这类岗位的"匹配度"不应看起来和应届岗一样高。
+_EXPERIENCE_PENALTY = 20
+
+
+def _entry_value(job: MarketJob, experience_required: bool) -> int:
+    """入职门槛友好度：校招/管培 100，社招但未写明经验 85，要求经验 0。"""
+    if experience_required:
+        return 0
+    return 100 if job.kind in ("campus", "trainee") else 85
+
+
+def _score(
+    *,
+    exact_title: bool,
+    direction_match: bool,
+    specific: list[str],
+    matched: list[str],
+    city_match: bool,
+    entry: int,
+    experience_required: bool,
+) -> tuple[int, list[ScorePart]]:
+    direction = 100 if exact_title else (85 if direction_match else 0)
+    if specific:
+        skills = round(min(len(specific), 3) / 3 * 100)
+    elif matched:
+        # 只命中 Python/SQL 这类通用工具时不给满分：它几乎出现在每份简历里。
+        skills = 40
+    else:
+        skills = 0
+    parts = [
+        ScorePart(key="direction", value=direction, weight=_SCORE_WEIGHTS["direction"]),
+        ScorePart(key="skills", value=skills, weight=_SCORE_WEIGHTS["skills"]),
+        ScorePart(key="city", value=100 if city_match else 0, weight=_SCORE_WEIGHTS["city"]),
+        ScorePart(key="entry", value=entry, weight=_SCORE_WEIGHTS["entry"]),
+    ]
+    weighted = sum(part.value * part.weight for part in parts) / 100
+    total = weighted - (_EXPERIENCE_PENALTY if experience_required else 0)
+    return max(0, min(100, round(total))), parts
+
+
+def _gaps(
+    *,
+    floor: JobDegreeFloor,
+    profile: CareerProfile,
+    notes: list[str],
+    check_skills: list[str],
+    city_match: bool,
+    evidence: str,
+) -> list[MatchGap]:
+    """把"为什么不是满分"拆成可读的条目，供界面逐条展示。"""
+    gaps: list[MatchGap] = []
+    if "degree_unspecified" in notes:
+        gaps.append(MatchGap(key="degree_unspecified"))
+    if "degree_unconfirmed" in notes:
+        gaps.append(MatchGap(key="degree_unconfirmed"))
+    if "experience_check" in notes:
+        gaps.append(MatchGap(key="experience_required"))
+    if "graduation_check" in notes:
+        gaps.append(MatchGap(key="graduation_check"))
+    if check_skills:
+        gaps.append(MatchGap(key="missing_skills", values=check_skills[:5]))
+    if not city_match:
+        gaps.append(MatchGap(key="city_mismatch", values=list(profile.cities[:3])))
+    if not evidence:
+        # 只有方向/技能名称对得上，简历里找不到对应原文——这类"可能合适"最需要人核对。
+        gaps.append(MatchGap(key="no_evidence"))
+    return gaps
 
 
 def _assess(
@@ -254,7 +350,9 @@ def _assess(
         and _has(title, "研发")
         and any(_has(_normalize(job.requirements), term) for term in _FOOD_HINTS)
     )
-    direction_match = exact_title or bool(directions & job_directions) or related_materials or related_food
+    direction_match = (
+        exact_title or bool(directions & job_directions) or related_materials or related_food
+    )
     req_skills = _mentions(_normalize(job.requirements))
     matched = sorted(confirmed_skills & _mentions(text))
     for skill in profile.skills:
@@ -285,7 +383,10 @@ def _assess(
     if job.kind == "campus":
         notes.append("graduation_check")
     experience_required = bool(
-        (job.experience_requirement and not re.search(r"不限|无要求|无经验", job.experience_requirement))
+        (
+            job.experience_requirement
+            and not re.search(r"不限|无要求|无经验", job.experience_requirement)
+        )
         or _requires_experience(job.requirements)
         or re.search(r"\b(?:senior|sr\.?|manager|director)\b|高级|资深|主管", job.title, re.I)
     )
@@ -293,14 +394,23 @@ def _assess(
         notes.append("experience_check")
 
     strong = direction_match and bool(specific or len(matched) >= 2) and not experience_required
-    score = (
-        13 * direction_match
-        + 6 * exact_title
-        + 3 * min(len(specific), 4)
-        + min(len(matched), 4)
-        + 3 * city_match
-        + (2 if job.kind in ("campus", "trainee") else 0)
-        - (18 if experience_required else 0)
+    total, parts = _score(
+        exact_title=exact_title,
+        direction_match=direction_match,
+        specific=specific,
+        matched=matched,
+        city_match=city_match,
+        entry=_entry_value(job, experience_required),
+        experience_required=experience_required,
+    )
+    missing = sorted(req_skills - confirmed_skills)[:5]
+    gaps = _gaps(
+        floor=floor,
+        profile=profile,
+        notes=notes,
+        check_skills=missing,
+        city_match=city_match,
+        evidence=evidence,
     )
     return _Candidate(
         match=MatchedJob(
@@ -314,9 +424,14 @@ def _assess(
             city_match=city_match,
             degree_floor=floor,
             eligibility_notes=notes,
-            check_skills=sorted(req_skills - confirmed_skills)[:5],
+            check_skills=missing,
+            score=total,
+            score_parts=parts,
+            gaps=gaps,
         ),
-        score=score,
+        # 排序沿用原来的相对分：它在"硬门槛优先"之后才参与比较，改动它会影响
+        # 既有的排序断言；对外的 0–100 分只负责解释，不改变结果顺序的语义。
+        score=total,
     )
 
 
@@ -341,10 +456,14 @@ async def match_market(profile: CareerProfile, snapshot: MarketSnapshot) -> Care
     shortlist_size = 14
     shortlist = candidates[:shortlist_size]
     semantic = await semantic_scores(profile, [item.match.job for item in shortlist])
+    for item in shortlist:
+        similarity = semantic.get(item.match.job.id)
+        if similarity is not None:
+            item.match.relatedness = max(0, min(100, round(similarity * 100)))
     shortlist.sort(
         key=lambda item: (
             item.match.current,
-            item.score + 9 * semantic.get(item.match.job.id, 0),
+            item.score + 30 * semantic.get(item.match.job.id, 0),
         ),
         reverse=True,
     )
