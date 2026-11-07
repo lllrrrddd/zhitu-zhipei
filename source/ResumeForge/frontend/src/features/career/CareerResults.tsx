@@ -116,7 +116,11 @@ function ResultCard({
             {t(match.current ? "career.result.live" : "career.result.cached")}
           </Tag>
         </div>
-        <h3>{job.title}</h3>
+        <h3>
+          <a href={job.url} target="_blank" rel="noopener noreferrer">
+            {job.title} <ExportOutlined aria-hidden />
+          </a>
+        </h3>
         <p className="career-help">
           {job.company} · {t(KIND_LABELS[job.kind])} · {visibleCities}
           {job.cities.length > 3 &&

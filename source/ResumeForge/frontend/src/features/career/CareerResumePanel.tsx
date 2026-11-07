@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { InboxOutlined } from "@ant-design/icons";
-import { Alert, Button, Card, Input, Space, Upload } from "antd";
+import { Alert, Button, Card, Input, Upload } from "antd";
 import { useRef, useState } from "react";
 import { getGraduateDemo } from "../../api/graduate";
 import { getProfile, parseProfileText } from "../../api/profile";
@@ -132,7 +132,7 @@ export default function CareerResumePanel({
         <strong>{t("career.resume.upload")}</strong>
         <span>{t("career.resume.uploadHint")}</span>
       </Upload.Dragger>
-      <Space wrap className="career-action-row">
+      <div className="career-upload-actions">
         <Button
           disabled={disabled}
           onClick={() =>
@@ -157,7 +157,6 @@ export default function CareerResumePanel({
           {t("career.resume.saved")}
         </Button>
         <Button
-          type="link"
           disabled={disabled}
           onClick={() => {
             setFeedback(undefined);
@@ -166,7 +165,7 @@ export default function CareerResumePanel({
         >
           {t("career.resume.manual")}
         </Button>
-      </Space>
+      </div>
       <details className="career-disclosure">
         <summary>{t("career.resume.paste")}</summary>
         <Input.TextArea
@@ -198,6 +197,14 @@ export default function CareerResumePanel({
       </details>
       <div className="career-help" aria-live="polite">
         {t(reading ? "career.resume.reading" : "career.resume.local")}
+      </div>
+      <div className="career-next-steps">
+        <strong>{t("career.resume.nextTitle")}</strong>
+        <ol>
+          <li>{t("career.resume.nextReview")}</li>
+          <li>{t("career.resume.nextTarget")}</li>
+          <li>{t("career.resume.nextOfficial")}</li>
+        </ol>
       </div>
       {feedback && (
         <Alert className="career-feedback" type={feedback.type} title={feedback.text} showIcon />

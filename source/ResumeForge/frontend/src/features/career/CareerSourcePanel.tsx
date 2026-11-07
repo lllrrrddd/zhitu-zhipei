@@ -37,6 +37,7 @@ export default function CareerSourcePanel({
   const [check, setCheck] = useState<PostingCheck | null>(null);
   const [checkError, setCheckError] = useState(false);
   const cached = (market?.count ?? 0) - (market?.current_count ?? 0);
+  const checkingWithoutCurrent = refreshing && !market?.current_count;
 
   async function verify() {
     if (checking || !url.trim()) return;
@@ -55,7 +56,11 @@ export default function CareerSourcePanel({
   return (
     <Card className="career-panel" title={t("career.market.title")}>
       <div className="career-market-heading">
-        <strong>{t("career.market.count", { count: market?.current_count ?? 0 })}</strong>
+        <strong>
+          {checkingWithoutCurrent
+            ? t("career.market.checking")
+            : t("career.market.count", { count: market?.current_count ?? 0 })}
+        </strong>
         <Button icon={<ReloadOutlined />} loading={refreshing} onClick={onRefresh}>
           {t("career.market.refresh")}
         </Button>
