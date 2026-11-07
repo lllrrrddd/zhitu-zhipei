@@ -48,7 +48,9 @@ _EDUCATION_NOISE_MARKERS = (
     # 考研简历常把"报考院校/报考专业"写在教育附近，那是报考意向，不是已就读的教育经历。
     "报考",
 )
-_MAX_SCHOOL_CHARS = 24
+_MAX_SCHOOL_CHARS = 48
+# 带这些后缀的文本仍然像一所学校/研究机构，长度超限也不直接丢。
+_SCHOOL_SUFFIX_RE = re.compile(r"(?:大学|学院|学校|研究院|研究所|科学院|校区)")
 
 
 def _collapse_cjk_spaces(value: str) -> str:
@@ -104,10 +106,12 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
         major = _collapse_cjk_spaces(major)
         degree = _collapse_cjk_spaces(degree)
         # 论文/奖项/课程明细被误当学校名时整条丢弃：它连带的"专业/学历"也都是碎片，
-        # 留着只会让用户在校对页删条记录。
-        if len(school) > _MAX_SCHOOL_CHARS or any(
-            marker in school for marker in _EDUCATION_NOISE_MARKERS
-        ):
+        # 留着只会让用户在校对页删条记录。长度只在**明显不是校名**时才作为判据——
+        # 「函授研究生：某某科技发展院 计算科学专业；导师陈丽教授。」这类真实教育行
+        # 也会很长，用 24 字卡会把整条学历丢掉。
+        if any(marker in school for marker in _EDUCATION_NOISE_MARKERS):
+            continue
+        if len(school) > _MAX_SCHOOL_CHARS and not _SCHOOL_SUFFIX_RE.search(school):
             continue
         if not achievements and details:
             achievements = "\n".join(details)

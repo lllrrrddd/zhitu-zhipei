@@ -9,6 +9,7 @@ import { t } from "../../i18n";
 import { formatDateTime } from "../../utils/format";
 import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
 import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
+import "../../styles/career-score.css";
 
 const KIND_LABELS = {
   campus: "career.result.campus",

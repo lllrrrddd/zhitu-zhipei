@@ -192,9 +192,34 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     # Some PDF text layers emit the heading after its single-line education row.
     # Recover only an unambiguous dated school/major/degree row when the normal
     # education section is empty; the original text remains available for review.
+    # 只在这个标题**所在的小段**里找：上下各最多 3 行、遇到别的分区标题就停。
+    # 这本来是为了处理"标题跟在唯一那条教育行后面"的 PDF 文本层顺序；在整份文档里
+    # 搜会把别的分区里的学历行拽进教育，用户看不到提示，教育条目却凭空多一条。
     if not sections["educations"]:
+        heading_index = next(
+            (index for index, line in enumerate(lines) if _heading_key(line) == "educations"),
+            None,
+        )
+        nearby: list[str] = []
+        if heading_index is None:
+            # 整份资料没有教育标题（纯模板式排版）：此时没有"别的分区"可误借，
+            # 允许在全文里找唯一那条带学历的行。
+            nearby = [line for line in lines if line]
+        else:
+            for step in (-1, 1):
+                cursor, taken = heading_index + step, 0
+                # 最多各看 6 行，但遇到别的分区标题就停：真实样本里"教育背景"标
+                # 题被排到文档末尾，唯一那条学历行在 5 行之外（实践经历分区里）。
+                while 0 <= cursor < len(lines) and taken < 6:
+                    line = lines[cursor]
+                    if line and _heading_key(line) is not None:
+                        break
+                    if line:
+                        nearby.append(line)
+                        taken += 1
+                    cursor += step
         recovered = next(
-            (line for line in lines if _compact_header_fields(line, "education").get("degree")),
+            (line for line in nearby if _compact_header_fields(line, "education").get("degree")),
             None,
         )
         if recovered:

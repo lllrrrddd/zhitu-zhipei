@@ -77,8 +77,10 @@ def test_parse_profile_text_recovers_spaced_school_and_separate_degree_label():
     )
 
     assert len(result.educations) == 1
-    assert result.educations[0].school == "甲 师范大学"
-    assert result.educations[0].major == "计算机 科学与技术"
+    # 中文串内部的对齐空白会被去掉：``甲 师范大学`` 是 PDF 按字间距切出来的，
+    # 直接存进资料页看起来像"名字打错了"。（含拉丁字母的值不受影响。）
+    assert result.educations[0].school == "甲师范大学"
+    assert result.educations[0].major == "计算机科学与技术"
     assert result.educations[0].degree == "本科"
 
 
