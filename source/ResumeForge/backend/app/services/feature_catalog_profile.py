@@ -27,6 +27,7 @@ class FeatureEntry:
 # 功能域：与前端导航 label 一一对应（守卫测试双向断言）。顺序即菜单顺序。
 FUNCTIONAL_DOMAINS: tuple[str, ...] = (
     "找岗位",
+    "全部岗位",
     "已保存岗位",
     "手动核对岗位",
     "求职总览",
