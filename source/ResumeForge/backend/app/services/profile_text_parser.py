@@ -74,6 +74,7 @@ from .profile_parser.normalization import (
     _heading_parts,
     _normalize_lines,
     _starts_with_field,
+    _trim_non_resume_prefix,
 )
 from .profile_parser.result_bounds import _bound_parse_result
 from .profile_parser.section_constants import _RESET_SECTION_ALIASES, _SECTION_ALIASES
@@ -185,18 +186,15 @@ __all__ = [
 
 def parse_profile_text(text: str) -> ProfileTextParseResult:
     """解析一段个人资料，返回可直接回填表单的结构化草稿。"""
-    lines = _normalize_lines(text or "")
+    trimmed_text, trimmed_chars = _trim_non_resume_prefix(text or "")
+    lines = _normalize_lines(trimmed_text)
     sections = _split_sections(lines)
     # Some PDF text layers emit the heading after its single-line education row.
     # Recover only an unambiguous dated school/major/degree row when the normal
     # education section is empty; the original text remains available for review.
     if not sections["educations"]:
         recovered = next(
-            (
-                line
-                for line in lines
-                if _compact_header_fields(line, "education").get("degree")
-            ),
+            (line for line in lines if _compact_header_fields(line, "education").get("degree")),
             None,
         )
         if recovered:
@@ -230,6 +228,8 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     )
     result = ProfileTextParseResult.model_validate({**basic, "summary": summary, **parsed_sections})
     warnings: list[str] = []
+    if trimmed_chars:
+        warnings.append(f"文档开头有约 {trimmed_chars} 字不像是简历内容，已跳过，请核对原文。")
     if not result.name:
         warnings.append("未识别到姓名，请手动填写。")
     if not result.educations and any(_heading_key(line) == "educations" for line in lines):

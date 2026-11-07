@@ -31,6 +31,34 @@ _BIRTH_PREFIX_RE = re.compile(
     r"^\s*((?:19|20)\d{2})\s*(?:[年./-]\s*(\d{1,2})(?!\d)\s*[月./-]?\s*(?:\d{1,2}\s*[日号])?)?"
 )
 
+# ``王 宇 松`` / ``贾文 杰``：模板为了排版把姓名撑开，缩进还可能不均匀。只在合并后
+# 只有 2–3 字时当成姓名——``郑 州 大 学`` 合并后 4 字，仍然按普通 token 处理。
+_SPACED_CHINESE_NAME_RE = re.compile(r"^[\u4e00-\u9fff]{1,2}(?:\s+[\u4e00-\u9fff]{1,2}){1,2}$")
+
+
+def _collapse_spaced_chinese_name(token: str) -> str:
+    if _SPACED_CHINESE_NAME_RE.match(token):
+        joined = re.sub(r"\s+", "", token)
+        if 2 <= len(joined) <= 3:
+            return joined
+    return token
+
+
+def _looks_like_column_header(line: str) -> bool:
+    """``政治 英语 普通化学 有机化学 总分`` 这类多列表头不是姓名行。
+
+    考研成绩单式的简历把这个表头放在最上面，行首两个字曾被直接取成姓名（实测样本
+    姓名栏显示"初试成绩"）。判据要求**全部**是 2–6 个纯汉字、至少四列、且不含
+    电话/邮箱/数字——``王五 男 2002年 北京 13700000000 wangwu@example.com`` 这种
+    真实的"姓名 性别 年份 城市 电话"行因此不受影响。
+    """
+    tokens = line.split()
+    if len(tokens) < 4:
+        return False
+    if _PHONE_RE.search(line) or _EMAIL_RE.search(line):
+        return False
+    return all(re.fullmatch(r"[\u4e00-\u9fff]{2,6}", token) for token in tokens)
+
 
 def _format_birth(value: str) -> str:
     """出生年月统一成 ``YYYY`` / ``YYYY-MM``。
@@ -57,8 +85,22 @@ def _format_birth(value: str) -> str:
 
 
 @lru_cache(maxsize=64)
+def _label_regex_source(label: str) -> str:
+    """标签的中文写法允许字间留白。
+
+    简历模板为了让两字/四字标签对齐，会把标签撑开成 ``姓    名：``、``籍　　贯：``
+    （全角空格在 _normalize_lines 里已折成普通空格）。按字面匹配会漏掉这类标签，
+    姓名、籍贯整块变成"未识别"。只在纯中文标签内部插入 ``\\s*``：英文标签本身
+    可能带空格或连字符（``E-mail``），插入空白会改变语义。
+    """
+    if re.fullmatch(r"[\u4e00-\u9fff]{2,}", label):
+        return r"\s*".join(re.escape(char) for char in label)
+    return re.escape(label)
+
+
+@lru_cache(maxsize=64)
 def _label_value_pattern(labels: tuple[str, ...]) -> re.Pattern[str]:
-    alternatives = "|".join(re.escape(label) for label in labels)
+    alternatives = "|".join(_label_regex_source(label) for label in labels)
     return re.compile(
         rf"^(?:{alternatives})(?:\s*[:：]\s*|\s+)(?P<value>.+?)\s*$",
         re.IGNORECASE,
@@ -72,8 +114,14 @@ def _label_value(line: str, labels: tuple[str, ...]) -> str:
 
 @lru_cache(maxsize=64)
 def _label_matches_pattern(labels: tuple[str, ...]) -> re.Pattern[str]:
-    alternatives = "|".join(re.escape(label) for label in sorted(labels, key=len, reverse=True))
-    return re.compile(rf"(?<![\w\u4e00-\u9fff])(?:{alternatives})(?=\s*[:：]|\s+|$)", re.IGNORECASE)
+    alternatives = "|".join(
+        _label_regex_source(label) for label in sorted(labels, key=len, reverse=True)
+    )
+    # 只对拉丁字母/数字设边界：PDF 文本层常把多个字段连成一行
+    # （``姓    名： 李鸣方籍    贯： 河南省…``），标签紧跟在汉字后面。要求标签前必须
+    # 是空白/标点时，第二个标签就检测不到，姓名会把整行剩余内容一起吞掉。后面的
+    # ``(?=\s*[:：]|\s+|$)`` 仍然要求标签接着冒号或空白，普通词句不会误命中。
+    return re.compile(rf"(?<![A-Za-z0-9_])(?:{alternatives})(?=\s*[:：]|\s+|$)", re.IGNORECASE)
 
 
 def _label_matches(line: str, labels: tuple[str, ...]) -> list[tuple[int, int, str]]:
@@ -200,6 +248,18 @@ def _extract_unlabeled_basic(lines: list[str], values: dict[str, str]) -> None:
             or values["city"]
         )
         for line in preamble:
+            # 多列表头（考研成绩单）不参与姓名推断；带已知字段标签的行不受影响。
+            if _looks_like_column_header(line) and not _extract_inline_labeled_values(line):
+                continue
+            # 整行就是被撑开的姓名（``贾文 杰``、``王 宇 松``）。
+            whole_name = _collapse_spaced_chinese_name(line)
+            if (
+                whole_name != line
+                and 2 <= len(whole_name) <= 3
+                and not any(marker in whole_name for marker in _NON_NAME_MARKERS)
+            ):
+                values["name"] = whole_name
+                return
             # 常见简历首行会用空格排列“姓名 性别 城市 电话”；先只取行首
             # 的短中文姓名，避免把后面的学校或岗位描述当成姓名。
             leading_name = re.match(r"^([\u4e00-\u9fff]{2,4})(?=\s+|[|｜丨,，;；]|$)", line)
@@ -220,6 +280,7 @@ def _extract_unlabeled_basic(lines: list[str], values: dict[str, str]) -> None:
                 if token.strip()
             ]
             for token in tokens:
+                token = _collapse_spaced_chinese_name(token)
                 token = re.sub(r"(?:男|女)(?:性)?$", "", token).strip()
                 token = re.sub(r"(?:19|20)\d{2}\s*年?(?:出生|年生)?$", "", token).strip()
                 if (
@@ -240,13 +301,16 @@ def _recover_standalone_name(lines: list[str]) -> str:
 
     Multiple candidates are ambiguous, so leave the field for user confirmation.
     """
-    candidates = {
-        line.strip()
-        for line in lines
-        if re.fullmatch(r"[\u4e00-\u9fff]{2,3}", line.strip())
-        and _heading_key(line) is None
-        and not any(marker in line for marker in _NON_NAME_MARKERS)
-    }
+    candidates = set()
+    for line in lines:
+        stripped = line.strip()
+        if _heading_key(line) is not None:
+            continue
+        if any(marker in stripped for marker in _NON_NAME_MARKERS):
+            continue
+        token = _collapse_spaced_chinese_name(stripped)
+        if re.fullmatch(r"[\u4e00-\u9fff]{2,3}", token):
+            candidates.add(token)
     return next(iter(candidates)) if len(candidates) == 1 else ""
 
 

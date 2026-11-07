@@ -10,6 +10,7 @@ from .entry_blocks import (
     _split_entry_blocks,
 )
 from .entry_constants import _DATE_RE, _DEGREE_TERMS
+from .entry_dedupe import _merge_education_entries
 from .entry_details import _detail_groups
 from .entry_inference import _compact_header_fields, _find_date_range, _infer_unlabeled_header
 from .normalization import _clean_line
@@ -24,6 +25,42 @@ _CAMPUS_ROLE_SUFFIX_RE = re.compile(
     r"主席|副主席|会长|副会长|理事长|班长|副班长|委员|干事|队长|副队长|"
     r"组长|副组长|社长|副社长|成员|志愿者)$"
 )
+
+# 项目条目的明细行被误当条目头时的特征标签。
+_PROJECT_DETAIL_LABEL_RE = re.compile(
+    r"^(?:技术栈|技术选型|技术方案|开发环境|项目周期|项目背景|项目描述|"
+    r"负责部分|主要工作|项目成果|项目职责)\s*[:：]"
+)
+
+# 教育条目里"学校"字段不该出现的内容：论文/奖项/课程明细被当成学校名后，卡片标题
+# 会显示一整段话（实测样本出现 ``6 学术论文（Biomolecules，JCR Q1``）。
+_EDUCATION_NOISE_MARKERS = (
+    "学术论文",
+    "论文",
+    "专利",
+    "奖学金",
+    "竞赛",
+    "证书",
+    "荣誉",
+    "奖项",
+    "主修课程",
+    "辅修课程",
+    # 考研简历常把"报考院校/报考专业"写在教育附近，那是报考意向，不是已就读的教育经历。
+    "报考",
+)
+_MAX_SCHOOL_CHARS = 24
+
+
+def _collapse_cjk_spaces(value: str) -> str:
+    """去掉中文串内部的对齐空白：``河南 师范大学`` → ``河南师范大学``。
+
+    PDF 文本层按字形间距切词，中文校名与专业名里会留下空格。含拉丁字母的值不动，
+    避免把 ``New York University`` 粘成一个词。
+    """
+    text = str(value or "").strip()
+    if not text or re.search(r"[A-Za-z]", text):
+        return text
+    return re.sub(r"\s+", "", text)
 
 
 def _parse_education(lines: list[str]) -> list[dict[str, str]]:
@@ -63,6 +100,15 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
         start, end = _find_date_range(
             block, compact.get("start_date", start), compact.get("end_date", end)
         )
+        school = _collapse_cjk_spaces(school)
+        major = _collapse_cjk_spaces(major)
+        degree = _collapse_cjk_spaces(degree)
+        # 论文/奖项/课程明细被误当学校名时整条丢弃：它连带的"专业/学历"也都是碎片，
+        # 留着只会让用户在校对页删条记录。
+        if len(school) > _MAX_SCHOOL_CHARS or any(
+            marker in school for marker in _EDUCATION_NOISE_MARKERS
+        ):
+            continue
         if not achievements and details:
             achievements = "\n".join(details)
         if school or major or degree or details:
@@ -80,7 +126,8 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
                     "reference_content": "",
                 }
             )
-    return result
+    # 同一所学校被文本重复或字段切分拆成多条时合回一条（见 entry_dedupe）。
+    return _merge_education_entries(result)
 
 
 def _parse_experience(lines: list[str], campus: bool = False) -> list[dict[str, str]]:
@@ -185,6 +232,10 @@ def _parse_projects(lines: list[str]) -> list[dict[str, str]]:
         name = (
             labeled_name or compact.get("first", "") or inferred_name or (parts[0] if parts else "")
         )
+        # 「技术栈：Java 17、Spring Boot…」被当成项目名时，卡片标题会显示一整行技术栈。
+        # 这类行本身是项目的明细，退回让 role/description 承担信息。
+        if _PROJECT_DETAIL_LABEL_RE.match(name):
+            name = ""
         role = (
             labeled_role
             or compact.get("role", "")

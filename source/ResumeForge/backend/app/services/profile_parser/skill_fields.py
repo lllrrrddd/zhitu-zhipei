@@ -6,6 +6,58 @@ import re
 from .normalization import _clean_line
 from .skill_constants import _SKILL_LEADING_LEVEL_RE, _SKILL_LEVEL_RE
 
+# 句子残片、日期串、区段标签都不是技能。实测样本里"技能"区被整段项目描述污染后，
+# 一条简历能产出 200 条"技能"，其中包含 ``保障系统稳定。``、``2026.01-2026.04``、
+# ``项目背景 : ...``、``项目经历  1``、``技术栈：Java 17、Spring Boot 3.5``。
+# 这些碎片会进入岗位匹配的技能命中，直接抬高匹配度，比"少抽几条技能"危害更大。
+_SKILL_SENTENCE_END_RE = re.compile(r"[。；;！!？?]")
+_SKILL_LABEL_LEAK_RE = re.compile(r"[：:]")
+_SKILL_DATE_PREFIX_RE = re.compile(r"^(?:\d{4}\s*[.\-/年]|\d{1,2}\s*月)")
+_SKILL_CLAUSE_PREFIXES = (
+    "负责",
+    "实现",
+    "完成",
+    "保障",
+    "能够",
+    "可以",
+    "可独立",
+    "通过",
+    "以及",
+    "并且",
+    "同时",
+    "参与",
+    "协助",
+    "支撑",
+    "配合",
+    "具备",
+    "项目背景",
+    "项目经历",
+    "项目描述",
+    "项目成果",
+    "负责部分",
+    "技术栈",
+    "主修课程",
+    "主修",
+    "荣誉",
+    "奖项",
+    "自我评价",
+)
+# 超过这个长度基本是句子而不是技能名（``熟练掌握相机的使用，能独自完成视频拍摄与
+# 剪辑工作`` 这类"整句技能"仍在限内）。
+_MAX_SKILL_NAME_CHARS = 32
+
+
+def _looks_like_skill_fragment(name: str) -> bool:
+    if len(name) > _MAX_SKILL_NAME_CHARS:
+        return True
+    if _SKILL_SENTENCE_END_RE.search(name):
+        return True
+    if _SKILL_LABEL_LEAK_RE.search(name):
+        return True
+    if _SKILL_DATE_PREFIX_RE.match(name):
+        return True
+    return bool(name.startswith(_SKILL_CLAUSE_PREFIXES))
+
 
 def _split_tokens(value: str) -> list[str]:
     # 斜杠通常是分隔符，但 CI/CD 是一个完整技能；先保护它，避免被拆成
@@ -236,8 +288,9 @@ def _parse_skills(lines: list[str]) -> list[dict[str, str]]:
         tokens = [clean] if long_sentence else _split_tokens(clean)
         for token in tokens:
             name, level = _skill_name_and_level(token, inherited_level)
-            key = name.casefold()
-            if not name or len(name) > 64:
+            # 空白差异不算不同技能（``雅思7.0`` / ``雅思 7.0``）。
+            key = re.sub(r"\s+", "", name).casefold()
+            if not name or len(name) > 64 or _looks_like_skill_fragment(name):
                 continue
             existing_index = indices_by_name.get(key)
             if existing_index is None:
