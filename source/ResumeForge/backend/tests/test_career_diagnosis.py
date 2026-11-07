@@ -86,9 +86,7 @@ def test_missing_keywords_are_reported_with_three_states():
 
 def test_mentioned_only_when_skill_is_in_experience_but_not_skill_list():
     profile = STRONG.model_copy(update={"skills": ["Linux", "Python"]})
-    result = diagnose(
-        profile, _job("熟悉 Kubernetes 与 Docker，能独立排查线上问题。")
-    )
+    result = diagnose(profile, _job("熟悉 Kubernetes 与 Docker，能独立排查线上问题。"))
     states = {term.term: term.state for term in result.terms}
     assert states.get("Kubernetes") in {"mentioned", "missing"}
     if states.get("Kubernetes") == "mentioned":

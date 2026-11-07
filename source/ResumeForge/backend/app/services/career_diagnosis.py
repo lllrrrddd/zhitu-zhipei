@@ -33,9 +33,34 @@ _WEIGHTS = {"keyword": 40, "quantified": 25, "action": 20, "readiness": 15}
 # 从 JD 里额外抓英文技术词（词表没覆盖的工具名），排除过于通用的词。
 _ENGLISH_TERM_RE = re.compile(r"(?<![A-Za-z])[A-Za-z][A-Za-z0-9+#./-]{1,19}(?![A-Za-z])")
 _TERM_STOPWORDS = {
-    "and", "or", "the", "with", "for", "you", "your", "will", "are", "our",
-    "team", "work", "role", "job", "year", "years", "plus", "etc", "http", "https",
-    "com", "cn", "www", "ability", "skills", "skill", "experience", "good",
+    "and",
+    "or",
+    "the",
+    "with",
+    "for",
+    "you",
+    "your",
+    "will",
+    "are",
+    "our",
+    "team",
+    "work",
+    "role",
+    "job",
+    "year",
+    "years",
+    "plus",
+    "etc",
+    "http",
+    "https",
+    "com",
+    "cn",
+    "www",
+    "ability",
+    "skills",
+    "skill",
+    "experience",
+    "good",
 }
 _MAX_TERMS = 12
 _MAX_JD_CHARS = 4000
@@ -49,9 +74,29 @@ _NUMBER_RE = re.compile(
 )
 # 强动词：能体现主导与产出；「负责/参与/协助」这类只说明分工，不算。
 _STRONG_VERBS = (
-    "主导", "牵头", "设计", "搭建", "实现", "重构", "优化", "落地", "推动",
-    "交付", "沉淀", "定位", "排查", "改造", "迁移", "上线", "验证", "复现",
-    "构建", "建立", "提出", "独立完成", "自动化",
+    "主导",
+    "牵头",
+    "设计",
+    "搭建",
+    "实现",
+    "重构",
+    "优化",
+    "落地",
+    "推动",
+    "交付",
+    "沉淀",
+    "定位",
+    "排查",
+    "改造",
+    "迁移",
+    "上线",
+    "验证",
+    "复现",
+    "构建",
+    "建立",
+    "提出",
+    "独立完成",
+    "自动化",
 )
 _WEAK_VERBS = ("负责", "参与", "协助", "配合", "帮助", "完成", "从事")
 _MAX_EXCERPT = 80
@@ -130,8 +175,9 @@ def diagnose(profile: CareerProfile, job: MarketJob) -> CareerDiagnosis:
     states = [(term, _term_state(term, profile)) for term in terms]
     total = len(states)
     if total:
-        covered = sum(1.0 if state == "found" else 0.5 if state == "mentioned" else 0.0
-                      for _, state in states)
+        covered = sum(
+            1.0 if state == "found" else 0.5 if state == "mentioned" else 0.0 for _, state in states
+        )
         keyword_value = round(covered / total * 100)
     else:
         keyword_value = 0
@@ -152,10 +198,10 @@ def diagnose(profile: CareerProfile, job: MarketJob) -> CareerDiagnosis:
         CareerDiagnosisPart(
             key="quantified", value=round(quantified_ratio * 100), weight=_WEIGHTS["quantified"]
         ),
-        CareerDiagnosisPart(key="action", value=round(action_ratio * 100), weight=_WEIGHTS["action"]),
         CareerDiagnosisPart(
-            key="readiness", value=readiness_value, weight=_WEIGHTS["readiness"]
+            key="action", value=round(action_ratio * 100), weight=_WEIGHTS["action"]
         ),
+        CareerDiagnosisPart(key="readiness", value=readiness_value, weight=_WEIGHTS["readiness"]),
     ]
     score = round(sum(part.value * part.weight for part in parts) / 100)
 
