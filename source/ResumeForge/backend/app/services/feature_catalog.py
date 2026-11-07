@@ -67,16 +67,17 @@ def build_capability_map() -> str:
     用户问"某功能在哪"时，助手据此如实指路，而不是凭记忆里的旧清单回答。
     """
     lines: list[str] = [
-        "# 能力地图（由 feature_catalog 动态生成）",
+        "# 能力地图",
         "",
-        "按「功能域 → 在哪个菜单 → 你能帮什么」记下面这份清单；用户问到功能在哪里时，据此如实指路，不要凭猜。"
-        "「界面功能」里写了「当前界面不可达」的，如实说明『功能已实现、界面暂未提供入口』——既不要指路，也不要说它不存在。",
+        "用户问到功能在哪，照这份清单如实指路，不要凭猜；标注「当前界面不可达」的，"
+        "说明『已实现、界面暂无入口』——不指路，也不否认它存在。",
         "",
-        "## 功能域",
+        # 功能域改用一行罗列：每个功能条目后面本来就带域名为前缀，逐行铺开只是
+        # 把同一份信息抄两遍，白白占掉固定 prompt 的字符预算。
+        "## 功能域：" + "、".join(FUNCTIONAL_DOMAINS),
+        "",
+        "## 界面功能（不是后端工具；括号里是所在菜单与用法）",
     ]
-    lines.extend(f"- {domain}" for domain in FUNCTIONAL_DOMAINS)
-    lines.append("")
-    lines.append("## 界面功能（这些是 UI 功能，不是后端工具；括号里是它在哪个菜单、怎么用）")
     for feature in FEATURES:
         lines.append(f"- {feature.name}（{feature.domain}：{feature.where}）")
     lines.append("")
