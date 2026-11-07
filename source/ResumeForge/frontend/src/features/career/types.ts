@@ -59,6 +59,24 @@ export interface MarketBrowse {
   page_size: number;
 }
 
+export interface ScorePart {
+  key: "direction" | "skills" | "city" | "entry";
+  value: number;
+  weight: number;
+}
+
+export interface MatchGap {
+  key:
+    | "degree_unspecified"
+    | "degree_unconfirmed"
+    | "experience_required"
+    | "missing_skills"
+    | "city_mismatch"
+    | "no_evidence"
+    | "graduation_check";
+  values: string[];
+}
+
 export interface MatchedJob {
   job: MarketJob;
   checked_at: string;
@@ -70,9 +88,16 @@ export interface MatchedJob {
   city_match: boolean;
   degree_floor: CareerDegree;
   eligibility_notes: (
-    "degree_unspecified" | "degree_unconfirmed" | "graduation_check" | "experience_check"
+    | "degree_unspecified"
+    | "degree_unconfirmed"
+    | "graduation_check"
+    | "experience_check"
   )[];
   check_skills: string[];
+  score: number;
+  score_parts: ScorePart[];
+  gaps: MatchGap[];
+  relatedness: number | null;
 }
 
 export interface CareerMatches {

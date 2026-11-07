@@ -23,6 +23,23 @@ const NOTE_LABELS = {
   experience_check: "career.result.experience_check",
 } as const;
 
+const PART_LABELS = {
+  direction: "career.score.direction",
+  skills: "career.score.skills",
+  city: "career.score.city",
+  entry: "career.score.entry",
+} as const;
+
+const GAP_LABELS = {
+  degree_unspecified: "career.gap.degree_unspecified",
+  degree_unconfirmed: "career.gap.degree_unconfirmed",
+  experience_required: "career.gap.experience_required",
+  missing_skills: "career.gap.missing_skills",
+  city_mismatch: "career.gap.city_mismatch",
+  no_evidence: "career.gap.no_evidence",
+  graduation_check: "career.gap.graduation_check",
+} as const;
+
 function ResultCard({
   match,
   profile,
@@ -126,6 +143,31 @@ function ResultCard({
           {job.cities.length > 3 &&
             " " + t("career.result.moreCities", { count: job.cities.length })}
         </p>
+        <div className="career-score" aria-label={t("career.score.note")}>
+          <div className="career-score-head">
+            <span className="career-score-value">{match.score ?? 0}</span>
+            <span className="career-score-unit">{t("career.score.unit")}</span>
+            {match.relatedness !== null && match.relatedness !== undefined && (
+              <span className="career-score-relatedness">
+                {t("career.score.relatedness", { value: match.relatedness })}
+              </span>
+            )}
+          </div>
+          {/* score_parts 缺失时按空数组处理：前端可能连到还没升级的后端，
+              此时宁可不显示横条，也不能整页崩掉。 */}
+          <ul className="career-score-parts">
+            {(match.score_parts ?? []).map((part) => (
+              <li key={part.key}>
+                <span className="career-score-part-label">{t(PART_LABELS[part.key])}</span>
+                <span className="career-score-bar">
+                  <i style={{ width: `${part.value}%` }} />
+                </span>
+                <em>{part.value}</em>
+              </li>
+            ))}
+          </ul>
+          <p className="career-help">{t("career.score.note")}</p>
+        </div>
         <div className="career-reasons">
           <strong>{t("career.result.why")}</strong>
           {match.matched_skills.length > 0 && (
@@ -149,6 +191,16 @@ function ResultCard({
             {match.check_skills.length > 0 && (
               <p>{t("career.result.checkSkills", { skills: match.check_skills.join("、") })}</p>
             )}
+          </div>
+        )}
+        {(match.gaps ?? []).length > 0 && (
+          <div className="career-gaps">
+            <strong>{t("career.gap.title")}</strong>
+            <ul>
+              {(match.gaps ?? []).map((gap) => (
+                <li key={gap.key}>{t(GAP_LABELS[gap.key], { values: gap.values.join("、") })}</li>
+              ))}
+            </ul>
           </div>
         )}
         <details className="career-disclosure">
