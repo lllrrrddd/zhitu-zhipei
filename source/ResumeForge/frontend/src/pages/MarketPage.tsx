@@ -195,7 +195,7 @@ export default function MarketPage() {
         title={selected?.job.title}
         open={selected !== null}
         onClose={() => setSelected(null)}
-        width={560}
+        size="large"
       >
         {selected && (
           <div className="career-browse-detail">
