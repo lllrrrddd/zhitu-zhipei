@@ -55,6 +55,38 @@ def test_parse_profile_text_splits_inline_chinese_education_and_work_headers():
     assert result.projects[0].role == "项目负责人"
 
 
+def test_parse_profile_text_recovers_education_before_misordered_heading():
+    result = parse_profile_text(
+        "姓名：测试者\n实践经历\n"
+        "2022.09-2026.06 甲大学 数据科学与大数据技术（本科）\n"
+        "• 主修课程：统计学\n报考信息\n教育背景"
+    )
+
+    assert len(result.educations) == 1
+    assert result.educations[0].school == "甲大学"
+    assert result.educations[0].major == "数据科学与大数据技术"
+    assert result.educations[0].degree == "本科"
+    assert result.educations[0].end_date == "2026-06"
+
+
+def test_parse_profile_text_recovers_spaced_school_and_separate_degree_label():
+    result = parse_profile_text(
+        "历：本科\n教育背景\n"
+        "2022.09-2026.06 甲 师范大学 计算机 科学与技术\n"
+        "主修课程：数据结构、操作系统"
+    )
+
+    assert len(result.educations) == 1
+    assert result.educations[0].school == "甲 师范大学"
+    assert result.educations[0].major == "计算机 科学与技术"
+    assert result.educations[0].degree == "本科"
+
+
+def test_dated_campus_role_is_not_recovered_as_education():
+    result = parse_profile_text("校园经历\n2022-2024 甲大学 学生会干事\n负责活动组织")
+    assert result.educations == []
+
+
 def test_parse_profile_text_allows_strong_project_field_after_an_explicit_section():
     result = parse_profile_text(
         "教育背景：2020-2024 甲大学 软件工程 本科\n"

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Input, InputNumber, Select } from "antd";
+import { Alert, Button, Card, Input, InputNumber, Select } from "antd";
 import { t } from "../../i18n";
 import { splitCities } from "./profileFromResume";
 import type { CareerDegree, CareerProfile } from "./types";
@@ -27,6 +27,12 @@ export default function CareerProfileForm({
   return (
     <Card className="career-panel" title={t("career.profile.title")}>
       <p className="career-help">{t("career.profile.intro")}</p>
+      {!profile.direction.trim() && (
+        <Alert type="warning" showIcon title={t("career.profile.required")} />
+      )}
+      {(!profile.major.trim() || profile.degree === "unknown") && (
+        <Alert type="info" showIcon title={t("career.profile.educationReview")} />
+      )}
       <div className="career-profile-grid">
         <label>
           <span>{t("career.profile.direction")}</span>

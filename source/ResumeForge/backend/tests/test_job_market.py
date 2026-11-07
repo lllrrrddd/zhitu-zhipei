@@ -3,8 +3,11 @@
 import asyncio
 from datetime import UTC, datetime
 
+import pytest
+from app.api.career import find_matches
 from app.schemas.job_market import CareerProfile, MarketJob, MarketSnapshot, SourceSnapshot
 from app.services import job_market_catalog, job_market_match
+from fastapi import HTTPException
 
 
 def _job(job_id: str, title: str, *, years: str = "", kind: str = "campus") -> MarketJob:
@@ -109,3 +112,49 @@ def test_experience_requirement_cannot_be_marked_strong(monkeypatch):
     assert matches[0].fit == "strong"
     assert matches[1].fit == "possible"
     assert "experience_check" in matches[1].eligibility_notes
+
+
+def test_skills_alone_do_not_recommend_unrelated_job(monkeypatch):
+    async def no_embeddings(*_args, **_kwargs):
+        return {}
+
+    monkeypatch.setattr(job_market_match, "semantic_scores", no_embeddings)
+    now = datetime.now(UTC)
+    snapshot = MarketSnapshot(
+        sources={"tencent": SourceSnapshot(
+            attempted_at=now, checked_at=now, status="updated",
+            jobs=[_job("chip", "芯片设计工程师")],
+        )}
+    )
+    profile = CareerProfile(
+        major="食品科学", direction="食品研发", skills=["Linux", "Docker", "Kubernetes"],
+    )
+
+    assert asyncio.run(job_market_match.match_market(profile, snapshot)).matches == []
+
+
+def test_career_api_requires_confirmed_target_role(monkeypatch):
+    async def should_not_refresh():
+        raise AssertionError("must validate before requesting public job sources")
+
+    monkeypatch.setattr("app.api.career.refresh_market", should_not_refresh)
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(find_matches(CareerProfile(major="食品科学", skills=["Python"])))
+    assert error.value.status_code == 422
+
+
+def test_related_data_analysis_titles_match_without_identical_wording(monkeypatch):
+    async def no_embeddings(*_args, **_kwargs):
+        return {}
+
+    monkeypatch.setattr(job_market_match, "semantic_scores", no_embeddings)
+    now = datetime.now(UTC)
+    snapshot = MarketSnapshot(
+        sources={"tencent": SourceSnapshot(
+            attempted_at=now, checked_at=now, status="updated",
+            jobs=[_job("data", "数据分析岗")],
+        )}
+    )
+    profile = CareerProfile(direction="数据分析师", skills=["SQL"])
+    matches = asyncio.run(job_market_match.match_market(profile, snapshot)).matches
+    assert len(matches) == 1

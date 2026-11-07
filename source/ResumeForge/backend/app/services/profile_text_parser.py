@@ -5,6 +5,8 @@
 无法确定的内容保留在对应经历的描述中，最终仍由用户在资料页核对后保存。
 """
 
+import re
+
 from ..schemas.profile import ProfileTextParseResult
 from .profile_parser.basic_fields import (
     _extract_basic,
@@ -185,6 +187,20 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     """解析一段个人资料，返回可直接回填表单的结构化草稿。"""
     lines = _normalize_lines(text or "")
     sections = _split_sections(lines)
+    # Some PDF text layers emit the heading after its single-line education row.
+    # Recover only an unambiguous dated school/major/degree row when the normal
+    # education section is empty; the original text remains available for review.
+    if not sections["educations"]:
+        recovered = next(
+            (
+                line
+                for line in lines
+                if _compact_header_fields(line, "education").get("degree")
+            ),
+            None,
+        )
+        if recovered:
+            sections["educations"] = [recovered]
     basic = _extract_basic(lines)
     summary_lines = [_clean_line(line) for line in sections["summary"] if line]
     summary = "\n".join(summary_lines).strip()
@@ -196,6 +212,19 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
         "skills": _parse_skills(sections["skills"]),
         "awards": _parse_awards(sections["awards"]),
     }
+    if len(parsed_sections["educations"]) == 1 and not parsed_sections["educations"][0]["degree"]:
+        # Narrow fallback for a broken PDF text label ("学历" -> "历").
+        # Only apply a standalone label when there is one unambiguous education row.
+        degree_line = next(
+            (
+                match.group(1)
+                for line in lines
+                if (match := re.fullmatch(r"(?:学历|历)\s*[:：]\s*(本科|硕士|博士|专科)", line))
+            ),
+            "",
+        )
+        if degree_line:
+            parsed_sections["educations"][0]["degree"] = degree_line
     basic, summary, parsed_sections, was_truncated = _bound_parse_result(
         basic, summary, parsed_sections
     )

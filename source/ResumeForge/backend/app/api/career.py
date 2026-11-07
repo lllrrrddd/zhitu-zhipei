@@ -40,8 +40,8 @@ async def refresh_postings(force: bool = False) -> MarketSummary:
 
 @router.post("/match", response_model=CareerMatches)
 async def find_matches(profile: CareerProfile) -> CareerMatches:
-    if not (profile.direction or profile.major or profile.skills or profile.experience):
-        raise HTTPException(status_code=422, detail="请补充专业、想找的岗位或技能，再查找岗位。")
+    if not profile.direction:
+        raise HTTPException(status_code=422, detail="请先填写并确认想找的岗位，再查找招聘信息。")
     return await match_market(profile, await refresh_market())
 
 

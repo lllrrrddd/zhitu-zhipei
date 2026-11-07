@@ -6,6 +6,7 @@ import { getGraduateDemo } from "../../api/graduate";
 import { getProfile, parseProfileText } from "../../api/profile";
 import { t } from "../../i18n";
 import { classifyAttachment, MAX_ATTACHMENT_BYTES, readAsDataUrl } from "../../utils/attachments";
+import { MAX_CAREER_PDF_BYTES, readPdfResumeText } from "../../utils/pdfText";
 import {
   EMPTY_CAREER_PROFILE,
   exampleToCareerProfile,
@@ -30,13 +31,18 @@ export default function CareerResumePanel({
   const busy = useRef(false);
   const disabled = reading || searching || undefined;
 
-  async function load(read: () => Promise<CareerProfile>, success: string, useSaved = false) {
+  async function load(
+    read: () => Promise<CareerProfile | { profile: CareerProfile; warning: string }>,
+    success: string,
+    useSaved = false,
+  ) {
     if (busy.current || searching) return;
     busy.current = true;
     setReading(true);
     setFeedback(undefined);
     try {
-      const profile = await read();
+      const result = await read();
+      const profile = "profile" in result ? result.profile : result;
       if (!hasSearchDetails(profile)) {
         setFeedback({
           type: "warning",
@@ -44,7 +50,11 @@ export default function CareerResumePanel({
         });
         if (useSaved) return;
       } else {
-        setFeedback({ type: "success", text: success });
+        setFeedback(
+          "warning" in result
+            ? { type: "warning", text: `${success} ${result.warning}` }
+            : { type: "success", text: success },
+        );
       }
       onLoad(profile);
     } catch (error) {
@@ -60,12 +70,36 @@ export default function CareerResumePanel({
 
   function importFile(file: File) {
     const attachment = classifyAttachment(file);
-    if (attachment?.kind !== "document" || file.size > MAX_ATTACHMENT_BYTES) {
+    if (
+      attachment?.kind !== "document" ||
+      file.size >
+        (attachment.mimeType === "application/pdf" ? MAX_CAREER_PDF_BYTES : MAX_ATTACHMENT_BYTES)
+    ) {
       setFeedback({ type: "error", text: t("career.resume.invalid") });
       return;
     }
     void load(
       async () => {
+        if (attachment.mimeType === "application/pdf" && file.size > MAX_ATTACHMENT_BYTES) {
+          const extracted = await readPdfResumeText(file);
+          const parsed = await parseProfileText({ text: extracted.text }, undefined, undefined, {
+            localOnly: true,
+          });
+          const warning = [
+            t("career.resume.pdfLocalText"),
+            extracted.pages > 8 ? t("career.resume.pdfLong") : "",
+            extracted.truncated ? t("career.resume.pdfTruncated") : "",
+            extracted.blankPages
+              ? t("career.resume.pdfScanPages", { count: extracted.blankPages })
+              : "",
+            parsed.skills.length > 40 || parsed.projects.length > 12
+              ? t("career.resume.pdfNoisy")
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return { profile: resumeToCareerProfile(parsed), warning };
+        }
         const data = await readAsDataUrl(file);
         const parsed = await parseProfileText(
           { text: "", documents: [{ name: file.name, mime_type: attachment.mimeType, data }] },
@@ -73,7 +107,10 @@ export default function CareerResumePanel({
           undefined,
           { localOnly: true },
         );
-        return resumeToCareerProfile(parsed);
+        const profile = resumeToCareerProfile(parsed);
+        return parsed.skills.length > 40 || parsed.projects.length > 12
+          ? { profile, warning: t("career.resume.pdfNoisy") }
+          : profile;
       },
       t("career.resume.read", { file: file.name }),
     );

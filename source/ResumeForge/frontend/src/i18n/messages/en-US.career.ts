@@ -6,7 +6,7 @@ const career = {
     "Search public employer postings and see why each job matches, what to check, and where to read the original.",
   "career.resume.title": "1. Add a resume",
   "career.resume.upload": "Click or drop a PDF or Word resume",
-  "career.resume.uploadHint": "PDF or DOCX up to 2 MB",
+  "career.resume.uploadHint": "PDF up to 15 MB; DOCX up to 2 MB. Large PDFs are read as text only.",
   "career.resume.reading": "Reading your resume…",
   "career.resume.read": "Read {file}. Review the information below.",
   "career.resume.local": "Your resume is read locally for this search.",
@@ -20,7 +20,21 @@ const career = {
   "career.resume.pasteHint": "Paste the education, skills, and experience from your resume.",
   "career.resume.parse": "Read this text",
   "career.resume.manual": "Enter details",
-  "career.resume.invalid": "Choose a PDF or DOCX up to 2 MB, or paste the resume text.",
+  "career.resume.invalid": "Choose a PDF up to 15 MB or a DOCX up to 2 MB.",
+  "career.resume.pdfTooLarge": "This PDF exceeds 15 MB. Compress it and try again.",
+  "career.resume.pdfTooManyPages": "This PDF exceeds 40 pages. Use a shorter resume version.",
+  "career.resume.pdfNoText":
+    "This PDF has no readable text. Use a text PDF or paste the resume content.",
+  "career.resume.pdfTruncated":
+    "Text beyond 100,000 characters was not read. Review the details below.",
+  "career.resume.pdfLong":
+    "This file exceeds 8 pages. Check that attachments were not read as resume skills or experience.",
+  "career.resume.pdfNoisy":
+    "Many skills or projects were detected. Remove anything that is not yours before searching.",
+  "career.resume.pdfScanPages":
+    "{count} pages may be scans and were not read. Review the details below.",
+  "career.resume.pdfLocalText":
+    "Text was extracted from the large PDF locally. Review the details below.",
   "career.resume.noFields": "Add information below so we can find relevant jobs.",
   "career.resume.error": "Could not read the resume. Try again or paste the text.",
   "career.profile.title": "2. Review your details and search",
@@ -37,7 +51,9 @@ const career = {
   "career.profile.skillsHint": "Type a skill and press Enter",
   "career.profile.experience": "Project and work experience",
   "career.profile.experienceHint": "One experience per line",
-  "career.profile.required": "Enter a role, field of study, or skill.",
+  "career.profile.required": "Enter and confirm the role you want before searching.",
+  "career.profile.educationReview":
+    "Your major or degree may be missing. Check them against the resume.",
   "career.profile.search": "Confirm and find jobs",
   "career.profile.searching": "Finding and comparing jobs…",
   "career.market.title": "Recruitment sources",

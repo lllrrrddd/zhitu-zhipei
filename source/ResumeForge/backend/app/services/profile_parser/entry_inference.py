@@ -34,6 +34,21 @@ def _compact_header_fields(line: str, kind: str) -> dict[str, str]:
         return {}
 
     if kind == "education":
+        # PDF text layers sometimes keep the degree in the same token as the major.
+        # Require an explicit school suffix so project dates cannot become education.
+        inline_degree = re.fullmatch(r"(.+?)[（(](本科|学士|硕士|博士)[）)]", tokens[-1])
+        if (
+            inline_degree
+            and len(tokens) >= 2
+            and re.search(r"(?:大学|学院)$", tokens[0])
+        ):
+            return {
+                "school": tokens[0],
+                "major": " ".join([*tokens[1:-1], inline_degree.group(1)]),
+                "degree": inline_degree.group(2),
+                "start_date": date_match.group("start"),
+                "end_date": date_match.group("end"),
+            }
         degree_index = next(
             (
                 index
@@ -43,6 +58,18 @@ def _compact_header_fields(line: str, kind: str) -> dict[str, str]:
             -1,
         )
         if degree_index < 2:
+            school_end = next(
+                (index + 1 for index, token in enumerate(tokens) if re.search(r"(?:大学|学院)$", token)),
+                0,
+            )
+            if school_end and school_end < len(tokens) and school_end <= 3:
+                return {
+                    "school": " ".join(tokens[:school_end]),
+                    "major": " ".join(tokens[school_end:]),
+                    "degree": "",
+                    "start_date": date_match.group("start"),
+                    "end_date": date_match.group("end"),
+                }
             return {}
         # 英文院校名通常由多个词组成；优先把 University/College/Institute
         # 及其前缀一起作为学校，其余部分才是专业，避免只取首个词。

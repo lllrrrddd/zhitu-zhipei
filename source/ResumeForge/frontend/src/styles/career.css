@@ -75,6 +75,10 @@
   margin-top: 12px;
 }
 
+.career-panel > .ant-card-body > .ant-alert {
+  margin-top: 12px;
+}
+
 .career-disclosure {
   margin-top: 12px;
 }

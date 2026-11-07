@@ -36,6 +36,8 @@ _DIRECTIONS = (
         "nlp",
         "rag",
         "数据科学",
+        "数据分析",
+        "数据挖掘",
         "data science",
     ),
     (
@@ -94,6 +96,7 @@ _DIRECTIONS = (
     ("设计师", "用户体验", "工业设计", "交互设计", "ux", "产品设计"),
     ("市场", "销售", "商务", "营销", "客户经理", "产品运营", "marketing", "sales"),
     ("法学", "法务", "律师", "legal"),
+    ("食品", "食品科学", "食品研发", "食品工程", "食品安全", "food science"),
 )
 _SKILL_TERMS: dict[str, tuple[str, ...]] = {
     "Python": ("python",),
@@ -214,9 +217,9 @@ def _assess(
             matched.append(skill)
     matched = list(dict.fromkeys(matched))
     specific = [skill for skill in matched if _normalize(skill) not in _GENERIC_SKILLS]
-    if not direction_match and (
-        len(specific) < 2 or (profile.direction and directions and job_directions)
-    ):
+    # Skills are supporting evidence, not a substitute for the role the user chose.
+    # Otherwise common tooling in a resume can surface a different profession.
+    if not direction_match:
         return None
 
     city_match = bool(cities & {_city_key(city) for city in job.cities})
@@ -274,11 +277,7 @@ def _assess(
 async def match_market(profile: CareerProfile, snapshot: MarketSnapshot) -> CareerMatches:
     profile_text = _normalize("\n".join([*profile.skills, *profile.experience]))
     confirmed_skills = _mentions(profile_text)
-    directions = (
-        _domains(_normalize(profile.direction))
-        or _domains(_normalize(profile.major))
-        or _domains(profile_text)
-    )
+    directions = _domains(_normalize(profile.direction))
     cities = {_city_key(city) for city in profile.cities}
     candidates: list[_Candidate] = []
     for source in snapshot.sources.values():

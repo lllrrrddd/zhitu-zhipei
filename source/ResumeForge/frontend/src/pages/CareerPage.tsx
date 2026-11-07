@@ -7,7 +7,6 @@ import CareerMaterialCheck from "../features/career/CareerMaterialCheck";
 import CareerResults from "../features/career/CareerResults";
 import CareerResumePanel from "../features/career/CareerResumePanel";
 import CareerSourcePanel from "../features/career/CareerSourcePanel";
-import { hasSearchDetails } from "../features/career/profileFromResume";
 import type { CareerMatches, CareerProfile, MarketSummary } from "../features/career/types";
 import { useApi } from "../hooks/useApi";
 import { t } from "../i18n";
@@ -69,7 +68,7 @@ export default function CareerPage() {
 
   async function search() {
     if (searching || !draft) return;
-    if (!hasSearchDetails(draft)) {
+    if (!draft.direction.trim()) {
       setSearchError(t("career.profile.required"));
       return;
     }

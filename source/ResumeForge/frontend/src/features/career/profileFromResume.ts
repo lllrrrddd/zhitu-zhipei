@@ -57,8 +57,10 @@ export function resumeToCareerProfile(
     return { education, degree };
   });
   schools.sort((a, b) => degreeRank[b.degree] - degreeRank[a.degree]);
-  const education = schools[0]?.education;
-  const year = education?.end_date?.match(/\b(?:19|20)\d{2}\b/)?.[0];
+  const major = schools.find(({ education }) => education.major?.trim())?.education.major ?? "";
+  const year = schools
+    .map(({ education }) => education.end_date?.match(/\b(?:19|20)\d{2}\b/)?.[0])
+    .find(Boolean);
   const skills = [
     ...resume.skills.map((item) => item.name),
     ...resume.projects.flatMap((item) => (item.tech_stack || "").split(/[,，、;；\n]/)),
@@ -72,7 +74,7 @@ export function resumeToCareerProfile(
   return {
     degree: schools[0]?.degree ?? "unknown",
     graduation_year: year ? Number(year) : null,
-    major: education?.major?.slice(0, 120) || "",
+    major: major.slice(0, 120),
     direction: resume.job_intent?.slice(0, 160) || directionFromExperience(resume),
     cities: splitCities(resume.target_city || ""),
     skills: uniqueParts(skills, 40, 80),
