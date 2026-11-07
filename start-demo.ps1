@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateRange(1024, 65535)][int]$BackendPort = 8005,
     [ValidateRange(1024, 65535)][int]$FrontendPort = 5173,
     [switch]$NoBrowser,
@@ -54,6 +54,15 @@ $env:RF_DATA_DIR = Join-Path $runtimeDir 'data'
 $env:VITE_BACKEND_URL = "http://127.0.0.1:$BackendPort"
 $backend = $null
 $frontend = $null
+# PowerShell 5.1 的 Start-Process 会把环境变量复制进一个**大小写不敏感**的字典。
+# 机器上同时有 HTTPS_PROXY 与 https_proxy 时（Git Bash、多数代理客户端都会这么设），
+# 复制过程抛 "已添加项。字典中的关键字:HTTPS_PROXY…"，脚本在启动任何进程前就失败。
+# Windows 的环境变量本身不分大小写，删掉小写重复项后大写变量仍然在，子进程照常拿到代理。
+foreach ($name in @('http_proxy', 'https_proxy', 'all_proxy', 'no_proxy')) {
+    if ($null -ne [Environment]::GetEnvironmentVariable($name)) {
+        [Environment]::SetEnvironmentVariable($name, $null)
+    }
+}
 try {
     $backend = Start-Process -FilePath $python -ArgumentList @('-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', "$BackendPort") -WorkingDirectory $backendDir -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'backend.out.log') -RedirectStandardError (Join-Path $runtimeDir 'backend.err.log')
     $frontend = Start-Process -FilePath $node -ArgumentList @($vite, '--host', '127.0.0.1', '--port', "$FrontendPort", '--strictPort') -WorkingDirectory $frontendDir -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'frontend.out.log') -RedirectStandardError (Join-Path $runtimeDir 'frontend.err.log')

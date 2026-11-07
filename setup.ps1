@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $env:PYTHONUTF8 = '1'
 $root = $PSScriptRoot
 $backend = Join-Path $root 'source/ResumeForge/backend'

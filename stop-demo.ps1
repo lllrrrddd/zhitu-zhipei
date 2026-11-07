@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $pidFile = Join-Path $PSScriptRoot 'runtime/demo/processes.json'
 if (-not (Test-Path -LiteralPath $pidFile)) {
     Write-Host '没有演示进程记录。'
