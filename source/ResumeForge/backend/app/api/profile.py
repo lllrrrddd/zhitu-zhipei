@@ -231,7 +231,7 @@ async def parse_profile_text_draft(
         if not source_text.strip():
             raise HTTPException(
                 status_code=422,
-                detail="这份简历没有可读取的文字。请上传文字版 PDF 或 Word，或直接粘贴简历内容。",
+                detail="这份简历没有可读取的文字。",
             )
         return _with_catalog_draft(
             finalize_recognition_result(

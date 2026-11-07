@@ -41,7 +41,7 @@ async def refresh_postings(force: bool = False) -> MarketSummary:
 @router.post("/match", response_model=CareerMatches)
 async def find_matches(profile: CareerProfile) -> CareerMatches:
     if not profile.direction:
-        raise HTTPException(status_code=422, detail="请先填写并确认想找的岗位，再查找招聘信息。")
+        raise HTTPException(status_code=422, detail="未确认目标岗位方向。")
     return await match_market(profile, await refresh_market())
 
 
@@ -57,4 +57,4 @@ async def check_material(payload: CareerMaterialRequest, db: Session = Depends(g
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except LLMError as exc:
-        raise HTTPException(status_code=502, detail="图片文字识别失败，请换清晰图片重试") from exc
+        raise HTTPException(status_code=502, detail="图片文字识别失败。") from exc

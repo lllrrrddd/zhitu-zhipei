@@ -14,6 +14,27 @@ function sourceStatus(source: MarketSource) {
   return t(source.status === "partial" ? "career.market.partial" : "career.market.updated");
 }
 
+function sourceItem(source: MarketSource) {
+  return (
+    <li key={source.id}>
+      <div>
+        <a href={source.url} target="_blank" rel="noopener noreferrer">
+          {source.name} ↗
+        </a>
+        <small>
+          {source.checked_at ? formatDateTime(source.checked_at) : sourceStatus(source)}
+        </small>
+      </div>
+      <div className="career-source-status">
+        <span>{t("career.market.sourceCount", { count: source.count })}</span>
+        {source.checked_at && (
+          <Tag color={source.current ? "green" : "default"}>{sourceStatus(source)}</Tag>
+        )}
+      </div>
+    </li>
+  );
+}
+
 const CHECK_MESSAGES = {
   found: "career.market.checkFound",
   cached: "career.market.checkCached",
@@ -38,6 +59,7 @@ export default function CareerSourcePanel({
   const [checkError, setCheckError] = useState(false);
   const cached = (market?.count ?? 0) - (market?.current_count ?? 0);
   const checkingWithoutCurrent = refreshing && !market?.current_count;
+  const extraSources = market?.sources.slice(4) ?? [];
 
   async function verify() {
     if (checking || !url.trim()) return;
@@ -70,26 +92,15 @@ export default function CareerSourcePanel({
         {t(refreshing ? "career.market.refreshing" : "career.market.interval")}
       </p>
       {error && <Alert type="warning" showIcon title={t("career.market.refreshError")} />}
-      <ul className="career-source-list">
-        {market?.sources.map((source) => (
-          <li key={source.id}>
-            <div>
-              <a href={source.url} target="_blank" rel="noopener noreferrer">
-                {source.name} ↗
-              </a>
-              <small>
-                {source.checked_at ? formatDateTime(source.checked_at) : sourceStatus(source)}
-              </small>
-            </div>
-            <div className="career-source-status">
-              <span>{t("career.market.sourceCount", { count: source.count })}</span>
-              {source.checked_at && (
-                <Tag color={source.current ? "green" : "default"}>{sourceStatus(source)}</Tag>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+      <ul className="career-source-list">{market?.sources.slice(0, 4).map(sourceItem)}</ul>
+      {extraSources.length > 0 && (
+        <details className="career-disclosure">
+          <summary>
+            {t("career.market.title")} ({extraSources.length})
+          </summary>
+          <ul className="career-source-list">{extraSources.map(sourceItem)}</ul>
+        </details>
+      )}
       <details className="career-disclosure">
         <summary>{t("career.market.check")}</summary>
         <Space.Compact className="career-full-width">

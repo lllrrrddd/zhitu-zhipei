@@ -8,7 +8,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .graduate import JobDegreeFloor
 
-SourceId = Literal["huawei", "tencent", "bosch", "syngenta"]
+SourceId = Literal[
+    "huawei", "tencent", "bosch", "syngenta", "lesaffre", "avery_dennison",
+    "nielsen_iq", "eurofins", "vitol", "yili",
+]
 SourceStatus = Literal["idle", "updated", "partial", "failed"]
 Skill = Annotated[str, Field(min_length=1, max_length=80)]
 City = Annotated[str, Field(min_length=1, max_length=40)]

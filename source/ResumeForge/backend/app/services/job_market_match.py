@@ -19,11 +19,18 @@ _EXPLICIT_DEGREE = re.compile(r"(本科|学士|硕士|博士)(?:研究生)?\s*(?
 _EXPLICIT_YEAR = re.compile(r"(?:限|仅限|面向|招聘对象[：: ]*)\s*(20\d{2})\s*届")
 _EXPERIENCE = re.compile(
     r"(?:至少|不少于)\s*\d+\s*年.{0,14}经验|\d+\s*年(?:及)?以上.{0,18}经验"
-    r"|\b\d+\s*\+?\s+years?\s+of\s+.{0,35}experience",
+    r"|\b\d+\s*\+?\s*years?\s+(?:of\s+)?(?:.{0,35})experience"
+    r"|\b(?:at least|minimum)\s+\d+\s+years?\b",
     re.I,
 )
 _PREFERENCE = re.compile(r"优先|preferred|desirable|a plus", re.I)
 _GENERIC_SKILLS = {"python", "sql", "excel", "linux", "git", "office", "英语"}
+_CHEMISTRY_HINTS = (
+    "应用化学", "化学工程", "化学分析", "化学类", "物理化学", "电化学",
+    "化工技术", "化工研发", "chemistry", "chemical", "chemist",
+)
+_MATERIAL_TITLE_HINTS = ("材料", "电池", "高分子", "material", "materials", "battery", "polymer")
+_FOOD_HINTS = ("食品", "乳品", "营养", "food science", "food technology", "nutrition")
 
 _DIRECTIONS = (
     (
@@ -35,10 +42,17 @@ _DIRECTIONS = (
         "算法",
         "nlp",
         "rag",
+    ),
+    (
         "数据科学",
         "数据分析",
         "数据挖掘",
         "data science",
+        "data scientist",
+        "data analyst",
+        "data analytics",
+        "data modeling",
+        "consumer insights",
     ),
     (
         "软件开发",
@@ -54,7 +68,6 @@ _DIRECTIONS = (
     (
         "运维",
         "云计算",
-        "云服务",
         "网络技术",
         "网络运维",
         "基础设施",
@@ -69,6 +82,11 @@ _DIRECTIONS = (
         "材料",
         "电池",
         "高分子",
+        "material",
+        "materials",
+    ),
+    _CHEMISTRY_HINTS,
+    (
         "工艺",
         "仿真",
         "机械",
@@ -76,8 +94,8 @@ _DIRECTIONS = (
         "热设计",
         "暖通",
         "液压",
-        "material",
     ),
+    ("自动化", "automation", "智能制造", "控制工程", "机电", "robotics", "机器人", "plc"),
     (
         "生物",
         "育种",
@@ -96,7 +114,10 @@ _DIRECTIONS = (
     ("设计师", "用户体验", "工业设计", "交互设计", "ux", "产品设计"),
     ("市场", "销售", "商务", "营销", "客户经理", "产品运营", "marketing", "sales"),
     ("法学", "法务", "律师", "legal"),
-    ("食品", "食品科学", "食品研发", "食品工程", "食品安全", "food science"),
+    (
+        "食品", "食品科学", "食品研发", "食品工程", "食品安全",
+        "food science", "food safety", "food technology", "baking",
+    ),
 )
 _SKILL_TERMS: dict[str, tuple[str, ...]] = {
     "Python": ("python",),
@@ -178,6 +199,17 @@ def _degree_floor(requirements: str) -> JobDegreeFloor:
     return "unknown"
 
 
+def _requires_experience(requirements: str) -> bool:
+    for match in _EXPERIENCE.finditer(requirements):
+        preceding = requirements[max(0, match.start() - 25):match.start()]
+        if re.match(r"1\s*year", match.group(), re.I) and re.search(
+            r"fresh\s+(?:graduates?\s+)?or\s*$", preceding, re.I
+        ):
+            continue
+        return True
+    return False
+
+
 def _city_key(city: str) -> str:
     return "".join(lazy_pinyin(_normalize(city).removesuffix("市"))).replace(" ", "")
 
@@ -201,6 +233,8 @@ def _assess(
     if profile.degree != "unknown" and _DEGREES[profile.degree] < _DEGREES[floor]:
         return None
     years = set(_EXPLICIT_YEAR.findall(job.requirements))
+    if job.kind == "campus":
+        years.update(re.findall(r"(?<!\d)(20\d{2})届校招", job.title))
     if profile.graduation_year and len(years) == 1 and str(profile.graduation_year) not in years:
         return None
 
@@ -209,7 +243,18 @@ def _assess(
     wanted = [part.strip() for part in re.split(r"[，,、/；;]", profile.direction) if part.strip()]
     exact_title = any(_has(title, term) for term in wanted)
     job_directions = _domains(title)
-    direction_match = exact_title or bool(directions & job_directions)
+    related_materials = (
+        any(_has(_normalize(profile.direction), term) for term in _CHEMISTRY_HINTS)
+        and any(_has(title, term) for term in _MATERIAL_TITLE_HINTS)
+        and any(_has(_normalize(job.requirements), term) for term in _CHEMISTRY_HINTS)
+    )
+    related_food = (
+        job.source_id == "yili"
+        and any(_has(_normalize(profile.direction), term) for term in _FOOD_HINTS)
+        and _has(title, "研发")
+        and any(_has(_normalize(job.requirements), term) for term in _FOOD_HINTS)
+    )
+    direction_match = exact_title or bool(directions & job_directions) or related_materials or related_food
     req_skills = _mentions(_normalize(job.requirements))
     matched = sorted(confirmed_skills & _mentions(text))
     for skill in profile.skills:
@@ -240,8 +285,9 @@ def _assess(
     if job.kind == "campus":
         notes.append("graduation_check")
     experience_required = bool(
-        (job.experience_requirement and not re.search(r"不限|无要求", job.experience_requirement))
-        or _EXPERIENCE.search(job.requirements)
+        (job.experience_requirement and not re.search(r"不限|无要求|无经验", job.experience_requirement))
+        or _requires_experience(job.requirements)
+        or re.search(r"\b(?:senior|sr\.?|manager|director)\b|高级|资深|主管", job.title, re.I)
     )
     if experience_required:
         notes.append("experience_check")

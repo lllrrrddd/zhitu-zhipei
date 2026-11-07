@@ -21,7 +21,7 @@ from ..schemas.job_market import (
     SourceId,
     SourceSnapshot,
 )
-from .job_market_sources import SMART_BOARDS, SMART_HOST, SOURCE_INFO, fetch_source
+from .job_market_sources import SMART_BOARDS, SMART_HOST, SOURCE_INFO, YILI_HOST, fetch_source
 
 logger = logging.getLogger(__name__)
 _AUTO_INTERVAL = timedelta(minutes=30)
@@ -174,6 +174,12 @@ def posting_identity(raw_url: str) -> tuple[SourceId, str] | None:
             post_id = parse_qs(url.query, max_num_fields=20).get("postId", [""])[0]
             if re.fullmatch(r"\d{1,20}", post_id):
                 return "tencent", f"tencent-{post_id}"
+        if url.netloc == YILI_HOST and url.path == "/wt/yili/web/mobMobileWebsite/index/viewPositionInfoN1":
+            query = parse_qs(url.query, max_num_fields=20)
+            post_id = query.get("postId", [""])[0]
+            recruit_type = query.get("recruitType", [""])[0]
+            if re.fullmatch(r"\d{1,20}", post_id) and recruit_type == "1":
+                return "yili", f"yili-{post_id}"
         if url.netloc == SMART_HOST:
             parts = url.path.strip("/").split("/")
             if len(parts) == 2:

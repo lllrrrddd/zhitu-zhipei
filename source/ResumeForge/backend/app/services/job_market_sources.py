@@ -5,7 +5,7 @@ import asyncio
 import re
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from html import unescape
 from urllib.parse import urlencode, urlsplit
 
@@ -20,13 +20,47 @@ TENCENT_API = "https://careers.tencent.com/tencentcareer/api/post"
 TENCENT_DETAIL = "https://careers.tencent.com/jobdesc.html"
 SMART_API = "https://api.smartrecruiters.com/v1/companies"
 SMART_HOST = "jobs.smartrecruiters.com"
-SMART_BOARDS = {"bosch": "BoschGroup", "syngenta": "SyngentaGroup"}
+YILI_HOST = "yili.hotjob.cn"
+YILI_BOARD = (
+    f"https://{YILI_HOST}/wt/yili/web/templet1000/index/"
+    "corpwebPosition1000yili!gotoPostListForAjax?brandCode=1&recruitType=1&showComp=true"
+)
+YILI_API = f"https://{YILI_HOST}/wt/yili/web/json/position"
+YILI_DETAIL = f"https://{YILI_HOST}/wt/yili/web/mobMobileWebsite/index/viewPositionInfoN1"
+SMART_BOARDS: dict[SourceId, str] = {
+    "bosch": "BoschGroup",
+    "syngenta": "SyngentaGroup",
+    "lesaffre": "Lesaffre",
+    "avery_dennison": "AveryDennison",
+    "nielsen_iq": "NielsenIQ",
+    "eurofins": "eurofins",
+    "vitol": "Vitol",
+}
+SMART_COMPANIES: dict[SourceId, str] = {
+    "bosch": "博世",
+    "syngenta": "先正达集团",
+    "lesaffre": "乐斯福",
+    "avery_dennison": "艾利丹尼森",
+    "nielsen_iq": "尼尔森IQ",
+    "eurofins": "欧陆科技",
+    "vitol": "维多集团",
+}
+SMART_EARLY_CAREER_SOURCES = frozenset({
+    "lesaffre", "avery_dennison", "nielsen_iq", "eurofins", "vitol",
+})
+SMART_EARLY_CAREER_LEVELS = frozenset({"entry_level", "associate", "internship"})
 
 SOURCE_INFO: dict[SourceId, tuple[str, str]] = {
     "huawei": ("华为校招", HUAWEI_BOARD),
     "tencent": ("腾讯招聘 · 运维岗位", "https://careers.tencent.com/search.html"),
     "bosch": ("博世 JMP 管培生", f"https://{SMART_HOST}/BoschGroup"),
     "syngenta": ("先正达集团中国岗位", f"https://{SMART_HOST}/SyngentaGroup"),
+    "lesaffre": ("乐斯福 · 初级岗位", f"https://{SMART_HOST}/Lesaffre"),
+    "avery_dennison": ("艾利丹尼森 · 初级岗位", f"https://{SMART_HOST}/AveryDennison"),
+    "nielsen_iq": ("尼尔森IQ · 初级岗位", f"https://{SMART_HOST}/NielsenIQ"),
+    "eurofins": ("欧陆科技 · 初级岗位", f"https://{SMART_HOST}/eurofins"),
+    "vitol": ("维多集团 · 初级岗位", f"https://{SMART_HOST}/Vitol"),
+    "yili": ("伊利 · 校招研发", YILI_BOARD),
 }
 
 _HUAWEI_HEADERS = {
@@ -67,6 +101,10 @@ def _date(value: object) -> date | None:
         except ValueError:
             pass
     return None
+
+
+def _china_today() -> date:
+    return (datetime.now(UTC) + timedelta(hours=8)).date()
 
 
 def _id(value: object) -> str:
@@ -207,6 +245,10 @@ async def _smart_jobs(
         for row in rows
         if _id(row.get("id"))
         and (source_id != "bosch" or re.search(r"\bJMP\b", str(row.get("name")), re.I))
+        and (
+            source_id not in SMART_EARLY_CAREER_SOURCES
+            or (row.get("experienceLevel") or {}).get("id") in SMART_EARLY_CAREER_LEVELS
+        )
     ]
 
     async def detail(row: dict) -> list[MarketJob]:
@@ -230,6 +272,10 @@ async def _smart_jobs(
             or path[1].split("-", 1)[0] != posting_id
         ):
             raise ValueError("Employer job detail does not match its public listing")
+        if source_id in SMART_EARLY_CAREER_SOURCES and (
+            (data.get("experienceLevel") or {}).get("id") not in SMART_EARLY_CAREER_LEVELS
+        ):
+            return []
         sections = data["jobAd"]["sections"]
         title = _text(data["name"], 180)
         city = _text(location.get("city"), 60)
@@ -240,7 +286,7 @@ async def _smart_jobs(
             MarketJob(
                 id=f"{source_id}-{posting_id}",
                 source_id=source_id,
-                company="博世" if source_id == "bosch" else "先正达集团",
+                company=SMART_COMPANIES[source_id],
                 title=title,
                 family=title,
                 cities=[city] if city else [],
@@ -249,11 +295,90 @@ async def _smart_jobs(
                 listed_date=_date(data.get("releasedDate")),
                 requirements=requirements,
                 responsibilities=_text(sections.get("jobDescription", {}).get("text"), 850),
+                experience_requirement=(
+                    "" if source_id in SMART_EARLY_CAREER_SOURCES
+                    else _text((data.get("experienceLevel") or {}).get("label"), 80)
+                ),
             )
         ]
 
     jobs, partial = await _collect_details(chosen, detail)
     return jobs, partial or len(rows) < total
+
+
+async def _yili_jobs(client: httpx.AsyncClient) -> tuple[list[MarketJob], bool]:
+    board = await client.get(YILI_BOARD)
+    board.raise_for_status()
+    tokens = {}
+    for endpoint in ("list", "detail"):
+        match = re.search(
+            rf"/wt/yili/web/json/position/{endpoint}\?operational=([0-9a-f]{{32,256}})",
+            board.text,
+        )
+        if not match:
+            raise ValueError("Yili public board did not expose its current job feed")
+        tokens[endpoint] = match.group(1)
+
+    rows: list[dict] = []
+    page_count = 1
+    for page in range(1, 4):
+        if page > page_count:
+            break
+        response = await client.get(f"{YILI_API}/list", params={
+            "operational": tokens["list"], "brandCode": 1, "recruitType": 1,
+            "positionName": "研发", "page": page,
+        })
+        response.raise_for_status()
+        result = response.json()
+        page_count = int(result["pageCount"])
+        if page_count < 0:
+            raise ValueError("Yili public job list has invalid pagination")
+        rows.extend(_list(result["postList"]))
+    if not rows:
+        return [], page_count > 3
+
+    today = _china_today()
+    chosen = [row for row in rows if (
+        _id(row.get("postId"))
+        and re.search(r"20\d{2}届校招.*研发", str(row.get("postName", "")))
+        and (_date(row.get("endDate")) is None or _date(row["endDate"]) >= today)
+    )]
+
+    async def detail(row: dict) -> list[MarketJob]:
+        post_id = _id(row["postId"])
+        response = await client.get(f"{YILI_API}/detail", params={
+            "operational": tokens["detail"], "recruitType": 1, "postId": post_id,
+        })
+        response.raise_for_status()
+        info = response.json()["postInfo"]
+        if _id(info.get("postId")) != post_id or str(info.get("recruitType")) != "1":
+            raise ValueError("Yili job detail does not match its public listing")
+        if _date(info.get("endDate")) and _date(info["endDate"]) < today:
+            return []
+        title = _text(info.get("postName"), 180)
+        requirements = _text(info.get("serviceCondition"), 1600)
+        if not title or title != _text(row.get("postName"), 180) or not requirements:
+            raise ValueError("Yili job title or requirements could not be verified")
+        url = (
+            f"{YILI_DETAIL}?brandCode=1&safe=Y&canBack=true&sourceFrom=index"
+            f"&recruitType=1&postId={post_id}"
+        )
+        direct = await client.get(url)
+        direct.raise_for_status()
+        if title not in direct.text:
+            raise ValueError("Yili job detail link did not show the same posting")
+        return [MarketJob(
+            id=f"yili-{post_id}", source_id="yili", company="伊利集团",
+            title=title, family=title,
+            cities=[_text(info.get("workPlace"), 80)] if info.get("workPlace") else [],
+            kind="campus", url=url, listed_date=_date(info.get("publishDate")),
+            requirements=requirements,
+            responsibilities=_text(info.get("workConcet"), 850),
+            experience_requirement=_text(row.get("workYears"), 80),
+        )]
+
+    jobs, partial = await _collect_details(chosen, detail)
+    return jobs, partial or page_count > 3
 
 
 async def _tencent_jobs(client: httpx.AsyncClient) -> tuple[list[MarketJob], bool]:
@@ -325,4 +450,6 @@ async def fetch_source(
         return await _huawei_jobs(client)
     if source_id == "tencent":
         return await _tencent_jobs(client)
+    if source_id == "yili":
+        return await _yili_jobs(client)
     return await _smart_jobs(client, source_id)
