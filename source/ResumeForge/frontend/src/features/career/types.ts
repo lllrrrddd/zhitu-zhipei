@@ -125,3 +125,36 @@ export interface CareerMaterialResult {
     excerpt: string;
   }[];
 }
+
+export interface CareerDiagnosisPart {
+  key: "keyword" | "quantified" | "action" | "readiness";
+  value: number;
+  weight: number;
+}
+
+export interface CareerDiagnosisTerm {
+  term: string;
+  state: "found" | "mentioned" | "missing";
+}
+
+export interface CareerDiagnosisIssue {
+  key:
+    | "missing_keyword"
+    | "mentioned_only"
+    | "no_numbers"
+    | "weak_verb"
+    | "no_experience"
+    | "few_skills";
+  values: string[];
+  excerpt: string;
+}
+
+export interface CareerDiagnosis {
+  score: number;
+  parts: CareerDiagnosisPart[];
+  coverage: number;
+  terms: CareerDiagnosisTerm[];
+  issues: CareerDiagnosisIssue[];
+  job_title: string;
+  company: string;
+}

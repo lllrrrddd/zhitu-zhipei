@@ -52,6 +52,27 @@ _MAX_SCHOOL_CHARS = 48
 # 带这些后缀的文本仍然像一所学校/研究机构，长度超限也不直接丢。
 _SCHOOL_SUFFIX_RE = re.compile(r"(?:大学|学院|学校|研究院|研究所|科学院|校区)")
 
+# 校名后面直接粘着专业名的头部（``中北大学软件工程``）。PDF 文本层按空格切列时，
+# 学校与专业可能被当成同一个 token，学校栏就会显示成"中北大学软件工程"。
+_SCHOOL_TAIL_RE = re.compile(
+    r"^(?P<school>.{2,20}?(?:大学|学院|学校|研究院|研究所))(?P<rest>[\u4e00-\u9fff].{1,20})$"
+)
+# 这些是校名的一部分（校区、分校、研究生院），不能当作专业名切出去。
+_SCHOOL_KEEP_TAILS = ("校区", "分校", "分部", "研究生院", "继续教育")
+
+
+def _split_school_major(school: str, major: str) -> tuple[str, str]:
+    """把误粘在校名后的专业名还给专业栏；专业栏已有值时不猜。"""
+    if major or not school:
+        return school, major
+    match = _SCHOOL_TAIL_RE.match(school)
+    if not match:
+        return school, major
+    rest = match.group("rest")
+    if rest.startswith(_SCHOOL_KEEP_TAILS):
+        return school, major
+    return match.group("school"), rest
+
 
 def _collapse_cjk_spaces(value: str) -> str:
     """去掉中文串内部的对齐空白：``河南 师范大学`` → ``河南师范大学``。
@@ -105,6 +126,7 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
         school = _collapse_cjk_spaces(school)
         major = _collapse_cjk_spaces(major)
         degree = _collapse_cjk_spaces(degree)
+        school, major = _split_school_major(school, major)
         # 论文/奖项/课程明细被误当学校名时整条丢弃：它连带的"专业/学历"也都是碎片，
         # 留着只会让用户在校对页删条记录。长度只在**明显不是校名**时才作为判据——
         # 「函授研究生：某某科技发展院 计算科学专业；导师陈丽教授。」这类真实教育行

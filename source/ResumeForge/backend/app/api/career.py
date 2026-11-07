@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..schemas.job_market import (
+    CareerDiagnosis,
+    CareerDiagnosisRequest,
     CareerMatches,
     CareerMaterialRequest,
     CareerMaterialResult,
@@ -16,6 +18,7 @@ from ..schemas.job_market import (
     PostingCheck,
     PostingCheckRequest,
 )
+from ..services.career_diagnosis import diagnose
 from ..services.career_material_check import inspect_material
 from ..services.job_market_catalog import (
     check_posting,
@@ -87,6 +90,12 @@ async def find_matches(profile: CareerProfile) -> CareerMatches:
     if not profile.direction:
         raise HTTPException(status_code=422, detail="未确认目标岗位方向。")
     return await match_market(profile, await refresh_market())
+
+
+@router.post("/diagnose", response_model=CareerDiagnosis)
+def diagnose_resume(payload: CareerDiagnosisRequest) -> CareerDiagnosis:
+    """岗位定向诊断：关键词覆盖、成果量化、行动力、材料完整四项，纯规则可复算。"""
+    return diagnose(payload.profile, payload.job)
 
 
 @router.post("/check", response_model=PostingCheck)

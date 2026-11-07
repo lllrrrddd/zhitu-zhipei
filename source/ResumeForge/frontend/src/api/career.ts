@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 import type {
+  CareerDiagnosis,
   CareerMatches,
   CareerMaterialResult,
   CareerProfile,
   MarketBrowse,
+  MarketJob,
   MarketSummary,
   PostingCheck,
 } from "../features/career/types";
@@ -57,6 +59,18 @@ export function checkCareerMaterial(payload: {
   return request("/career/material/check", {
     method: "POST",
     body: JSON.stringify(payload),
+    budget: "analysis",
+  });
+}
+
+export function diagnoseCareerResume(
+  profile: CareerProfile,
+  // 必须传完整岗位对象：后端按 MarketJob 校验（source_id 枚举、url https 约束）
+  job: MarketJob,
+): Promise<CareerDiagnosis> {
+  return request("/career/diagnose", {
+    method: "POST",
+    body: JSON.stringify({ profile, job }),
     budget: "analysis",
   });
 }

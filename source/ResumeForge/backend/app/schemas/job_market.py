@@ -152,6 +152,54 @@ class CareerMatches(BaseModel):
     method: Literal["semantic", "rules"]
 
 
+class CareerDiagnosisPart(BaseModel):
+    """诊断分的一个组成项，界面上画成横条。"""
+
+    key: Literal["keyword", "quantified", "action", "readiness"]
+    value: int = Field(ge=0, le=100)
+    weight: int = Field(ge=0, le=100)
+
+
+class CareerDiagnosisTerm(BaseModel):
+    """岗位关键词与简历里的覆盖状态。
+
+    ``found`` 技能清单里就有；``mentioned`` 只写在经历描述里（容易被筛掉，
+    但转述成技能栏就能补上）；``missing`` 完全没提。
+    """
+
+    term: str
+    state: Literal["found", "mentioned", "missing"]
+
+
+class CareerDiagnosisIssue(BaseModel):
+    key: Literal[
+        "missing_keyword",
+        "mentioned_only",
+        "no_numbers",
+        "weak_verb",
+        "no_experience",
+        "few_skills",
+    ]
+    values: list[str] = Field(default_factory=list)
+    # 指回用户自己填的原文，界面直接展示，不生成"改好的句子"。
+    excerpt: str = ""
+
+
+class CareerDiagnosis(BaseModel):
+    score: int = Field(ge=0, le=100)
+    parts: list[CareerDiagnosisPart]
+    coverage: float = Field(ge=0, le=1)
+    terms: list[CareerDiagnosisTerm] = Field(default_factory=list)
+    issues: list[CareerDiagnosisIssue] = Field(default_factory=list)
+    job_title: str
+    company: str
+
+
+class CareerDiagnosisRequest(BaseModel):
+    profile: CareerProfile
+    job: MarketJob
+
+
 class PostingCheckRequest(BaseModel):
     url: str = Field(min_length=1, max_length=600)
 

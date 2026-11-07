@@ -97,3 +97,23 @@
   font-size: 13px;
   color: var(--rf-text-secondary);
 }
+
+/* 岗位定向诊断：关键词三态标签 + 问题清单（每条带原文片段）。 */
+.career-check-terms {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.career-check-issues {
+  margin: 8px 0 0;
+  padding-inline-start: 18px;
+}
+
+.career-check-issues li {
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--rf-text-secondary);
+  overflow-wrap: anywhere;
+}

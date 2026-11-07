@@ -8,6 +8,7 @@ import { createJob, listJobs } from "../../api/jobs";
 import { t } from "../../i18n";
 import { formatDateTime } from "../../utils/format";
 import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
+import CareerDiagnosisPanel from "./CareerDiagnosisPanel";
 import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
 import "../../styles/career-score.css";
 
@@ -210,6 +211,7 @@ function ResultCard({
         </details>
         <details className="career-disclosure">
           <summary>{t("career.diagnosis.title")}</summary>
+          <CareerDiagnosisPanel profile={profile} job={job} />
           {match.matched_skills.length > 0 && match.evidence ? (
             <>
               <p className="career-help">
