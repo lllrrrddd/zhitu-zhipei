@@ -63,8 +63,10 @@ function allowedParents(): string[] {
  */
 export const DEMO_ROUTES = [
   "/",
+  "/workspace",
+  "/market",
   "/jobs",
-  "/graduate",
+  "/graduate/advanced",
   "/favorites",
   "/resumes",
   "/apply",
