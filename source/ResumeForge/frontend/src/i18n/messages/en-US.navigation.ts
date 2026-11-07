@@ -7,6 +7,7 @@
 const navigation = {
   // ── Navigation entries (labelKey values on NAVIGATION_ITEMS) ──────────
   "navigation.item.home": "Find jobs",
+  "navigation.item.market": "All jobs",
   "navigation.item.jobs": "Saved jobs",
   "navigation.item.graduate": "Review jobs manually",
   "navigation.item.workspace": "Career overview",

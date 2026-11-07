@@ -27,6 +27,7 @@ import {
   JobsPage,
   KnowledgePage,
   MaterialsPage,
+  MarketPage,
   ProfilePage,
   ResumesPage,
   SettingsPage,
@@ -45,6 +46,7 @@ import {
 export const APP_ROOT_ROUTE: ReactElement = (
   <Route element={<AppShell />}>
     <Route path="/" element={<CareerPage />} />
+    <Route path="/market" element={<MarketPage />} />
     <Route path="/workspace" element={<HomePage />} />
     <Route path="/jobs" element={<JobsPage />} />
     <Route path="/graduate" element={<Navigate to="/" replace />} />

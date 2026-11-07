@@ -6,6 +6,139 @@
   gap: 20px;
 }
 
+.career-market-browse-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.career-browse-toolbar,
+.career-browse-filters,
+.career-browse-card-head,
+.career-browse-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.career-browse-toolbar {
+  align-items: flex-start;
+}
+
+.career-browse-toolbar > div {
+  min-width: 0;
+}
+
+.career-browse-toolbar strong {
+  font-size: 18px;
+}
+
+.career-browse-filters {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.career-browse-filters .ant-input-search {
+  width: min(100%, 360px);
+}
+
+.career-browse-filters .ant-select {
+  width: min(100%, 230px);
+}
+
+.career-browse-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.career-browse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.career-browse-card,
+.career-browse-card .ant-card-body {
+  min-width: 0;
+  height: 100%;
+}
+
+.career-browse-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.career-browse-card-head {
+  justify-content: flex-start;
+  color: var(--rf-text-description);
+}
+
+.career-browse-card h2 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.career-browse-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+}
+
+.career-browse-excerpt {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  margin: 0;
+  color: var(--rf-text-description);
+}
+
+.career-browse-card-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--rf-border-subtle);
+}
+
+.career-browse-card-foot small {
+  color: var(--rf-text-description);
+}
+
+.career-browse-pagination {
+  margin-inline: auto;
+}
+
+.career-browse-loading {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+}
+
+.career-browse-detail {
+  display: grid;
+  gap: 10px;
+  white-space: pre-line;
+}
+
+.career-browse-detail h3,
+.career-browse-detail p {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .career-browse-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .career-browse-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
 .career-hero {
   padding: clamp(20px, 4vw, 34px);
   border: 1px solid var(--rf-border-subtle);

@@ -60,6 +60,21 @@ class MarketSummary(BaseModel):
     current_count: int
 
 
+class MarketBrowseItem(BaseModel):
+    job: MarketJob
+    source_name: str
+    checked_at: datetime | None
+    current: bool
+
+
+class MarketBrowse(BaseModel):
+    market: MarketSummary
+    items: list[MarketBrowseItem]
+    total: int
+    page: int
+    page_size: int
+
+
 class CareerProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 

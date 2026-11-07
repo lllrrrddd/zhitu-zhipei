@@ -9,6 +9,7 @@
 const navigation = {
   // ── 导航入口名（NAVIGATION_ITEMS 的 labelKey）──────────────
   "navigation.item.home": "找岗位",
+  "navigation.item.market": "全部岗位",
   "navigation.item.jobs": "已保存岗位",
   "navigation.item.graduate": "手动核对岗位",
   "navigation.item.workspace": "求职总览",

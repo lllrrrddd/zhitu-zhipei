@@ -59,6 +59,38 @@ def test_refresh_keeps_last_verified_records_when_source_fails(tmp_path, monkeyp
     assert check.status == "cached"
 
 
+def test_browse_market_jobs_paginates_filters_and_preserves_original_links(client, tmp_path, monkeypatch):
+    monkeypatch.setattr(job_market_catalog, "_cache_file", lambda: tmp_path / "jobs.json")
+    jobs = [_job(str(index), f"云平台运维工程师 {index}") for index in range(21)]
+    snapshot = MarketSnapshot(sources={
+        "tencent": SourceSnapshot(
+            attempted_at=datetime.now(UTC), checked_at=datetime.now(UTC),
+            status="updated", jobs=jobs,
+        )
+    })
+    job_market_catalog._write_market(snapshot)
+
+    first = client.get("/api/career/market/jobs")
+    assert first.status_code == 200
+    assert first.json()["total"] == 21
+    assert len(first.json()["items"]) == 20
+    assert first.json()["items"][0]["job"]["url"].startswith(
+        "https://careers.tencent.com/jobdesc.html?postId="
+    )
+    second = client.get("/api/career/market/jobs?page=2")
+    assert len(second.json()["items"]) == 1
+    filtered = client.get("/api/career/market/jobs?q=%E8%BF%90%E7%BB%B4&source_id=tencent")
+    assert filtered.json()["total"] == 21
+    assert client.get("/api/career/market/jobs?source_id=unknown").status_code == 422
+
+    snapshot.sources["tencent"].status = "failed"
+    job_market_catalog._write_market(snapshot)
+    cached = client.get("/api/career/market/jobs")
+    assert cached.json()["total"] == 21
+    assert cached.json()["items"][0]["current"] is False
+    assert client.get("/api/career/market/jobs?current_only=true").json()["total"] == 0
+
+
 def test_link_check_never_fetches_unknown_urls(monkeypatch):
     async def unexpected(*_args, **_kwargs):
         raise AssertionError("unexpected public feed request")

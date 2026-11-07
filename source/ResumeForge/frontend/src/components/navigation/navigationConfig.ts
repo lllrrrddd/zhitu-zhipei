@@ -41,6 +41,13 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     required: true,
   },
   {
+    key: "/market",
+    icon: createElement(SearchOutlined),
+    labelKey: "navigation.item.market",
+    group: "primary",
+    required: true,
+  },
+  {
     key: "/jobs",
     icon: createElement(StarOutlined),
     labelKey: "navigation.item.jobs",

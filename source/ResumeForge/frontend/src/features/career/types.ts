@@ -44,6 +44,21 @@ export interface MarketJob {
   experience_requirement: string;
 }
 
+export interface MarketBrowseItem {
+  job: MarketJob;
+  source_name: string;
+  checked_at: string | null;
+  current: boolean;
+}
+
+export interface MarketBrowse {
+  market: MarketSummary;
+  items: MarketBrowseItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 export interface MatchedJob {
   job: MarketJob;
   checked_at: string;

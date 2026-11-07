@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Public posting discovery and resume-based job search."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -10,6 +10,8 @@ from ..schemas.job_market import (
     CareerMaterialRequest,
     CareerMaterialResult,
     CareerProfile,
+    MarketBrowse,
+    MarketBrowseItem,
     MarketSummary,
     PostingCheck,
     PostingCheckRequest,
@@ -17,6 +19,7 @@ from ..schemas.job_market import (
 from ..services.career_material_check import inspect_material
 from ..services.job_market_catalog import (
     check_posting,
+    is_current,
     read_market,
     refresh_market,
     summarize_market,
@@ -31,6 +34,47 @@ router = APIRouter(prefix="/api/career", tags=["career"])
 @router.get("/market", response_model=MarketSummary)
 def market_summary() -> MarketSummary:
     return summarize_market(read_market())
+
+
+@router.get("/market/jobs", response_model=MarketBrowse)
+def browse_market_jobs(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=50),
+    q: str = Query(default="", max_length=100),
+    source_id: str = Query(default="", max_length=40),
+    current_only: bool = False,
+) -> MarketBrowse:
+    snapshot = read_market()
+    market = summarize_market(snapshot)
+    if source_id and source_id not in {source.id for source in market.sources}:
+        raise HTTPException(status_code=422, detail="未知招聘来源。")
+    needle = q.strip().casefold()
+    items = [
+        MarketBrowseItem(
+            job=job,
+            source_name=source.name,
+            checked_at=state.checked_at,
+            current=source.current,
+        )
+        for source in market.sources
+        if not source_id or source.id == source_id
+        for state in [snapshot.sources.get(source.id)]
+        if state is not None and (not current_only or is_current(state))
+        for job in state.jobs
+        if not needle or needle in " ".join(
+            (job.title, job.company, job.family, *job.cities)
+        ).casefold()
+    ]
+    items.sort(key=lambda item: (
+        item.job.listed_date.isoformat() if item.job.listed_date else "",
+        item.checked_at.isoformat() if item.checked_at else "",
+        item.job.id,
+    ), reverse=True)
+    start = (page - 1) * page_size
+    return MarketBrowse(
+        market=market, items=items[start:start + page_size], total=len(items),
+        page=page, page_size=page_size,
+    )
 
 
 @router.post("/market/refresh", response_model=MarketSummary)

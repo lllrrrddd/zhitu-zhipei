@@ -2,6 +2,7 @@
 import { ReloadOutlined } from "@ant-design/icons";
 import { Alert, Button, Card, Input, Space, Tag } from "antd";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { checkCareerPosting } from "../../api/career";
 import { t } from "../../i18n";
 import { formatDateTime } from "../../utils/format";
@@ -91,6 +92,9 @@ export default function CareerSourcePanel({
       <p className="career-help" aria-live="polite">
         {t(refreshing ? "career.market.refreshing" : "career.market.interval")}
       </p>
+      <Link className="career-market-browse-link" to="/market">
+        {t("career.browse.title")} →
+      </Link>
       {error && <Alert type="warning" showIcon title={t("career.market.refreshError")} />}
       <ul className="career-source-list">{market?.sources.slice(0, 4).map(sourceItem)}</ul>
       {extraSources.length > 0 && (
