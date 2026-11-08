@@ -143,7 +143,10 @@ export default function CareerResumePanel({
           onClick={() =>
             void load(async () => {
               const demo = await getGraduateDemo();
-              return exampleToCareerProfile(demo.profiles[0]);
+              return exampleToCareerProfile(
+                demo.profiles[0],
+                t("career.profiles.exampleDirection"),
+              );
             }, t("career.resume.exampleReady"))
           }
         >

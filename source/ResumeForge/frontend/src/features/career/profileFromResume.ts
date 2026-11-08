@@ -82,12 +82,15 @@ export function resumeToCareerProfile(
   };
 }
 
-export function exampleToCareerProfile(profile: GraduateProfile): CareerProfile {
+export function exampleToCareerProfile(
+  profile: GraduateProfile,
+  direction: string,
+): CareerProfile {
   return {
     degree: profile.degree,
     graduation_year: profile.graduation_year,
     major: profile.major,
-    direction: "AI 应用工程师、算法工程师",
+    direction,
     cities: profile.target_cities,
     skills: Object.keys(profile.evidence),
     experience: uniqueParts(Object.values(profile.evidence), 12, 600),

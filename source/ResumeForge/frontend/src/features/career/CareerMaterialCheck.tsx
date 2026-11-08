@@ -13,12 +13,11 @@ import {
 import { downloadBlob } from "../../utils/download";
 import type { CareerMaterialResult, CareerProfile } from "./types";
 
-const DEGREE_LABELS = {
-  unknown: "",
-  bachelor: "本科",
-  master: "硕士",
-  doctor: "博士",
-};
+/** 学历展示名走语言包；空串表示"未确认"，由调用处决定显示什么。 */
+function degreeLabel(degree: CareerProfile["degree"]): string {
+  if (degree === "unknown") return "";
+  return t(`career.degree.${degree}`);
+}
 
 export default function CareerMaterialCheck({ profile }: { profile: CareerProfile }) {
   useLocale();
@@ -43,7 +42,7 @@ export default function CareerMaterialCheck({ profile }: { profile: CareerProfil
       const expected = [
         { label: t("career.material.name"), value: name.trim() },
         { label: t("career.material.school"), value: school.trim() },
-        { label: t("career.material.degree"), value: DEGREE_LABELS[profile.degree] },
+        { label: t("career.material.degree"), value: degreeLabel(profile.degree) },
         { label: t("career.material.major"), value: profile.major.trim() },
         {
           label: t("career.material.year"),
@@ -119,7 +118,7 @@ export default function CareerMaterialCheck({ profile }: { profile: CareerProfil
       </div>
       <p className="career-help">
         {t("career.material.autoFields", {
-          degree: DEGREE_LABELS[profile.degree] || t("career.material.unknown"),
+          degree: degreeLabel(profile.degree) || t("career.material.unknown"),
           major: profile.major || t("career.material.unknown"),
           year: profile.graduation_year || t("career.material.unknown"),
         })}

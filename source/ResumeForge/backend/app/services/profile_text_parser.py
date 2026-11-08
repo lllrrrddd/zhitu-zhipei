@@ -96,6 +96,7 @@ from .profile_parser.section_parsers import (
     _parse_experience,
     _parse_projects,
 )
+from .profile_parser.skill_backfill import backfill_skills, entry_texts
 from .profile_parser.skill_constants import _SKILL_LEADING_LEVEL_RE, _SKILL_LEVEL_RE
 from .profile_parser.skill_fields import (
     _normalize_skill_name,
@@ -241,6 +242,17 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
         "skills": _parse_skills(sections["skills"]),
         "awards": _parse_awards(sections["awards"]),
     }
+    # 研究型简历：能力只写在项目/经历里，技能区为空。按同一份词表回抽，并如实告知。
+    backfilled = backfill_skills(
+        parsed_sections["skills"],
+        entry_texts(
+            parsed_sections["projects"],
+            parsed_sections["experiences"],
+            parsed_sections["campus_experiences"],
+        ),
+    )
+    if backfilled:
+        parsed_sections["skills"] = [*parsed_sections["skills"], *backfilled]
     if len(parsed_sections["educations"]) == 1 and not parsed_sections["educations"][0]["degree"]:
         # Narrow fallback for a broken PDF text label ("学历" -> "历").
         # Only apply a standalone label when there is one unambiguous education row.
@@ -267,6 +279,10 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
         )
     if trimmed_tail_chars:
         warnings.append(f"文档末尾有约 {trimmed_tail_chars} 字像是正文文章，已跳过，请核对原文。")
+    if backfilled:
+        warnings.append(
+            f"简历里没有独立的技能区，已从项目/经历描述里回抽 {len(backfilled)} 条能力词，请核对是否准确。"
+        )
     if len(result.skills) >= 60:
         # 正常简历的技能在 5–40 条之间。到这个量级通常意味着文件里混入了正文或聊天
         # 记录（实测"把简历贴给 AI"的导出件会检出上百条），必须让用户知道结果不可信。

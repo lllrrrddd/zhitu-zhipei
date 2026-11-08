@@ -20,6 +20,7 @@ from ..schemas.job_market import (
 )
 from .job_market_catalog import is_current, summarize_market
 from .job_market_embeddings import semantic_scores
+from .skill_lexicon import SKILL_TERMS as _SKILL_TERMS
 
 _DEGREES = {"unknown": 0, "bachelor": 1, "master": 2, "doctor": 3}
 _DEGREE_LABELS = {"本科": "bachelor", "学士": "bachelor", "硕士": "master", "博士": "doctor"}
@@ -143,45 +144,6 @@ _DIRECTIONS = (
         "baking",
     ),
 )
-_SKILL_TERMS: dict[str, tuple[str, ...]] = {
-    "Python": ("python",),
-    "Java": ("java",),
-    "C/C++": ("c++", "c/c++", "c语言"),
-    "Go": ("golang", "go语言", "go language"),
-    "SQL": ("sql", "mysql", "postgresql"),
-    "PyTorch": ("pytorch",),
-    "机器学习": ("机器学习", "machine learning"),
-    "深度学习": ("深度学习", "deep learning"),
-    "大语言模型": ("大语言模型", "大模型", "llm", "large language model"),
-    "检索增强生成": ("rag", "检索增强", "retrieval-augmented"),
-    "自然语言处理": ("nlp", "自然语言处理", "natural language processing"),
-    "多模态": ("多模态", "multimodal"),
-    "强化学习": ("强化学习", "reinforcement learning"),
-    "计算机视觉": ("计算机视觉", "computer vision", "图像识别"),
-    "Linux": ("linux",),
-    "Shell": ("shell", "bash"),
-    "Docker": ("docker",),
-    "Kubernetes": ("kubernetes", "k8s"),
-    "Ansible": ("ansible",),
-    "监控告警": ("prometheus", "zabbix", "grafana", "监控告警", "observability"),
-    "网络协议": ("tcp/ip", "路由协议", "网络协议"),
-    "分布式": ("分布式", "distributed systems"),
-    "数据库": ("数据库", "database"),
-    "Verilog": ("verilog", "systemverilog"),
-    "FPGA": ("fpga",),
-    "EDA": ("eda", "cadence", "synopsys"),
-    "有限元仿真": ("有限元", "ansys", "abaqus", "finite element"),
-    "材料表征": ("材料表征", "xrd", "sem", "材料分析", "material characterization"),
-    "失效分析": ("失效分析", "failure analysis"),
-    "基因编辑": ("基因编辑", "crispr", "gene editing"),
-    "测序": ("测序", "sequencing", "ngs"),
-    "细胞培养": ("细胞培养", "cell culture"),
-    "分子生物学": ("分子生物", "molecular biology"),
-    "财务分析": ("财务分析", "financial analysis"),
-    "会计": ("会计", "accounting"),
-    "审计": ("审计", "audit"),
-    "数据分析": ("数据分析", "data analysis", "数据挖掘"),
-}
 
 
 def _normalize(value: str) -> str:
