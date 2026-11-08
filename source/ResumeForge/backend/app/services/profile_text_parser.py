@@ -75,6 +75,7 @@ from .profile_parser.normalization import (
     _normalize_lines,
     _starts_with_field,
     _trim_non_resume_prefix,
+    _trim_trailing_article,
 )
 from .profile_parser.result_bounds import _bound_parse_result
 from .profile_parser.section_constants import _RESET_SECTION_ALIASES, _SECTION_ALIASES
@@ -188,6 +189,8 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     """解析一段个人资料，返回可直接回填表单的结构化草稿。"""
     trimmed_text, trimmed_chars = _trim_non_resume_prefix(text or "")
     lines = _normalize_lines(trimmed_text)
+    # 网页打印件：简历之后的文章会继续被当成项目/技能解析，剪掉并告知用户。
+    lines, trimmed_tail_chars = _trim_trailing_article(lines)
     sections = _split_sections(lines)
     # Some PDF text layers emit the heading after its single-line education row.
     # Recover only an unambiguous dated school/major/degree row when the normal
@@ -255,6 +258,8 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     warnings: list[str] = []
     if trimmed_chars:
         warnings.append(f"文档开头有约 {trimmed_chars} 字不像是简历内容，已跳过，请核对原文。")
+    if trimmed_tail_chars:
+        warnings.append(f"文档末尾有约 {trimmed_tail_chars} 字像是正文文章，已跳过，请核对原文。")
     if not result.name:
         warnings.append("未识别到姓名，请手动填写。")
     if not result.educations and any(_heading_key(line) == "educations" for line in lines):

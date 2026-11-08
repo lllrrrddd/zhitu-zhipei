@@ -153,3 +153,65 @@ def test_duplicate_school_entries_merge_into_one():
 """
     result = parse_profile_text(text)
     assert len(result.educations) == 1
+
+
+def test_compatibility_glyphs_are_unified():
+    """某些 PDF 把「大」写成康熙部首 ⼤（U+2F24），"大学"后缀就匹配不上了。"""
+    text = """姓名：王某某
+教育背景
+2022-09 〜 2026-06 江汉⼤学 -- 数字媒体技术 （本科）
+主修课程：Java、数据结构
+"""
+    result = parse_profile_text(text)
+    assert len(result.educations) == 1
+    assert result.educations[0].school == "江汉大学"
+    assert result.educations[0].major == "数字媒体技术"
+    # 学历的括号要去掉，否则下拉框认不出来
+    assert result.educations[0].degree == "本科"
+    assert result.educations[0].start_date == "2022-09"
+
+
+def test_course_score_fragments_do_not_become_schools():
+    text = """姓名：李某某
+教育背景
+2022-09 扬舟科技大学 物理计算机系 学士
+主修课程：Python（95/100），结构化程序设计（97/100），GPA(3.49/4.0)
+"""
+    result = parse_profile_text(text)
+    assert len(result.educations) == 1
+    assert result.educations[0].school == "扬舟科技大学"
+
+
+def test_trailing_article_is_trimmed_with_warning():
+    article = "\n".join(
+        f"第 {index} 段：这一段是与简历无关的正文，讲的是招聘渠道与检索技巧，"
+        "既不是项目也不是技能，长度足够触发尾部裁剪的判定阈值。"
+        for index in range(1, 40)
+    )
+    text = f"""姓名：赵某某
+教育背景
+2022-09-2026-06 河南某大学 软件工程 本科
+专业技能
+Python、SQL
+
+{article}
+"""
+    result = parse_profile_text(text)
+    # 简历部分照常解析，文章部分被剪掉并告知用户
+    assert result.educations and result.educations[0].school == "河南某大学"
+    assert any("末尾" in warning for warning in result.warnings)
+
+
+def test_short_prose_paragraph_is_not_treated_as_article():
+    """自我评价再长也不该被当成"尾部文章"剪掉。"""
+    text = """姓名：孙某某
+教育背景
+2022-09-2026-06 河南某大学 软件工程 本科
+自我评价
+学习能力强，能在陌生领域快速找到切入点并交付结果。
+喜欢把模糊的问题拆成可验证的小步骤，再逐个解决。
+愿意为团队补位，做过跨部门协作与对外沟通。
+"""
+    result = parse_profile_text(text)
+    assert result.summary
+    assert not any("末尾" in warning for warning in result.warnings)

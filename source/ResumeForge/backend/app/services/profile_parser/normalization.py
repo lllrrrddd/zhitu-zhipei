@@ -2,17 +2,45 @@
 """个人资料文本的行、标题和字段起始规范化。"""
 
 import re
+import unicodedata
 from functools import lru_cache
 
-from .entry_constants import _BULLET_RE, _EMAIL_RE, _NUMBERED_HEADING_RE, _PHONE_RE
+from .entry_constants import (
+    _BULLET_RE,
+    _DATE_RANGE_RE,
+    _EMAIL_RE,
+    _NUMBERED_HEADING_RE,
+    _PHONE_RE,
+)
 from .line_dedupe import _dedupe_repeated_lines
 from .section_constants import _RESET_SECTION_ALIASES, _SECTION_ALIASES
 
+# 兼容字形：某些 PDF 生成器把汉字写成「康熙部首」或「CJK 兼容表意文字」，
+# 看起来一样、码位不同。实测样本里 ``江汉⼤学``（⼤ = U+2F24）导致"大学"后缀匹配
+# 不上，整个教育条目被拆成"学校＝江汉⼤学--数字媒体技术、专业＝(本科)"。
+# 只在这些码位范围内做单字 NFKC：全角标点仍保持原样（上层注释依赖这一点）。
+_COMPAT_RANGES = (
+    (0x2E80, 0x2EFF),  # CJK 部首补充
+    (0x2F00, 0x2FDF),  # 康熙部首
+    (0x31C0, 0x31EF),  # CJK 笔画
+    (0xF900, 0xFAFF),  # CJK 兼容表意文字
+)
+
+
+def _unify_compat_char(char: str) -> str:
+    codepoint = ord(char)
+    if any(low <= codepoint <= high for low, high in _COMPAT_RANGES):
+        normalized = unicodedata.normalize("NFKC", char)
+        if len(normalized) == 1 and normalized != char:
+            return normalized
+    return char
+
 
 def _normalize_lines(text: str) -> list[str]:
-    # 仅归一化全角拉丁字母/数字和不可见空白，保留中文标点的原始语义。
+    # 仅归一化全角拉丁字母/数字、不可见空白与兼容字形，保留中文标点的原始语义。
     normalized_chars: list[str] = []
     for char in text:
+        char = _unify_compat_char(char)
         codepoint = ord(char)
         if char == "\u3000":
             normalized_chars.append(" ")
@@ -79,6 +107,44 @@ def _trim_non_resume_prefix(text: str) -> tuple[str, int]:
     if prose < _PREFIX_MIN_PROSE_LINES:
         return text, 0
     return "\n".join(lines[first_heading:]), len(prefix)
+
+
+# 尾部文章：网页打印件常把简历夹在正文中间，简历之后的文章会被当成"项目/技能"继续解析。
+# 判据要求同时满足，宁可漏剪也不误剪：
+#   * 连续 3 行都是长句（≥40 字）、以句末标点结尾、没有日期、没有项目符号；
+#   * 这一段到文末合计 ≥ 1500 字；
+#   * 这一段里**没有任何分区标题**（简历的"自我评价"再长也不会有 1500 字）。
+_TRAILING_PROSE_LINES = 3
+_TRAILING_PROSE_LINE_CHARS = 40
+_TRAILING_MIN_CHARS = 1500
+_PROSE_END_RE = re.compile(r"[。？！?!]$")
+_BULLET_PREFIXES = ("·", "•", "●", "◆", "▪", "■", "-", "*", "＊", "\uf06c", "\uf0b7")
+
+
+def _trim_trailing_article(lines: list[str]) -> tuple[list[str], int]:
+    """返回 (可能被裁剪的行, 剪掉的字符数)。"""
+    for index in range(len(lines) - _TRAILING_PROSE_LINES + 1):
+        window = lines[index : index + _TRAILING_PROSE_LINES]
+        if any(not line for line in window):
+            continue
+        if any(_heading_key(line) for line in window):
+            continue
+        if any(len(line) < _TRAILING_PROSE_LINE_CHARS for line in window):
+            continue
+        if any(not _PROSE_END_RE.search(line) for line in window):
+            continue
+        if any(line.lstrip().startswith(_BULLET_PREFIXES) for line in window):
+            continue
+        if any(_DATE_RANGE_RE.search(line) for line in window):
+            continue
+        tail = lines[index:]
+        joined = "\n".join(tail)
+        if len(joined) < _TRAILING_MIN_CHARS:
+            continue
+        if any(_heading_key(line) for line in tail):
+            continue
+        return lines[:index], len(joined)
+    return lines, 0
 
 
 def _compact_heading(value: str) -> str:

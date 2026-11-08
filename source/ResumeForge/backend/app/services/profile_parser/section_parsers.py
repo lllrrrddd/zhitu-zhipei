@@ -86,6 +86,39 @@ def _collapse_cjk_spaces(value: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
+# 成绩碎片：``（ 95``、``100）``、``97/100``、``GPA(3.49``。它们出现在课程明细里，
+# 被"/"切开后很像条目头，实测会把"Python（95"当成一所学校。
+_SCORE_FRAGMENT_RE = re.compile(r"[（(]\s*\d{2,3}\s*$|\d{2,3}\s*/\s*\d{2,3}|GPA", re.IGNORECASE)
+_DEGREE_WRAP_RE = re.compile(r"^[（(]\s*(.+?)\s*[）)]$")
+# 专业名后面挂着学历：``数字媒体技术（本科）``。只认括号里是学位词的写法，
+# ``软件工程（嵌入式）`` 这类方向说明不动。
+_MAJOR_DEGREE_RE = re.compile(r"^(?P<major>.*?)\s*[（(]\s*(?P<degree>本科|学士|硕士|博士|专科|研究生)\s*[）)]$")
+
+
+def _split_major_degree(major: str) -> tuple[str, str]:
+    """把挂在专业名后面的学历拆出来；拆不出就原样返回。"""
+    match = _MAJOR_DEGREE_RE.match(major.strip())
+    if not match:
+        return major, ""
+    return match.group("major").strip(), match.group("degree")
+
+
+def _unwrap_degree(value: str) -> str:
+    """``(本科)`` → ``本科``：学历字段留着括号，界面下拉框认不出来。
+
+    也处理 ``网络与信息安全方向（本科）`` 这种"方向挂学历"的写法：学历只留学位词，
+    前面的方向信息在专业字段里本来就有一份，不算丢。
+    """
+    text = value.strip()
+    match = _DEGREE_WRAP_RE.match(text)
+    if match:
+        return match.group(1)
+    trailing = re.search(r"[（(]\s*(本科|学士|硕士|博士|专科|研究生)\s*[）)]\s*$", text)
+    if trailing:
+        return trailing.group(1)
+    return value
+
+
 def _parse_education(lines: list[str]) -> list[dict[str, str]]:
     result: list[dict[str, str]] = []
     for block in _split_entry_blocks(lines, "education"):
@@ -125,8 +158,14 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
         )
         school = _collapse_cjk_spaces(school)
         major = _collapse_cjk_spaces(major)
-        degree = _collapse_cjk_spaces(degree)
+        degree = _unwrap_degree(_collapse_cjk_spaces(degree))
         school, major = _split_school_major(school, major)
+        major, bracketed_degree = _split_major_degree(major)
+        if bracketed_degree and (not degree or degree == major):
+            degree = bracketed_degree
+        # 课程明细里的成绩碎片（``Python（95``、``GPA(3.49``）不是学校，也不是专业。
+        if _SCORE_FRAGMENT_RE.search(school) or _SCORE_FRAGMENT_RE.search(major):
+            continue
         # 论文/奖项/课程明细被误当学校名时整条丢弃：它连带的"专业/学历"也都是碎片，
         # 留着只会让用户在校对页删条记录。长度只在**明显不是校名**时才作为判据——
         # 「函授研究生：某某科技发展院 计算科学专业；导师陈丽教授。」这类真实教育行
