@@ -106,18 +106,25 @@ def test_scan_pages_are_capped_at_eight_with_a_warning():
 
 
 def test_rendered_pages_respect_the_attachment_budget(monkeypatch):
-    """渲染图体积计入 5 MB 预算：超预算的页按页跳过并警告，不静默丢。"""
+    """渲染图体积计入附件总额度：超预算的页按页跳过并警告，不静默丢。
+
+    页大小按额度算出来（额度一半 + 1 MB），这样与 MAX_ATTACHMENTS_TOTAL_BYTES
+    的具体数值解耦：第一页放得下、第二页必然越界。
+    """
     from app.services import document_text
+    from app.services.attachments import MAX_ATTACHMENTS_TOTAL_BYTES
+
+    page_bytes = MAX_ATTACHMENTS_TOTAL_BYTES // 2 + 1024 * 1024
 
     def fake_render(raw: bytes, page_numbers):  # noqa: ANN001 - 测试桩
-        return [(number, b"\xff" * (3 * 1024 * 1024)) for number in page_numbers]
+        return [(number, b"\xff" * page_bytes) for number in page_numbers]
 
     monkeypatch.setattr(document_text, "render_pdf_page_images", fake_render)
     stub = DocumentStub("jd.pdf", build_mixed_pdf(image_pages=2), PDF_MIME)
 
     combined = extract_documents_text([stub])
 
-    # 预算 5MB - 文档原始字节：第 2 页勉强放下、第 3 页超限被跳过（按页跳过，逐页警告）。
+    # 额度减去文档原始字节后只够一页：第二张扫描页（第 3 页）被跳过并给出逐页警告。
     assert LONG_TEXT in combined.text
     assert len(combined.images) == 1
     assert any("第 3 页的扫描内容超出附件体积预算" in warning for warning in combined.warnings)

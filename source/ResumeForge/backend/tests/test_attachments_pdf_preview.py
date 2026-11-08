@@ -97,8 +97,8 @@ def test_pdf_preview_accepts_bare_base64(client):
 
 
 def test_pdf_preview_rejects_oversized_file(client):
-    """> 2 MB 走的是 `document_source` 的体积上限（与识别链路同一份预算）。"""
-    oversized = b"%PDF-1.4\n" + b"0" * (2 * 1024 * 1024 + 16)
+    """> 10 MB 走的是 `document_source` 的体积上限（与识别链路同一份预算）。"""
+    oversized = b"%PDF-1.4\n" + b"0" * (10 * 1024 * 1024 + 16)
     response = client.post(
         "/api/attachments/pdf-preview",
         json={
@@ -109,7 +109,7 @@ def test_pdf_preview_rejects_oversized_file(client):
     )
 
     assert response.status_code == 422
-    assert "2 MB" in response.json()["detail"]
+    assert "10 MB" in response.json()["detail"]
 
 
 def test_pdf_preview_rejects_non_pdf(client):
