@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createInterview } from "../../api/interview";
 import { createJob, listJobs } from "../../api/jobs";
 import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
 import { formatDateTime } from "../../utils/format";
 import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
 import CareerDiagnosisPanel from "./CareerDiagnosisPanel";
@@ -270,6 +271,7 @@ export default function CareerResults({
   profile: CareerProfile;
   onAcceptAdvice: (draft: string) => void;
 }) {
+  useLocale();
   return (
     <>
       <header className="career-results-header">

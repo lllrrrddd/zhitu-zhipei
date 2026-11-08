@@ -36,15 +36,20 @@ const common = {
   /** 批量删除按钮（`BatchDeleteButton`）。 */
   "common.batchBar.deleteSelected": "删除所选",
   /** 退出应用的二次确认标题。 */
-  "common.exitApp.title": "退出职途智配？",
+  "common.exitApp.title": "关闭职途智配？",
   /** 桌面壳形态的确认正文：退出后只能从桌面快捷方式重新启动。 */
-  "common.exitApp.confirm.desktop":
-    "应用会完全退出，后台服务一并停止。再次使用请从桌面快捷方式启动职途智配。",
+  "common.exitApp.confirm.desktop": [
+    "这是本机应用：「关闭」会停掉后台服务，窗口随之退出。",
+    "已保存的资料、简历和岗位都不会丢；下次双击桌面图标即可继续。",
+  ].join("\n"),
   /** 浏览器形态的确认正文：讲清哪些能力会立刻不可用，以及怎么再打开。 */
-  "common.exitApp.confirm.browser":
-    "前端与后端进程都会停止，当前页面上的查询与生成立即不可用（浏览器不允许脚本关闭本页，请顺手关掉这个标签页）。下次使用请在项目目录重新运行 start.cmd。",
+  "common.exitApp.confirm.browser": [
+    "职途智配跑在你这台电脑上：「关闭」会停掉后台服务，页面随即失效（刷新也打不开）。",
+    "已保存的资料、简历和岗位都不会丢；下次双击 start.cmd 就能重新启动。",
+    "只想关掉网页、让服务继续跑？直接关这个标签页就好，不用点这里。",
+  ].join("\n"),
   /** 退出完成后的结果页标题。 */
-  "common.exitApp.exited.title": "职途智配已退出",
+  "common.exitApp.exited.title": "职途智配已关闭",
   /** 桌面壳形态的结果页正文。 */
   "common.exitApp.exited.desktop":
     "前端、后端与桌面壳进程都已停止。再次使用请从桌面快捷方式启动职途智配。",
@@ -52,9 +57,9 @@ const common = {
   "common.exitApp.exited.browser":
     "前端与后端进程都已停止，现在可以关闭这个标签页。要再次使用，请在项目目录运行 start.cmd。",
   /** 退出按钮的 Tooltip：说明它会停掉什么。 */
-  "common.exitApp.tooltip": "退出应用（停止前端与后端进程）",
+  "common.exitApp.tooltip": "关闭应用（停止本机的前后端服务）",
   /** 退出按钮的无障碍名。 */
-  "common.exitApp.aria": "退出应用",
+  "common.exitApp.aria": "关闭应用",
   /** 后端没有返回说明时的退出中提示。 */
   "common.exitApp.exiting": "应用正在退出",
   /** 退出失败（没有更具体的原因）。 */

@@ -2,6 +2,7 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Alert, Button, Card, Input, InputNumber, Select } from "antd";
 import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
 import { splitCities } from "./profileFromResume";
 import type { CareerDegree, CareerProfile } from "./types";
 
@@ -23,6 +24,7 @@ export default function CareerProfileForm({
   onChange: (change: Partial<CareerProfile>) => void;
   onSearch: () => void;
 }) {
+  useLocale();
   const disabled = searching || undefined;
   return (
     <Card className="career-panel" title={t("career.profile.title")}>

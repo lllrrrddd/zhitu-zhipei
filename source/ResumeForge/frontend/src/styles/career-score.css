@@ -117,3 +117,27 @@
   color: var(--rf-text-secondary);
   overflow-wrap: anywhere;
 }
+
+/* 匹配档案切换条：一行放不下就换行，标签与提示用三级文字色。 */
+.career-profiles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 8px;
+  background: var(--rf-surface-alt);
+}
+
+.career-profiles-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rf-text-secondary);
+}
+
+.career-profiles .career-help {
+  margin: 0;
+  flex-basis: 100%;
+}

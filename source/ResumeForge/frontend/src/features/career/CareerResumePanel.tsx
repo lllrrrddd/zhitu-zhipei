@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { getGraduateDemo } from "../../api/graduate";
 import { getProfile, parseProfileText } from "../../api/profile";
 import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
 import { classifyAttachment, MAX_ATTACHMENT_BYTES, readAsDataUrl } from "../../utils/attachments";
 import { MAX_CAREER_PDF_BYTES, readPdfResumeText } from "../../utils/pdfText";
 import {
@@ -23,6 +24,7 @@ export default function CareerResumePanel({
   onLoad: (profile: CareerProfile) => void;
   searching: boolean;
 }) {
+  useLocale();
   const [reading, setReading] = useState(false);
   const [text, setText] = useState("");
   const [feedback, setFeedback] = useState<{

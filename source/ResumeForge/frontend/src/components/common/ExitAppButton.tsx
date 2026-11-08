@@ -33,8 +33,12 @@ export default function ExitAppButton() {
     modal.confirm({
       title: t("common.exitApp.title"),
       className: "rf-modal-danger",
-      content: isDesktop ? t(DESKTOP_CONFIRM_KEY) : t("common.exitApp.confirm.browser"),
-      okText: t("common.action.exit"),
+      content: (
+        <div style={{ whiteSpace: "pre-line" }}>
+          {isDesktop ? t(DESKTOP_CONFIRM_KEY) : t("common.exitApp.confirm.browser")}
+        </div>
+      ),
+      okText: t("common.exitApp.aria"),
       okButtonProps: { danger: true },
       cancelText: t("common.action.cancel"),
       onOk: async () => {
@@ -93,7 +97,7 @@ export default function ExitAppButton() {
         onClick={exit}
         aria-label={t("common.exitApp.aria")}
       >
-        <span className="app-exit-label">{t("common.action.exit")}</span>
+        <span className="app-exit-label">{t("common.exitApp.aria")}</span>
       </Button>
     </Tooltip>
   );

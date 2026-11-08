@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { checkCareerPosting } from "../../api/career";
 import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
 import { formatDateTime } from "../../utils/format";
 import type { MarketSource, MarketSummary, PostingCheck } from "./types";
 
@@ -54,6 +55,7 @@ export default function CareerSourcePanel({
   error: boolean;
   onRefresh: () => void;
 }) {
+  useLocale();
   const [url, setUrl] = useState("");
   const [checking, setChecking] = useState(false);
   const [check, setCheck] = useState<PostingCheck | null>(null);

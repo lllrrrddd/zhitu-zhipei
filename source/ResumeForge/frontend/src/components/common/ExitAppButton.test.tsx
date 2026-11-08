@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 /** 退出按钮：确认后调一次退出接口、页面切成"已退出"。 */
 import { App as AntdApp } from "antd";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ExitAppButton from "./ExitAppButton";
 
@@ -33,16 +33,18 @@ describe("ExitAppButton", () => {
   it("确认后调用退出接口并切成已退出", async () => {
     renderButton();
 
-    fireEvent.click(screen.getByRole("button", { name: "退出应用" }));
+    fireEvent.click(screen.getByRole("button", { name: "关闭应用" }));
     // 二次确认：退出会中断正在生成的回复，不能点一下就走。
     const dialog = await screen.findByRole("dialog");
-    expect(dialog.textContent).toContain("前端与后端进程都会停止");
+    expect(dialog.textContent).toContain("停掉后台服务");
+    expect(dialog.textContent).toContain("不会丢");
+    expect(dialog.textContent).toContain("直接关这个标签页");
 
-    fireEvent.click(screen.getByRole("button", { name: "退 出" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: /关闭应用/ }));
 
     await waitFor(() => expect(systemMocks.shutdownApp).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText("职途智配已退出")).toBeInTheDocument();
-    // 提示里要写明两个进程都停了、以及标签页要自己关（浏览器不允许脚本关本页）。
+    expect(await screen.findByText("职途智配已关闭")).toBeInTheDocument();
+    // 结果页里要写明两个进程都停了、以及标签页要自己关（浏览器不允许脚本关本页）。
     expect(screen.getByText(/前端与后端进程都已停止/)).toBeInTheDocument();
     expect(screen.getByText(/关闭这个标签页/)).toBeInTheDocument();
   });
@@ -54,17 +56,17 @@ describe("ExitAppButton", () => {
 
     renderButton();
 
-    fireEvent.click(screen.getByRole("button", { name: "退出应用" }));
+    fireEvent.click(screen.getByRole("button", { name: "关闭应用" }));
     const dialog = await screen.findByRole("dialog");
     // 桌面文案面向桌面快捷方式，不再出现浏览器措辞（start.cmd / 标签页）。
-    expect(dialog.textContent).toContain("应用会完全退出");
-    expect(dialog.textContent).toContain("桌面快捷方式");
+    expect(dialog.textContent).toContain("停掉后台服务");
+    expect(dialog.textContent).toContain("桌面图标");
     expect(dialog.textContent).not.toContain("start.cmd");
 
-    fireEvent.click(screen.getByRole("button", { name: "退 出" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: /关闭应用/ }));
 
     await waitFor(() => expect(systemMocks.shutdownApp).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText("职途智配已退出")).toBeInTheDocument();
+    expect(await screen.findByText("职途智配已关闭")).toBeInTheDocument();
     // shutdownApp 成功后追加退出壳进程。
     await waitFor(() => expect(quitApp).toHaveBeenCalledTimes(1));
     // 遮罩文案也面向桌面（没有"浏览器不允许/标签页"措辞）。

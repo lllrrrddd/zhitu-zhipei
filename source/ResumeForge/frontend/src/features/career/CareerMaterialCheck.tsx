@@ -4,6 +4,7 @@ import { Alert, Button, Card, Checkbox, Input, Select, Tag, Upload } from "antd"
 import { useState } from "react";
 import { checkCareerMaterial } from "../../api/career";
 import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
 import {
   attachmentByteLimit,
   classifyAttachment,
@@ -20,6 +21,7 @@ const DEGREE_LABELS = {
 };
 
 export default function CareerMaterialCheck({ profile }: { profile: CareerProfile }) {
+  useLocale();
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [school, setSchool] = useState("");

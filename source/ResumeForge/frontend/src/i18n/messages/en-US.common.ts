@@ -38,15 +38,20 @@ const common = {
   /** Batch delete button (`BatchDeleteButton`). */
   "common.batchBar.deleteSelected": "Delete selected",
   /** Title of the quit confirmation. */
-  "common.exitApp.title": "Quit ZhiTuZhiPei?",
+  "common.exitApp.title": "Close ZhiTuZhiPei?",
   /** Desktop shell: the only way back is the desktop shortcut. */
-  "common.exitApp.confirm.desktop":
-    "The app will quit completely and the background services will stop too. To use it again, start ZhiTuZhiPei from the desktop shortcut.",
+  "common.exitApp.confirm.desktop": [
+    "This app runs on your own machine: closing it stops the background services, and this window exits.",
+    "Your profile, resumes and saved jobs are kept — start it again from the desktop shortcut.",
+  ].join("\n"),
   /** Browser: says what stops working right away, and how to get back. */
-  "common.exitApp.confirm.browser":
-    "The frontend and backend processes will stop, so queries and generation on this page will stop working immediately (browsers do not let a script close its own tab, so please close this tab yourself). To use the app again, run start.cmd in the project directory.",
+  "common.exitApp.confirm.browser": [
+    "ZhiTuZhiPei runs on your own machine: closing it stops the background services and this page stops working (a refresh will not help).",
+    "Your profile, resumes and saved jobs are kept — run start.cmd again to restart.",
+    "Only want to close the web page? Just close this tab and the services keep running.",
+  ].join("\n"),
   /** Result page title after quitting. */
-  "common.exitApp.exited.title": "ZhiTuZhiPei has quit",
+  "common.exitApp.exited.title": "ZhiTuZhiPei is closed",
   /** Result page body in the desktop shell. */
   "common.exitApp.exited.desktop":
     "The frontend, backend and desktop shell processes have all stopped. To use the app again, start ZhiTuZhiPei from the desktop shortcut.",
@@ -54,9 +59,9 @@ const common = {
   "common.exitApp.exited.browser":
     "The frontend and backend processes have stopped, so you can close this tab now. To use the app again, run start.cmd in the project directory.",
   /** Tooltip of the quit button: says what it stops. */
-  "common.exitApp.tooltip": "Quit the app (stops the frontend and backend processes)",
+  "common.exitApp.tooltip": "Close the app (stops the local frontend and backend)",
   /** Accessible name of the quit button. */
-  "common.exitApp.aria": "Quit the app",
+  "common.exitApp.aria": "Close the app",
   /** Shown when the backend returns no message of its own. */
   "common.exitApp.exiting": "The app is quitting",
   /** Quit failed without a more specific cause. */
