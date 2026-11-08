@@ -10,15 +10,22 @@ import { t } from "../i18n";
 
 /** 一次请求最多几个附件。 */
 export const MAX_ATTACHMENT_COUNT = 4;
-/** 单个附件的字节上限。 */
+/** 单张图片的字节上限（图片要整体送进多模态模型，比文档严）。 */
 export const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
+/**
+ * 单份文档（PDF/DOCX）的字节上限。
+ *
+ * 比图片宽松：文档由后端在本机抽文字，不占模型 token；真实的高分扫描简历
+ * 常常超过 2 MB，卡太死等于把用户挡在门外。
+ */
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 /**
  * 一次请求所有附件的合计上限。
  *
  * 这个数字同时是请求体不超后端 `MAX_REQUEST_BODY_MB` 的保证：base64 会把体积
- * 放大约三分之一，5 MB 编码后约 6.7 MB，仍在默认的 8 MB 之内。
+ * 放大约三分之一，16 MB 编码后约 21 MB，后端默认上限已同步提到 24 MB。
  */
-export const MAX_TOTAL_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+export const MAX_TOTAL_ATTACHMENT_BYTES = 16 * 1024 * 1024;
 
 export const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   png: "image/png",
@@ -126,6 +133,18 @@ export const TEXT_ACCEPT = acceptFrom(Object.keys(TEXT_MIMES_BY_EXTENSION));
 /** 图片扩展名串（含会被后端转码的 bmp/tiff）。 */
 export const IMAGE_ACCEPT = acceptFrom(Object.keys(IMAGE_MIME_BY_EXTENSION));
 /** 文档扩展名串。 */
+/**
+ * 按扩展名选单文件上限：文档 8 MB，图片 2 MB。
+ *
+ * 调用方把"文件类型"和"体积上限"写在两处的写法容易漂移（曾经图片和文档共用
+ * 2 MB 一个常量），统一走这里。
+ */
+export function attachmentByteLimit(fileName: string): number {
+  const dot = fileName.lastIndexOf(".");
+  const extension = dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
+  return DOCUMENT_MIME_BY_EXTENSION[extension] ? MAX_DOCUMENT_BYTES : MAX_ATTACHMENT_BYTES;
+}
+
 export const DOCUMENT_ACCEPT = acceptFrom(Object.keys(DOCUMENT_MIME_BY_EXTENSION));
 /** 识别弹窗接受的类型：截图与文档（文本直接粘在输入框里）。 */
 export const RECOGNITION_ACCEPT = `${IMAGE_ACCEPT},${DOCUMENT_ACCEPT}`;

@@ -18,8 +18,8 @@ const hooksUi = {
   "hooksUi.recognition.warning.tooMany": "You can add up to {count} files",
   "hooksUi.recognition.warning.unsupported":
     "“{name}” is not a supported screenshot or document (png/jpg/webp/gif/bmp/tiff, pdf/docx)",
-  "hooksUi.recognition.warning.tooLarge": "“{name}” is over 2 MB",
-  "hooksUi.recognition.warning.totalTooLarge": "Files cannot exceed 5 MB in total",
+  "hooksUi.recognition.warning.tooLarge": "“{name}” is over the limit (10 MB for documents, 2 MB for images)",
+  "hooksUi.recognition.warning.totalTooLarge": "Files cannot exceed 16 MB in total",
   "hooksUi.recognition.error.read": "Could not read the file",
 
   "hooksUi.updateStatus.error.read":

@@ -4,7 +4,11 @@ import { Alert, Button, Card, Checkbox, Input, Select, Tag, Upload } from "antd"
 import { useState } from "react";
 import { checkCareerMaterial } from "../../api/career";
 import { t } from "../../i18n";
-import { classifyAttachment, MAX_ATTACHMENT_BYTES, readAsDataUrl } from "../../utils/attachments";
+import {
+  attachmentByteLimit,
+  classifyAttachment,
+  readAsDataUrl,
+} from "../../utils/attachments";
 import { downloadBlob } from "../../utils/download";
 import type { CareerMaterialResult, CareerProfile } from "./types";
 
@@ -128,7 +132,7 @@ export default function CareerMaterialCheck({ profile }: { profile: CareerProfil
             !attachment ||
             (attachment.kind !== "document" && attachment.kind !== "image") ||
             !/\.(pdf|docx|png|jpe?g)$/i.test(selected.name) ||
-            selected.size > MAX_ATTACHMENT_BYTES
+            selected.size > attachmentByteLimit(selected.name)
           ) {
             setFile(null);
             setResult(null);

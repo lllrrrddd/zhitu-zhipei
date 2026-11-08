@@ -218,10 +218,11 @@ def test_normalize_extraction_images_rejects_text_attachments_and_oversized_tota
     with pytest.raises(ValueError, match="不能超过 2 MB"):
         normalize_extraction_images([_image_stub(raw=_png_of(2 * 1024 * 1024 + 1))])
 
-    # 单张都合法，但合计超限：这是请求体不超 8 MB 的保证所在
+    # 四张各 2 MB 合计 8 MB，仍在新额度（16 MB）之内，必须通过；
+    # "合计超限"只在文档 + 图片混传时才可能发生，额度规则由
+    # test_document_text.test_attachment_budget_covers_count_and_total_bytes 覆盖。
     two_mb = _image_stub(raw=_png_of(2 * 1024 * 1024))
-    with pytest.raises(ValueError, match="总大小不能超过 5 MB"):
-        normalize_extraction_images([two_mb, two_mb, two_mb])
+    assert len(normalize_extraction_images([two_mb] * 4)) == 4
 
 
 def test_image_warnings_say_what_the_user_can_do():

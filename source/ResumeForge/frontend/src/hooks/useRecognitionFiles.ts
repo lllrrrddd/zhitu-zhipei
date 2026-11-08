@@ -11,9 +11,9 @@ import { App } from "antd";
 import { useCallback, useRef, useState } from "react";
 import { t } from "../i18n";
 import {
-  MAX_ATTACHMENT_BYTES,
   MAX_ATTACHMENT_COUNT,
   MAX_TOTAL_ATTACHMENT_BYTES,
+  attachmentByteLimit,
   classifyAttachment,
   clipboardImages,
   readAsDataUrl,
@@ -62,7 +62,8 @@ export function useRecognitionFiles() {
           message.warning(t("hooksUi.recognition.warning.unsupported", { name: file.name }));
           continue;
         }
-        if (file.size > MAX_ATTACHMENT_BYTES) {
+        // 文档 8 MB、图片 2 MB：图片要整体送进模型，文档只是本机抽文字。
+        if (file.size > attachmentByteLimit(file.name)) {
           message.warning(t("hooksUi.recognition.warning.tooLarge", { name: file.name }));
           continue;
         }

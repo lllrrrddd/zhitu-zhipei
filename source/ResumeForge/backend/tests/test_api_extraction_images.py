@@ -160,22 +160,17 @@ def test_too_many_or_oversized_images_are_rejected(client, path):
     assert oversized.status_code == 422
     assert "2 MB" in oversized.json()["detail"]
 
-    # 单张都合法、合计超限：这是请求体不超 8 MB 的保证，必须由服务端拦住。
-    # 取刚好越过合计上限、但编码后仍在请求体上限之内的体积，才能走到这条校验
-    # （再大就会先被中间件以 413 挡下，那是另一道闸，不是这条规则失效）。
-    over_total = [
-        _image(raw=_png(2 * 1024 * 1024)),
-        _image(raw=_png(2 * 1024 * 1024)),
-        _image(raw=_png(1_500_000)),
-    ]
-    assert sum(len(item["data"]) for item in over_total) < 8 * 1024 * 1024
-    total = client.post(path, json={"text": "", "images": over_total})
-    assert total.status_code == 422
-    assert "5 MB" in total.json()["detail"]
+    # 四张各 2 MB 的图片合计 8 MB，仍在新额度（16 MB）之内：必须全部放行。
+    # 合计预算现在只在"文档 + 图片混传"时才可能被顶到（单张文档可达 8 MB），
+    # 纯图片路径受 4 张 × 2 MB 的结构上限约束，天然低于总额度。
+    boundary = [_image(raw=_png(2 * 1024 * 1024)) for _ in range(MAX_EXTRACTION_IMAGE_COUNT)]
+    accepted = client.post(path, json={"text": "", "images": boundary})
+    assert accepted.status_code == 200
 
-    # 明显超限的请求会被请求体上限更早挡下，同样是拒绝
-    huge = client.post(path, json={"text": "", "images": [_image(raw=_png(2 * 1024 * 1024))] * 4})
-    assert huge.status_code in (413, 422)
+    # 图片路径已无法顶到合计额度（4 张 × 2 MB = 8 MB < 16 MB），所以不再构造
+    # "图片超合计"的请求；合计与请求体的耦合由下面两条守卫测试覆盖：
+    #   test_worst_case_image_payload_fits_the_default_body_limit（体积链）
+    #   test_document_text.test_attachment_budget_covers_count_and_total_bytes（额度）
 
 
 @pytest.mark.parametrize("path", [JOB_PATH, PROFILE_PATH])
@@ -234,5 +229,5 @@ def test_worst_case_image_payload_fits_the_default_body_limit():
     encoded = MAX_ATTACHMENTS_TOTAL_BYTES * 4 // 3
     assert encoded < max_body
     # 顺带确认这两个接口确实没有走 larger_body_paths 豁免
-    assert max_body == 8 * 1024 * 1024
+    assert max_body == 24 * 1024 * 1024
     assert create_app() is not None

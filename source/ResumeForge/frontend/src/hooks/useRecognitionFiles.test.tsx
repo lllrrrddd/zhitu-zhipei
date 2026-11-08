@@ -106,10 +106,10 @@ describe("useRecognitionFiles", () => {
     const { result } = renderHook(() => useRecognitionFiles(), { wrapper });
 
     await act(async () => {
+      // 合计上限 16 MB：先放两张 2 MB，再放一张凑到越过额度的大图（按文档算 10 MB 上限）。
       await result.current.addFiles([pngFile("a.png", 2 * 1024 * 1024)]);
       await result.current.addFiles([pngFile("b.png", 2 * 1024 * 1024)]);
-      // 再加一张 1.5 MB 会越过 5 MB 合计上限
-      await result.current.addFiles([pngFile("c.png", 1_500_000)]);
+      await result.current.addFiles([pngFile("c.pdf", 14 * 1024 * 1024)]);
     });
 
     expect(result.current.files.map((item) => item.name)).toEqual(["a.png", "b.png"]);

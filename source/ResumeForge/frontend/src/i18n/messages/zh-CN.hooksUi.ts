@@ -24,9 +24,9 @@ const hooksUi = {
   "hooksUi.recognition.warning.unsupported":
     "「{name}」不是受支持的截图或文档（png/jpg/webp/gif/bmp/tiff、pdf/docx）",
   /** 单个文件超过体积上限；`{name}` 是文件名。 */
-  "hooksUi.recognition.warning.tooLarge": "「{name}」超过 2 MB",
+  "hooksUi.recognition.warning.tooLarge": "「{name}」超过上限（文档 10 MB / 图片 2 MB）",
   /** 所有暂存文件的合计体积到上限。 */
-  "hooksUi.recognition.warning.totalTooLarge": "文件总大小不能超过 5 MB",
+  "hooksUi.recognition.warning.totalTooLarge": "文件总大小不能超过 16 MB",
   /** 文件读成 data URL 失败。 */
   "hooksUi.recognition.error.read": "读取文件失败",
 

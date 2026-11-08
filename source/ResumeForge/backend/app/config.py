@@ -79,7 +79,9 @@ class Settings(BaseSettings):
 
     # 允许跨域的前端地址，英文逗号分隔
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
-    max_request_body_mb: int = Field(default=8, ge=1, le=64)
+    # 附件合计额度放宽到 16 MB（见 services/attachments.py）：base64 后约 21 MB，
+    # 所以默认请求体上限同步从 8 MB 提到 24 MB。
+    max_request_body_mb: int = Field(default=24, ge=1, le=64)
 
     # 备份上传单独放宽：恢复用的压缩包体积随用户数据增长，而请求体是流式落盘的，
     # 内存占用与包大小无关。其余接口仍受 max_request_body_mb 约束。

@@ -202,6 +202,32 @@ def test_attachment_budget_covers_count_and_total_bytes():
 
     with pytest.raises(ValueError, match="一次最多上传 4 个附件"):
         assert_attachment_budget(count=5, total_bytes=1024)
-    with pytest.raises(ValueError, match="附件总大小不能超过 5 MB"):
-        assert_attachment_budget(count=3, total_bytes=total_attachment_bytes(two_mb * 3))
-    assert_attachment_budget(count=4, total_bytes=total_attachment_bytes(two_mb))
+    # 合计上限 16 MB（2026-11 从 5 MB 放宽，给 10 MB 文档留出空间）：
+    # 2 MB × 9 越过，2 MB × 4 仍在额度内。
+    with pytest.raises(ValueError, match="附件总大小不能超过 16 MB"):
+        assert_attachment_budget(count=4, total_bytes=total_attachment_bytes(two_mb * 9))
+    assert_attachment_budget(count=4, total_bytes=total_attachment_bytes(two_mb * 4))
+
+
+def test_single_document_limit_is_wider_than_images():
+    """文档 10 MB、图片 2 MB：扫描简历常见超过 2 MB，卡死会把真实用户挡在门外。"""
+    from app.services import attachments
+
+    assert attachments.MAX_DOCUMENT_BYTES == 10 * 1024 * 1024
+    assert attachments.MAX_ATTACHMENT_BYTES == 2 * 1024 * 1024
+    assert attachments.MAX_DOCUMENT_BYTES > attachments.MAX_ATTACHMENT_BYTES
+
+    def _pdf(size: int) -> str:
+        body = b"%PDF-1.7\n" + b"0" * (size - len(b"%PDF-1.7\n"))
+        return "data:application/pdf;base64," + base64.b64encode(body).decode()
+
+    ok_name, ok_mime, ok_raw = attachments.document_source(
+        "big.pdf", "application/pdf", _pdf(attachments.MAX_DOCUMENT_BYTES)
+    )
+    assert ok_name == "big.pdf" and ok_mime == "application/pdf"
+    assert len(ok_raw) == attachments.MAX_DOCUMENT_BYTES
+
+    with pytest.raises(ValueError, match="不能超过 10 MB"):
+        attachments.document_source(
+            "huge.pdf", "application/pdf", _pdf(attachments.MAX_DOCUMENT_BYTES + 1)
+        )

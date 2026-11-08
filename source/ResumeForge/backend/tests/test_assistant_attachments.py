@@ -91,12 +91,14 @@ def test_attachment_count_and_size_limits(client):
     assert response.status_code == 422
     assert "2 MB" in response.json()["detail"]
 
+    # 合计额度（16 MB）在这里构造不出来：文本附件单条已被 2 MB 卡住，4 条最多 8 MB。
+    # 额度规则本身由 tests/test_document_text.py 的
+    # test_attachment_budget_covers_count_and_total_bytes 直接测。
     items = [
         AssistantAttachmentInput(name=f"{index}.txt", mime_type="text/plain", data="x" * 1_800_000)
         for index in range(3)
     ]
-    with pytest.raises(ValueError, match="总大小不能超过 5 MB"):
-        normalize_attachments(items)
+    assert normalize_attachments(items)
 
 
 def test_follow_up_turn_carries_the_previous_turn_image(client, monkeypatch):

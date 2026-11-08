@@ -7,6 +7,8 @@ import {
   DOCUMENT_MIME_BY_EXTENSION,
   MAX_ATTACHMENT_BYTES,
   MAX_ATTACHMENT_COUNT,
+  MAX_DOCUMENT_BYTES,
+  attachmentByteLimit,
   MAX_TOTAL_ATTACHMENT_BYTES,
   RECOGNITION_ACCEPT,
   canPreviewImage,
@@ -152,9 +154,15 @@ describe("limits", () => {
   it("matches the backend contract", () => {
     // 这些值必须与 backend/app/services/attachments.py 一致
     expect(MAX_ATTACHMENT_COUNT).toBe(4);
+    // 图片仍 2 MB，文档放宽到 10 MB（扫描简历常见超过 2 MB）
     expect(MAX_ATTACHMENT_BYTES).toBe(2 * 1024 * 1024);
-    expect(MAX_TOTAL_ATTACHMENT_BYTES).toBe(5 * 1024 * 1024);
-    // base64 会把体积放大约三分之一，合计上限必须留在后端 8 MB 请求体之内
-    expect((MAX_TOTAL_ATTACHMENT_BYTES * 4) / 3).toBeLessThan(8 * 1024 * 1024);
+    expect(MAX_DOCUMENT_BYTES).toBe(10 * 1024 * 1024);
+    expect(MAX_TOTAL_ATTACHMENT_BYTES).toBe(16 * 1024 * 1024);
+    // base64 会把体积放大约三分之一，合计上限必须留在后端 24 MB 请求体之内
+    expect((MAX_TOTAL_ATTACHMENT_BYTES * 4) / 3).toBeLessThan(24 * 1024 * 1024);
+    // 按类型取上限：文档走 10 MB，图片走 2 MB
+    expect(attachmentByteLimit("a.pdf")).toBe(MAX_DOCUMENT_BYTES);
+    expect(attachmentByteLimit("a.DOCX")).toBe(MAX_DOCUMENT_BYTES);
+    expect(attachmentByteLimit("a.png")).toBe(MAX_ATTACHMENT_BYTES);
   });
 });

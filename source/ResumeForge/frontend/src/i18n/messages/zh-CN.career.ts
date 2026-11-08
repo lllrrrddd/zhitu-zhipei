@@ -6,7 +6,7 @@ const career = {
     "从企业公开招聘信息里找适合你的机会。每条推荐都附上匹配理由、需要核对的条件和招聘原文。",
   "career.resume.title": "1. 放入简历",
   "career.resume.upload": "点击或拖入 PDF、Word 简历",
-  "career.resume.uploadHint": "PDF 最多 15 MB；DOCX 最多 2 MB。大 PDF 只读取文字。",
+  "career.resume.uploadHint": "PDF 最多 15 MB；DOCX 最多 10 MB。大 PDF 只读取文字。",
   "career.resume.reading": "正在读取简历…",
   "career.resume.read": "已读取 {file}，请检查下方信息。",
   "career.resume.local": "简历在本机读取，用于本次查找。",
@@ -23,7 +23,7 @@ const career = {
   "career.resume.pasteHint": "把简历中的教育、技能和经历粘贴到这里。",
   "career.resume.parse": "读取这段文字",
   "career.resume.manual": "手动填写",
-  "career.resume.invalid": "请选择 15 MB 以内的 PDF 或 2 MB 以内的 DOCX。",
+  "career.resume.invalid": "请选择 15 MB 以内的 PDF 或 10 MB 以内的 DOCX。",
   "career.resume.pdfTooLarge": "PDF 超过 15 MB，请压缩后重试。",
   "career.resume.pdfTooManyPages": "PDF 超过 40 页，请使用简历正文版本。",
   "career.resume.pdfNoText": "这份 PDF 没有可读取的文字，请改用文字版简历或粘贴内容。",
@@ -187,7 +187,7 @@ const career = {
   "career.material.autoFields":
     "从上方资料带入：学历 {degree} · 专业 {major} · 毕业年份 {year}。需要更正请先修改上方资料。",
   "career.material.choose": "选择材料 PDF、Word 或图片",
-  "career.material.invalid": "请选择 2 MB 以内的 PDF、DOCX、PNG 或 JPEG。",
+  "career.material.invalid": "PDF、DOCX 限 10 MB，PNG、JPEG 限 2 MB。",
   "career.material.ocrConsent":
     "若材料是图片或扫描 PDF，同意用当前配置的模型抄录文字；外部模型会收到图像。",
   "career.material.check": "读取并核对",

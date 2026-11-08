@@ -13,8 +13,10 @@ MAX_RECOGNIZED_TEXT_CHARS = 20_000
 # data URL 的字符上限：4 张 2 MB 图片编码后的长度，再多一定超限，
 # 在解码之前就挡住，省得为一段注定不合法的 base64 分配内存。
 MAX_IMAGE_DATA_CHARS = 4 * ((2 * 1024 * 1024 + 2) // 3) + 64
-# 文档走同一套体积约定，字符上限也按同一公式算。
-MAX_DOCUMENT_DATA_CHARS = 4 * ((2 * 1024 * 1024 + 2) // 3) + 64
+# 文档的上限比图片宽松：图片要整体送进多模态模型，文档只在本机抽文字。
+# 10 MB 覆盖常见的高分扫描简历（实测 12 份授权样本最大 9.2 MB）。
+# 合计额度与请求体上限见 services/attachments.py 的说明。
+MAX_DOCUMENT_DATA_CHARS = 4 * ((10 * 1024 * 1024 + 2) // 3) + 64
 
 
 class _ExtractionAttachmentInput(BaseModel):

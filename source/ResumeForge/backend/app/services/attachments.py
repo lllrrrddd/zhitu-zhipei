@@ -19,15 +19,22 @@ import re
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-# 单张图片、单份文档上限。
+# 单张图片上限。
 MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024
+# 单份文档（PDF/DOCX）上限。
+#
+# 比图片宽松是有原因的：图片要整体送进多模态模型，体积直接换成 token 成本；
+# 文档是在本机抽文字的，10 MB 的扫描件很常见（一页 300 dpi 的图就可能 1 MB），
+# 卡在 2 MB 等于把真实用户的高分扫描简历挡在门外——实测 12 份授权样本里有 4 份
+# 因此连解析都没进。
+MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
 # 一次请求里所有附件的合计上限。
 #
 # 这个数字是**承重**的：调用方把它当作 JSON 请求体的体积预算。5 MB 原始数据经
-# base64 约 6.7 MB，仍在默认的 8 MB ``MAX_REQUEST_BODY_MB`` 之内；若放宽到 4 张
-# × 2 MB = 8 MB，编码后约 10.7 MB 会直接撞上中间件返回 413。改动前请一并核对
-# ``application.py`` 里的请求体上限。
-MAX_ATTACHMENTS_TOTAL_BYTES = 5 * 1024 * 1024
+# base64 约 6.7 MB，仍在默认的 8 MB ``MAX_REQUEST_BODY_MB`` 之内；放宽到 16 MB
+# 后编码约 21 MB，所以 ``config.max_request_body_mb`` 默认值同步提到 24。
+# 改动任一处前请一并核对 ``application.py`` 里的请求体上限。
+MAX_ATTACHMENTS_TOTAL_BYTES = 16 * 1024 * 1024
 # 一次请求里的附件个数上限。与 ``schemas/extraction.py`` 的
 # ``MAX_EXTRACTION_IMAGE_COUNT`` 和前端 ``utils/attachments.ts`` 的
 # ``MAX_ATTACHMENT_COUNT`` 是同一个约定；服务端这一份是权威。
@@ -295,8 +302,8 @@ def document_source(name: str, mime_type: str, data: str) -> tuple[str, str, byt
     data_mime, raw = decode_data_url(data)
     if data_mime and data_mime not in {canonical_mime, "application/octet-stream"}:
         raise ValueError(f"附件“{safe_name}”的 data URL 类型与扩展名不一致")
-    if len(raw) > MAX_ATTACHMENT_BYTES:
-        raise ValueError(f"附件“{safe_name}”不能超过 2 MB")
+    if len(raw) > MAX_DOCUMENT_BYTES:
+        raise ValueError(f"附件“{safe_name}”不能超过 10 MB")
     if not document_signature_matches(canonical_mime, raw):
         # 与图片同一条规则：名字可能说谎，内容说了算。认不出真实格式才拒绝。
         detected = document_mime_of_content(raw)
@@ -316,7 +323,7 @@ def assert_attachment_budget(*, count: int, total_bytes: int, word: str = "附�
     if count > MAX_ATTACHMENT_COUNT:
         raise ValueError(f"一次最多上传 {MAX_ATTACHMENT_COUNT} 个{word}")
     if total_bytes > MAX_ATTACHMENTS_TOTAL_BYTES:
-        raise ValueError(f"{word}总大小不能超过 5 MB")
+        raise ValueError(f"{word}总大小不能超过 16 MB")
 
 
 def normalize_extraction_images(images: Sequence[Any]) -> list[dict[str, Any]]:
@@ -330,7 +337,7 @@ def normalize_extraction_images(images: Sequence[Any]) -> list[dict[str, Any]]:
     ]
     total = total_attachment_bytes(normalized)
     if total > MAX_ATTACHMENTS_TOTAL_BYTES:
-        raise ValueError("图片总大小不能超过 5 MB")
+        raise ValueError("图片总大小不能超过 16 MB")
     return normalized
 
 

@@ -6,7 +6,7 @@ const career = {
     "Search public employer postings and see why each job matches, what to check, and where to read the original.",
   "career.resume.title": "1. Add a resume",
   "career.resume.upload": "Click or drop a PDF or Word resume",
-  "career.resume.uploadHint": "PDF up to 15 MB; DOCX up to 2 MB. Large PDFs are read as text only.",
+  "career.resume.uploadHint": "PDF up to 15 MB; DOCX up to 10 MB. Large PDFs are read as text only.",
   "career.resume.reading": "Reading your resume…",
   "career.resume.read": "Read {file}. Review the information below.",
   "career.resume.local": "Your resume is read locally for this search.",
@@ -24,7 +24,7 @@ const career = {
   "career.resume.pasteHint": "Paste the education, skills, and experience from your resume.",
   "career.resume.parse": "Read this text",
   "career.resume.manual": "Enter details",
-  "career.resume.invalid": "Choose a PDF up to 15 MB or a DOCX up to 2 MB.",
+  "career.resume.invalid": "Choose a PDF up to 15 MB or a DOCX up to 10 MB.",
   "career.resume.pdfTooLarge": "This PDF exceeds 15 MB. Compress it and try again.",
   "career.resume.pdfTooManyPages": "This PDF exceeds 40 pages. Use a shorter resume version.",
   "career.resume.pdfNoText":
@@ -204,7 +204,7 @@ const career = {
   "career.material.autoFields":
     "From the profile above: degree {degree}, major {major}, graduation year {year}. Correct the profile above if needed.",
   "career.material.choose": "Choose PDF, Word or image",
-  "career.material.invalid": "Choose a PDF, DOCX, PNG or JPEG up to 2 MB.",
+  "career.material.invalid": "PDF/DOCX up to 10 MB; PNG/JPEG up to 2 MB.",
   "career.material.ocrConsent":
     "For images or scanned PDFs, allow the configured model to transcribe text. External providers receive the image.",
   "career.material.check": "Read and compare",

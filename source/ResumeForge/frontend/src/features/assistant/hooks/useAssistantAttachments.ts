@@ -6,9 +6,9 @@ import type { RefObject } from "react";
 import { useCallback, useRef, useState } from "react";
 import { t } from "../../../i18n";
 import {
-  MAX_ATTACHMENT_BYTES,
   MAX_ATTACHMENT_COUNT,
   MAX_TOTAL_ATTACHMENT_BYTES,
+  attachmentByteLimit,
   classifyAttachment,
   readAsDataUrl,
   type PendingAttachment,
@@ -58,10 +58,11 @@ export function useAssistantAttachments({ mountedRef }: Options) {
         );
         return;
       }
-      if (file.size > MAX_ATTACHMENT_BYTES) {
+      const limit = attachmentByteLimit(file.name);
+      if (file.size > limit) {
         message.warning(
           t("assistantHooks.attachments.warning.tooLarge", {
-            size: MAX_ATTACHMENT_BYTES / 1024 / 1024,
+            size: limit / 1024 / 1024,
           }),
         );
         return;
