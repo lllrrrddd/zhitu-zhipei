@@ -13,6 +13,8 @@ from .skill_constants import _SKILL_LEADING_LEVEL_RE, _SKILL_LEVEL_RE
 _SKILL_SENTENCE_END_RE = re.compile(r"[。；;！!？?]")
 _SKILL_LABEL_LEAK_RE = re.compile(r"[：:]")
 _SKILL_DATE_PREFIX_RE = re.compile(r"^(?:\d{4}\s*[.\-/年]|\d{1,2}\s*月)")
+# 被截断的句子：``完善支付安全 ...``、``RAG 检索优化 …``。项目要点被当成技能时常见。
+_SKILL_ELLIPSIS_RE = re.compile(r"(?:\.{2,}|…+)\s*$")
 _SKILL_CLAUSE_PREFIXES = (
     "负责",
     "实现",
@@ -38,6 +40,10 @@ _SKILL_CLAUSE_PREFIXES = (
     "技术栈",
     "主修课程",
     "主修",
+    "主要工作",
+    "工作内容",
+    "项目职责",
+    "职责描述",
     "荣誉",
     "奖项",
     "自我评价",
@@ -55,6 +61,8 @@ def _looks_like_skill_fragment(name: str) -> bool:
     if _SKILL_LABEL_LEAK_RE.search(name):
         return True
     if _SKILL_DATE_PREFIX_RE.match(name):
+        return True
+    if _SKILL_ELLIPSIS_RE.search(name):
         return True
     return bool(name.startswith(_SKILL_CLAUSE_PREFIXES))
 

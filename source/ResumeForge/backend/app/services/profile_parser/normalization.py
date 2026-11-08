@@ -147,6 +147,43 @@ def _trim_trailing_article(lines: list[str]) -> tuple[list[str], int]:
     return lines, 0
 
 
+# 同一份简历被粘贴多遍：聊天记录导出（"把简历贴给 AI，它复述一遍再给代码"）里
+# 同一份简历会出现 3–5 次，分区标题也跟着重复。判据要求**同一个分区标题出现 ≥3 次**
+# ——正常简历每个标题只有一次，最多两处同义标题（教育经历 + 教育背景）。
+# 实测：不剪时这类文件会检出 200 条"技能"（触顶截断）且姓名被正文残片占掉；
+# 剪掉后姓名、教育条目反而正确。
+_REPEAT_HEADING_LIMIT = 3
+_MIN_KEYS_BEFORE_CUT = 2
+# 被判定为"重复副本"的尾部至少要有这么多字，否则视为简历内部的同义标题。
+_REPEAT_TAIL_MIN_CHARS = 150
+
+
+def _keep_first_resume_block(lines: list[str]) -> tuple[list[str], int]:
+    """同一份简历重复多遍时只留第一份；返回 (行, 剪掉的字符数)。"""
+    positions: list[tuple[int, str]] = []
+    for index, line in enumerate(lines):
+        key = _heading_key(line)
+        if key:
+            positions.append((index, key))
+    if not positions:
+        return lines, 0
+    counts: dict[str, int] = {}
+    for _, key in positions:
+        counts[key] = counts.get(key, 0) + 1
+    if max(counts.values()) < _REPEAT_HEADING_LIMIT:
+        return lines, 0
+
+    seen: set[str] = set()
+    for index, key in positions:
+        if key in seen and len(seen) >= _MIN_KEYS_BEFORE_CUT:
+            tail = "\n".join(lines[index:])
+            if len(tail) < _REPEAT_TAIL_MIN_CHARS:
+                continue
+            return lines[:index], len(tail)
+        seen.add(key)
+    return lines, 0
+
+
 def _compact_heading(value: str) -> str:
     """统一标题的编号、括号和中英文空白，容纳不同模板的复制结果。"""
     candidate = _NUMBERED_HEADING_RE.sub("", value.strip())

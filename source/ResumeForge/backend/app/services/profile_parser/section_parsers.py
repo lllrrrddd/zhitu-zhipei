@@ -59,11 +59,20 @@ _SCHOOL_TAIL_RE = re.compile(
 )
 # 这些是校名的一部分（校区、分校、研究生院），不能当作专业名切出去。
 _SCHOOL_KEEP_TAILS = ("校区", "分校", "分部", "研究生院", "继续教育")
+# 专业栏里挂在末尾的学历：``网络与信息安全方向（本科）``。
+_DEGREE_TAIL_RE = re.compile(r"[（(]\s*(?:本科|学士|硕士|博士|专科|研究生)\s*[）)]\s*$")
 
 
 def _split_school_major(school: str, major: str) -> tuple[str, str]:
-    """把误粘在校名后的专业名还给专业栏；专业栏已有值时不猜。"""
-    if major or not school:
+    """把误粘在校名后的专业名还给专业栏。
+
+    * 专业栏为空：拆出来的部分直接当专业（``中北大学软件工程`` → 中北大学 / 软件工程）。
+    * 专业栏是"方向 + 学历"（``网络与信息安全方向（本科）``）：说明这一行本来写成
+      ``中北大学 软件工程-网络与信息安全方向（本科）``，把拆出来的部分接到方向前面，
+      学历由调用方单独抽走。
+    * 其余情况（专业栏已有实质内容）不动：误拆的代价比留着后缀大。
+    """
+    if not school:
         return school, major
     match = _SCHOOL_TAIL_RE.match(school)
     if not match:
@@ -71,7 +80,13 @@ def _split_school_major(school: str, major: str) -> tuple[str, str]:
     rest = match.group("rest")
     if rest.startswith(_SCHOOL_KEEP_TAILS):
         return school, major
-    return match.group("school"), rest
+    if not major:
+        return match.group("school"), rest
+    if _DEGREE_TAIL_RE.search(major):
+        head = _DEGREE_TAIL_RE.sub("", major).strip(" -—–·")
+        combined = f"{rest}-{head}" if head else rest
+        return match.group("school"), combined
+    return school, major
 
 
 def _collapse_cjk_spaces(value: str) -> str:
@@ -92,7 +107,9 @@ _SCORE_FRAGMENT_RE = re.compile(r"[（(]\s*\d{2,3}\s*$|\d{2,3}\s*/\s*\d{2,3}|GPA
 _DEGREE_WRAP_RE = re.compile(r"^[（(]\s*(.+?)\s*[）)]$")
 # 专业名后面挂着学历：``数字媒体技术（本科）``。只认括号里是学位词的写法，
 # ``软件工程（嵌入式）`` 这类方向说明不动。
-_MAJOR_DEGREE_RE = re.compile(r"^(?P<major>.*?)\s*[（(]\s*(?P<degree>本科|学士|硕士|博士|专科|研究生)\s*[）)]$")
+_MAJOR_DEGREE_RE = re.compile(
+    r"^(?P<major>.*?)\s*[（(]\s*(?P<degree>本科|学士|硕士|博士|专科|研究生)\s*[）)]$"
+)
 
 
 def _split_major_degree(major: str) -> tuple[str, str]:

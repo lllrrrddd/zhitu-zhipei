@@ -72,6 +72,7 @@ from .profile_parser.normalization import (
     _field_start_pattern,
     _heading_key,
     _heading_parts,
+    _keep_first_resume_block,
     _normalize_lines,
     _starts_with_field,
     _trim_non_resume_prefix,
@@ -189,6 +190,8 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     """解析一段个人资料，返回可直接回填表单的结构化草稿。"""
     trimmed_text, trimmed_chars = _trim_non_resume_prefix(text or "")
     lines = _normalize_lines(trimmed_text)
+    # 聊天记录导出：同一份简历会被粘贴多遍，只留第一份（不剪时技能会检出 200 条）。
+    lines, repeated_chars = _keep_first_resume_block(lines)
     # 网页打印件：简历之后的文章会继续被当成项目/技能解析，剪掉并告知用户。
     lines, trimmed_tail_chars = _trim_trailing_article(lines)
     sections = _split_sections(lines)
@@ -258,8 +261,19 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
     warnings: list[str] = []
     if trimmed_chars:
         warnings.append(f"文档开头有约 {trimmed_chars} 字不像是简历内容，已跳过，请核对原文。")
+    if repeated_chars:
+        warnings.append(
+            f"文档里像是重复粘贴了多份简历，已只保留第一份（跳过约 {repeated_chars} 字），请核对。"
+        )
     if trimmed_tail_chars:
         warnings.append(f"文档末尾有约 {trimmed_tail_chars} 字像是正文文章，已跳过，请核对原文。")
+    if len(result.skills) >= 60:
+        # 正常简历的技能在 5–40 条之间。到这个量级通常意味着文件里混入了正文或聊天
+        # 记录（实测"把简历贴给 AI"的导出件会检出上百条），必须让用户知道结果不可信。
+        warnings.append(
+            f"技能识别出 {len(result.skills)} 条，明显偏多：这份文件里可能混入了正文或聊天记录，"
+            "建议只上传简历正文后重试。"
+        )
     if not result.name:
         warnings.append("未识别到姓名，请手动填写。")
     if not result.educations and any(_heading_key(line) == "educations" for line in lines):

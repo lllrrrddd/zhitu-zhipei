@@ -215,3 +215,49 @@ def test_short_prose_paragraph_is_not_treated_as_article():
     result = parse_profile_text(text)
     assert result.summary
     assert not any("末尾" in warning for warning in result.warnings)
+
+
+def test_school_suffix_moves_into_major_when_degree_follows():
+    """``中北大学 软件工程-网络与信息安全方向（本科）`` 被切成"学校＝中北大学软件工程"。"""
+    text = """姓名：周某
+教育背景
+2022-09 ~ 2026-06 中北大学 软件工程-网络与信息安全方向（本科）
+"""
+    result = parse_profile_text(text)
+    assert len(result.educations) == 1
+    assert result.educations[0].school == "中北大学"
+    assert result.educations[0].major == "软件工程-网络与信息安全方向"
+    assert result.educations[0].degree == "本科"
+
+
+def test_project_bullet_fragments_are_not_skills():
+    text = """姓名：郑某
+项目经历
+售后工单 Agent | Agent 全栈 | 2026.07-2026.10
+主要工作：
+完善支付安全 ...
+构建秒杀准入与补偿 …
+专业技能
+Python、FastAPI
+"""
+    names = [skill.name for skill in parse_profile_text(text).skills]
+    assert "Python" in names
+    assert not [name for name in names if name.endswith("…") or name.endswith("...")]
+    assert "主要工作" not in names
+
+
+def test_repeated_resume_blocks_keep_only_the_first():
+    """把简历贴给 AI 的导出件里，同一份简历会连同标题一起被粘贴多遍。"""
+    block = """教育背景
+2022-09-2026-06 河南某大学 软件工程 本科
+专业技能
+Python、SQL、Docker
+项目经历
+订单系统 后端开发 2026.01-2026.04
+"""
+    chat = "这张简历排版清晰，我帮你把文字提取出来，并给出生成 PDF 的步骤。\n"
+    text = "姓名：吴某\n" + block + chat + block + chat + block
+    result = parse_profile_text(text)
+    assert result.name == "吴某"
+    assert len(result.educations) == 1
+    assert any("重复粘贴" in warning for warning in result.warnings)
