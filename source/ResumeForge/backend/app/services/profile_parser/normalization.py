@@ -36,6 +36,64 @@ def _unify_compat_char(char: str) -> str:
     return char
 
 
+# PDF 文本层按版面宽度硬折行：一句完整的话被切成「…可通过日」+「志分析、命令工具…」。
+# 不合并的话，技能/项目会被拆成两条残片（真实样本里技能栏直接出现 ``可通过日``）。
+# 判据宁可少合也不误合——合错会把两条独立条目粘成一句，比留残片更难排查。
+_WRAP_MIN_PREV_CHARS = 30
+_WRAP_MIN_NEXT_CHARS = 4
+# 短纯中文行：``王 宇 松`` 这种姓名、或 ``初试成绩`` 这种小标题。它们常常单独成行，
+# 一旦被当成续行并进上一行，姓名就从表头里消失了（实测踩到）。
+_SHORT_CJK_ONLY_CHARS = 4
+# 行尾出现这些标点说明这句话写完了，不该再往下接。
+_SENTENCE_END_CHARS = "。！？；;，,：:、…"
+# 以年份开头的行多半是**条目标题**（``2025.6  某某大赛  项目描述…``）：它自己就是一条，
+# 下面的续行属于它的描述，不能粘回标题里——粘了就取不到条目名（实测把两条竞赛经历并没了）。
+_DATE_PREFIX_RE = re.compile(r"^\s*\d{4}(?=[\s.．/\-—年]|$)")
+# 「项目职责：」「任职要求：」这类标签行也是新条目，不接上一行。
+_LABEL_PREFIX_RE = re.compile(r"^[\u4e00-\u9fa5A-Za-z][\u4e00-\u9fa5A-Za-z /]{1,10}[：:]")
+# 下一行以这些开头说明它是新条目/新分区，不是上一行的续写。
+_LEADING_ORDINAL_RE = re.compile(r"^(?:\d{1,2}\s*[、.)）]|[一二三四五六七八九十]+\s*、)")
+
+
+def _looks_like_continuation(previous: str, current: str) -> bool:
+    if len(previous) < _WRAP_MIN_PREV_CHARS or len(current) < _WRAP_MIN_NEXT_CHARS:
+        return False
+    if previous[-1] in _SENTENCE_END_CHARS:
+        return False
+    # 上一行本身是分区标题、含日期区间、或以年份开头（多半是条目标题行）：不接。
+    if _heading_key(previous) is not None or _DATE_RANGE_RE.search(previous):
+        return False
+    if _DATE_PREFIX_RE.match(previous):
+        return False
+    # 下一行是标题 / 新条目 / 带日期 / 以"标签："开头：都不接。
+    if _heading_key(current) is not None or _DATE_RANGE_RE.search(current):
+        return False
+    # 下一行同样以年份开头：那是**下一条**经历/项目的标题，不是续写。
+    if _DATE_PREFIX_RE.match(current):
+        return False
+    if current.lstrip().startswith(_BULLET_PREFIXES) or _LEADING_ORDINAL_RE.match(current):
+        return False
+    compact = re.sub(r"\s+", "", current)
+    if len(compact) <= _SHORT_CJK_ONLY_CHARS and not re.search(r"[A-Za-z0-9]", compact):
+        return False
+    return not _LABEL_PREFIX_RE.match(current)
+
+
+def _join_wrapped_lines(lines: list[str]) -> list[str]:
+    """把 PDF 硬折行的续行接回上一行；只接"上一行明显没写完"的情况。"""
+    merged: list[str] = []
+    for line in lines:
+        if line and merged and merged[-1] and _looks_like_continuation(merged[-1], line):
+            previous = merged[-1]
+            # 只在"两侧都是 ASCII"时补空格，避免 ``Linux`` + ``Docker`` 粘成一个词；
+            # 中文续行直接相接（原文本来就没有空格）。
+            separator = " " if previous[-1].isascii() and line[0].isascii() else ""
+            merged[-1] = f"{previous}{separator}{line}"
+            continue
+        merged.append(line)
+    return merged
+
+
 def _normalize_lines(text: str) -> list[str]:
     # 仅归一化全角拉丁字母/数字、不可见空白与兼容字形，保留中文标点的原始语义。
     normalized_chars: list[str] = []
@@ -71,7 +129,7 @@ def _normalize_lines(text: str) -> list[str]:
         lines.pop()
     # PDF/Word 文本层会把同一行导出 2–4 遍；先收敛再分区，否则重复行会变成
     # 重复的教育条目与技能（见 line_dedupe 模块说明）。
-    return _dedupe_repeated_lines(lines)
+    return _join_wrapped_lines(_dedupe_repeated_lines(lines))
 
 
 # 行首装饰符号：emoji（🎓 ⚙ 💼）、箭头、勾叉、几何图形。模板简历常把它们放在

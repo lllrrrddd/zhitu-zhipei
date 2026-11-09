@@ -348,3 +348,59 @@ def test_resume_title_line_marks_where_the_resume_starts():
     assert len(result.educations) == 1
     assert result.educations[0].major == "计算机科学与技术"
     assert [skill.name for skill in result.skills] == ["Python", "SQL"]
+
+
+def test_hard_wrapped_line_is_joined_before_parsing():
+    """PDF 按版面宽度硬折行：上一行没写完时，续行要接回去，否则技能被拆成残片。"""
+    text = """姓名：吴某
+核心技能
+1、熟悉 Windows Server/Linux 系统运维，熟练部署维护 DHCP、DNS、Nginx、Docker 等核心服务，可通过日
+志分析、命令工具排查系统故障，保障系统稳定。
+"""
+    names = [skill.name for skill in parse_profile_text(text).skills]
+    # 残片不再出现，整句以完整短语进入技能栏
+    assert "可通过日" not in names
+    assert "志分析" not in names
+    assert any("可通过日志分析" in name for name in names)
+
+
+def test_wrapped_lines_are_not_joined_when_next_line_starts_a_new_item():
+    """下一行是序号条目 / 标签行 / 分区标题 / 带日期时都不接。"""
+    text = """姓名：吴某
+核心技能
+1、熟悉系统运维与网络设备配置，能够独立完成机房巡检与故障处理工作
+2、熟悉数据库日常维护
+项目经历
+订单系统 后端开发 2026.01-2026.04
+"""
+    names = [skill.name for skill in parse_profile_text(text).skills]
+    # 第 1 条没有被第 2 条粘上
+    assert not any("故障处理工作2" in name for name in names)
+    assert not any("故障处理工作2、熟悉数据库" in name for name in names)
+
+
+def test_wrapped_lines_are_not_joined_after_sentence_end():
+    """上一行已经写了句号，就不该再往下接。"""
+    text = """姓名：吴某
+自我评价
+工作认真负责，能独立完成系统运维与故障排查。
+熟悉 Linux 与 Docker 的日常使用
+"""
+    from app.services.profile_parser.normalization import _normalize_lines
+
+    lines = [line for line in _normalize_lines(text) if line]
+    assert "工作认真负责，能独立完成系统运维与故障排查。" in lines
+    assert "熟悉 Linux 与 Docker 的日常使用" in lines
+
+
+def test_wrapped_ascii_lines_keep_a_space():
+    """英文/数字续行补一个空格，避免把两个词粘成一个。"""
+    from app.services.profile_parser.normalization import _normalize_lines
+
+    text = (
+        "Responsibilities included maintaining the internal platform and "
+        "serving as the primary contact for\nincident triage across three teams\n"
+    )
+    lines = [line for line in _normalize_lines(text) if line]
+    assert any("incident triage across three teams" in line for line in lines)
+    assert not any("forincident" in line for line in lines)
