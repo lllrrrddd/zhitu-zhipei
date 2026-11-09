@@ -246,6 +246,11 @@ const career = {
     "这些技能你写在经历里了，但技能栏没有：加到技能栏即可，不用编造任何新经历。",
   "career.skills.missingHint": "简历里完全没有：确认这份岗位是否真的需要它，需要就补一段真实经历。",
   "career.skills.hint": "只按岗位要求里写到的技能对比，口径与简历解析、缺技能提示一致。",
+  "career.favorites.column": "匹配",
+  "career.favorites.saved": "{profile} · {score} 分",
+  "career.favorites.better": "更匹配：{profile} {score} 分",
+  "career.favorites.hint":
+    "只在本机记录：这条收藏当时用哪份匹配档案看的、打了几分。换一份档案再匹配同一岗位，就能看到哪个方向更有胜算。",
 } as const;
 
 export default career;

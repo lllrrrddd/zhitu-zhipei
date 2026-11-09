@@ -169,3 +169,99 @@ export function clearSnapshots(storage: Storage | null): MatchSnapshot[] {
   }
   return [];
 }
+
+/** 收藏岗位时"用的是哪份档案匹配的"：按**岗位数据库 id** 记，手工录入的岗位也能对上。 */
+export interface SavedProfileMatch {
+  jobId: number;
+  profileId: string;
+  profileLabel: string;
+  score: number;
+  at: string;
+}
+
+export const SAVED_PROFILE_KEY = "rf.career.favoriteProfiles.v1";
+/** 只记最近 200 个岗位的收藏上下文；再老的记录对"这个岗位当时怎么来的"没有价值。 */
+const SAVED_PROFILE_LIMIT = 200;
+
+function isSavedMatch(value: unknown): value is SavedProfileMatch {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<SavedProfileMatch>;
+  return (
+    typeof candidate.jobId === "number" &&
+    typeof candidate.profileId === "string" &&
+    typeof candidate.profileLabel === "string" &&
+    typeof candidate.score === "number" &&
+    Number.isFinite(candidate.score) &&
+    typeof candidate.at === "string"
+  );
+}
+
+/** 读出"收藏时的匹配上下文"：键是岗位 id 的字符串形式。坏数据整条丢。 */
+export function loadSavedMatches(storage: Storage | null): Record<string, SavedProfileMatch> {
+  if (!storage) return {};
+  try {
+    const raw = storage.getItem(SAVED_PROFILE_KEY);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const entries = Object.entries(parsed as Record<string, unknown>)
+      .filter((entry): entry is [string, SavedProfileMatch] => isSavedMatch(entry[1]))
+      .sort((left, right) => left[1].at.localeCompare(right[1].at))
+      .slice(-SAVED_PROFILE_LIMIT);
+    return Object.fromEntries(entries);
+  } catch {
+    return {};
+  }
+}
+
+export function saveSavedMatches(
+  storage: Storage | null,
+  matches: Record<string, SavedProfileMatch>,
+): void {
+  if (!storage) return;
+  try {
+    storage.setItem(SAVED_PROFILE_KEY, JSON.stringify(matches));
+  } catch {
+    // 配额满：丢的是"这条收藏是用哪份档案匹配的"这种便利信息，不该打断收藏本身。
+  }
+}
+
+/** 记一条收藏上下文（同一个岗位再次收藏时覆盖成最新那次）。 */
+export function withSavedMatch(
+  matches: Record<string, SavedProfileMatch>,
+  entry: SavedProfileMatch,
+): Record<string, SavedProfileMatch> {
+  const next = { ...matches, [String(entry.jobId)]: entry };
+  const entries = Object.entries(next)
+    .sort((left, right) => left[1].at.localeCompare(right[1].at))
+    .slice(-SAVED_PROFILE_LIMIT);
+  return Object.fromEntries(entries);
+}
+
+/** 一步记下"这条收藏是用哪份档案匹配的"（读-合并-写，调用处不用关心存储细节）。 */
+export function rememberSavedMatch(storage: Storage | null, entry: SavedProfileMatch): void {
+  saveSavedMatches(storage, withSavedMatch(loadSavedMatches(storage), entry));
+}
+
+/** 某个岗位在**各份档案**下最近一次的成绩（按分数从高到低）。 */
+export function latestPerProfile(
+  snapshots: MatchSnapshot[],
+  jobKey: string,
+): { profileId: string; profileLabel: string; score: number; at: string }[] {
+  const latest = new Map<string, MatchSnapshot>();
+  for (const item of snapshots) {
+    if (item.jobKey !== jobKey) continue;
+    const current = latest.get(item.profileId);
+    if (!current || current.createdAt.localeCompare(item.createdAt) < 0) {
+      latest.set(item.profileId, item);
+    }
+  }
+  return [...latest.values()]
+    .map((item) => ({
+      profileId: item.profileId,
+      profileLabel: item.profileLabel,
+      score: item.score,
+      at: item.createdAt,
+    }))
+    .sort((left, right) => right.score - left.score);
+}

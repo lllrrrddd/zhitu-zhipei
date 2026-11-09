@@ -2,6 +2,12 @@
 import { describe, expect, it } from "vitest";
 import {
   historyFor,
+  latestPerProfile,
+  loadSavedMatches,
+  rememberSavedMatch,
+  SAVED_PROFILE_KEY,
+  withSavedMatch,
+  type SavedProfileMatch,
   jobKeyOf,
   latestDelta,
   loadSnapshots,
@@ -166,5 +172,82 @@ describe("按 (岗位, 档案) 比较", () => {
 
   it("顺序按时间而不是插入顺序（乱序写入也要算对）", () => {
     expect(latestDelta([newer, older], "k", "p1")).toEqual({ previous: 60, delta: 15 });
+  });
+});
+
+describe("收藏上下文（用哪份档案收藏的）", () => {
+  const entry = (jobId: number, profileId: string, at: string): SavedProfileMatch => ({
+    jobId,
+    profileId,
+    profileLabel: profileId === "p1" ? "运维方向" : "测试方向",
+    score: 70,
+    at,
+  });
+
+  it("同一个岗位再次收藏时覆盖成最新那次", () => {
+    const first = withSavedMatch({}, entry(1, "p1", "2026-11-09T01:00:00Z"));
+    const second = withSavedMatch(first, entry(1, "p2", "2026-11-09T02:00:00Z"));
+    expect(Object.keys(second)).toEqual(["1"]);
+    expect(second["1"].profileId).toBe("p2");
+  });
+
+  it("坏数据整条丢弃，不让一条脏记录打崩收藏夹", () => {
+    const storage = fakeStorage({
+      [SAVED_PROFILE_KEY]: JSON.stringify({
+        "1": { jobId: 1, profileId: "p1", profileLabel: "运维方向", score: 70, at: "x" },
+        "2": { jobId: "2", profileId: "p1" },
+        "3": "nope",
+      }),
+    });
+    expect(Object.keys(loadSavedMatches(storage))).toEqual(["1"]);
+    expect(loadSavedMatches(fakeStorage({ [SAVED_PROFILE_KEY]: "{oops" }))).toEqual({});
+    expect(loadSavedMatches(null)).toEqual({});
+  });
+
+  it("一步记住（读-合并-写）后能读回来", () => {
+    const storage = fakeStorage();
+    rememberSavedMatch(storage, entry(5, "p1", "2026-11-09T01:00:00Z"));
+    rememberSavedMatch(storage, entry(6, "p2", "2026-11-09T02:00:00Z"));
+    expect(Object.keys(loadSavedMatches(storage)).sort()).toEqual(["5", "6"]);
+  });
+});
+
+describe("同一岗位的各档案成绩", () => {
+  const snap = (
+    id: string,
+    profileId: string,
+    score: number,
+    createdAt: string,
+    jobKey = "k",
+  ): MatchSnapshot => ({
+    id,
+    jobKey,
+    jobTitle: "岗位",
+    company: "公司",
+    score,
+    profileId,
+    profileLabel: profileId === "p1" ? "运维方向" : "测试方向",
+    createdAt,
+    matchedSkills: 1,
+  });
+
+  it("每份档案只取最近一次，并按分数从高到低", () => {
+    const rows = latestPerProfile(
+      [
+        snap("a", "p1", 60, "2026-11-01T00:00:00Z"),
+        snap("b", "p1", 72, "2026-11-03T00:00:00Z"),
+        snap("c", "p2", 88, "2026-11-02T00:00:00Z"),
+        snap("d", "p3", 50, "2026-11-04T00:00:00Z", "别的岗位"),
+      ],
+      "k",
+    );
+    expect(rows.map((row) => [row.profileId, row.score])).toEqual([
+      ["p2", 88],
+      ["p1", 72],
+    ]);
+  });
+
+  it("没有记录时返回空数组（界面据此留空）", () => {
+    expect(latestPerProfile([], "k")).toEqual([]);
   });
 });

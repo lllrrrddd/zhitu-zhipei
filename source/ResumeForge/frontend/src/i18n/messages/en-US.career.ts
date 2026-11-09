@@ -273,6 +273,11 @@ const career = {
     "Not mentioned anywhere. Check whether the role really needs it; if so, add a real piece of experience.",
   "career.skills.hint":
     "Only skills written in the job requirements are compared, using the same vocabulary as resume parsing.",
+  "career.favorites.column": "Match",
+  "career.favorites.saved": "{profile} · {score} pts",
+  "career.favorites.better": "Better fit: {profile} {score}",
+  "career.favorites.hint":
+    "Stored on this device only: which profile matched this job and what score it got. Run another profile on the same job to see which direction fits better.",
 } as const;
 
 export default career;

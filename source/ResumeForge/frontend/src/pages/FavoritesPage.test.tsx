@@ -5,6 +5,8 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { expectNoUnfocusableScroller } from "../test/a11yScrollRegion";
 import { TEMPLATE_CATALOG } from "../test/resumeFixtures";
+import { t } from "../i18n";
+import { MATCH_HISTORY_KEY, SAVED_PROFILE_KEY } from "../features/career/matchHistory";
 import FavoritesPage from "./FavoritesPage";
 
 const apiMocks = vi.hoisted(() => ({
@@ -205,5 +207,94 @@ describe("FavoritesPage 空收藏的横向滚动区（a11y）", () => {
     expect(
       document.querySelector(".ant-table")?.classList.contains("ant-table-scroll-horizontal"),
     ).toBe(false);
+  });
+});
+
+describe("收藏与匹配档案联动", () => {
+  const url = "https://career.example.com/job/1";
+  /** 岗位名是**用户数据**（来自后端），不是界面文案：抽成常量，断言与 fixture 同源。 */
+  const JOB_TITLE = "数据分析师";
+  /** 档案名同样是用户数据。 */
+  const OPS = "运维方向";
+  const TESTING = "测试方向";
+
+  beforeEach(() => {
+    apiMocks.listJobs.mockResolvedValue({
+      items: [
+        {
+          id: 1,
+          title: "数据分析师",
+          company: "示例公司",
+          location: "上海",
+          posted_at: "2026-08-20",
+          source_url: url,
+          favorite: true,
+        },
+      ],
+      total: 1,
+    });
+  });
+
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("显示收藏当时用的档案与分数，并指出更匹配的方向", async () => {
+    window.localStorage.setItem(
+      SAVED_PROFILE_KEY,
+      JSON.stringify({
+        "1": {
+          jobId: 1,
+          profileId: "p1",
+          profileLabel: "运维方向",
+          score: 87,
+          at: "2026-11-09T01:00:00Z",
+        },
+      }),
+    );
+    window.localStorage.setItem(
+      MATCH_HISTORY_KEY,
+      JSON.stringify([
+        {
+          id: "m1",
+          jobKey: url,
+          jobTitle: "数据分析师",
+          company: "示例公司",
+          score: 87,
+          profileId: "p1",
+          profileLabel: "运维方向",
+          createdAt: "2026-11-09T01:00:00Z",
+          matchedSkills: 2,
+        },
+        {
+          id: "m2",
+          jobKey: url,
+          jobTitle: "数据分析师",
+          company: "示例公司",
+          score: 91,
+          profileId: "p2",
+          profileLabel: "测试方向",
+          createdAt: "2026-11-09T02:00:00Z",
+          matchedSkills: 3,
+        },
+      ]),
+    );
+
+    renderPage();
+    expect(await screen.findByText(JOB_TITLE)).toBeInTheDocument();
+    // 收藏当时的上下文
+    expect(
+      screen.getByText(t("career.favorites.saved", { profile: OPS, score: 87 })),
+    ).toBeInTheDocument();
+    // 另有一份档案更高：直接点名，省得自己比对
+    expect(
+      screen.getByText(t("career.favorites.better", { profile: TESTING, score: 91 })),
+    ).toBeInTheDocument();
+  });
+
+  it("没有匹配记录时该列留空，不显示占位垃圾", async () => {
+    const { container } = renderPage();
+    expect(await screen.findByText(JOB_TITLE)).toBeInTheDocument();
+    expect(container.querySelector(".career-favorite-match")).toBeNull();
   });
 });

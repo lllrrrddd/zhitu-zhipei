@@ -70,6 +70,7 @@ function renderResults(items: MatchedJob[]) {
           result={data}
           profile={profile}
           profileId="profile-1"
+          profileLabel="运维方向"
           history={[]}
           addingSkill={null}
           onAddSkill={() => undefined}

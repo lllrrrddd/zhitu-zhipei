@@ -317,6 +317,7 @@ export default function CareerPage() {
           <section className="career-results" ref={resultSection}>
             <CareerResults
               profileId={currentId}
+              profileLabel={records.find((item) => item.id === currentId)?.label ?? ""}
               history={snapshots}
               addingSkill={addingSkill}
               onAddSkill={(term) => void addSkill(term)}

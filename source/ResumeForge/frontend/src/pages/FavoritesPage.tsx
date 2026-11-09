@@ -15,10 +15,27 @@ import ResumeDetailModal from "../components/ResumeDetailModal";
 import { useApi } from "../hooks/useApi";
 import type { JobList, Page, ResumeBrief } from "../types";
 import { formatDateTime } from "../utils/format";
+import FavoriteMatchTags from "../features/career/FavoriteMatchTags";
+import {
+  latestPerProfile,
+  loadSavedMatches,
+  loadSnapshots,
+  type MatchSnapshot,
+  type SavedProfileMatch,
+} from "../features/career/matchHistory";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 
 type FavoriteKind = "jobs" | "resumes";
+
+/** 隐私模式下访问 localStorage 会抛错：读不到就当没有匹配记录。 */
+function readStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
 type FavoritePage =
   { kind: "jobs"; page: Page<JobList> } | { kind: "resumes"; page: Page<ResumeBrief> };
 
@@ -35,6 +52,11 @@ export default function FavoritesPage() {
   const [pageSize, setPageSize] = useState(Number(searchParams.get("page_size")) || 10);
   const [previewId, setPreviewId] = useState<number | null>(null);
   const [updatingKey, setUpdatingKey] = useState("");
+  // 匹配上下文只在本机：收藏当时用哪份档案看的、各方向最近一次的分数。
+  const [savedMatches] = useState<Record<string, SavedProfileMatch>>(() =>
+    loadSavedMatches(readStorage()),
+  );
+  const [snapshots] = useState<MatchSnapshot[]>(() => loadSnapshots(readStorage()));
   const updatingKeyRef = useRef("");
 
   const { data, loading, error, reload } = useApi<FavoritePage>(async () => {
@@ -166,6 +188,16 @@ export default function FavoritesPage() {
             {job.title}
           </Button>
         </Tooltip>
+      ),
+    },
+    {
+      title: t("career.favorites.column"),
+      width: 240,
+      render: (_, job) => (
+        <FavoriteMatchTags
+          saved={savedMatches[String(job.id)]}
+          scores={latestPerProfile(snapshots, job.source_url?.trim() ?? "")}
+        />
       ),
     },
     {

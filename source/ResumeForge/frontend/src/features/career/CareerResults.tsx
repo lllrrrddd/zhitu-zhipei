@@ -12,9 +12,18 @@ import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
 import CareerDiagnosisPanel from "./CareerDiagnosisPanel";
 import CareerMatchHistory from "./CareerMatchHistory";
 import CareerSkillGaps from "./CareerSkillGaps";
-import { jobKeyOf, type MatchSnapshot } from "./matchHistory";
+import { jobKeyOf, rememberSavedMatch, type MatchSnapshot } from "./matchHistory";
 import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
 import "../../styles/career-score.css";
+
+/** 隐私模式下访问 localStorage 会抛错：读不到就当没有记录，不影响收藏。 */
+function storageOrNull(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
 
 const KIND_LABELS = {
   campus: "career.result.campus",
@@ -50,6 +59,7 @@ function ResultCard({
   match,
   profile,
   profileId,
+  profileLabel,
   history,
   addingSkill,
   onAddSkill,
@@ -58,6 +68,7 @@ function ResultCard({
   match: MatchedJob;
   profile: CareerProfile;
   profileId: string;
+  profileLabel: string;
   history: MatchSnapshot[];
   addingSkill: string | null;
   onAddSkill: (term: string) => void;
@@ -96,6 +107,14 @@ function ResultCard({
           favorite: true,
         }));
       setSavedId(saved.id);
+      // 收藏这一下有上下文：用哪份档案看的、几分。收藏夹据此显示「运维方向 · 87 分」。
+      rememberSavedMatch(storageOrNull(), {
+        jobId: saved.id,
+        profileId,
+        profileLabel,
+        score: Math.round(match.score ?? 0),
+        at: new Date().toISOString(),
+      });
     } catch (error) {
       message.error(error instanceof Error ? error.message : t("career.result.saveFailed"));
     } finally {
@@ -288,6 +307,7 @@ export default function CareerResults({
   result,
   profile,
   profileId,
+  profileLabel,
   history,
   addingSkill,
   onAddSkill,
@@ -296,6 +316,7 @@ export default function CareerResults({
   result: CareerMatches;
   profile: CareerProfile;
   profileId: string;
+  profileLabel: string;
   history: MatchSnapshot[];
   addingSkill: string | null;
   onAddSkill: (term: string) => void;
@@ -341,6 +362,7 @@ export default function CareerResults({
               match={match}
               profile={profile}
               profileId={profileId}
+              profileLabel={profileLabel}
               history={history}
               addingSkill={addingSkill}
               onAddSkill={onAddSkill}
