@@ -218,3 +218,38 @@
 .career-skills .career-help {
   margin: 4px 0 0;
 }
+
+/* 方向对比：小表 + 逐岗位分数标签。 */
+.career-compare {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 10px;
+  background: var(--rf-surface-alt);
+}
+
+.career-compare h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.career-compare-jobs {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.career-compare-jobs li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--rf-border-subtle);
+}
+
+.career-compare-job {
+  min-width: 220px;
+  font-size: 13px;
+  color: var(--rf-text-secondary);
+}

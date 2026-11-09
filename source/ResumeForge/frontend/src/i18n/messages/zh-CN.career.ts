@@ -52,6 +52,18 @@ const career = {
   "career.profiles.deleteHint": "只删掉这份本机档案，不影响「我的资料」，也不影响已保存的岗位。",
   "career.profiles.deleteConfirm": "删除",
   "career.profiles.deleteDisabled": "至少保留一份档案",
+  "career.compare.title": "方向对比",
+  "career.compare.summary": "共 {compared} 个岗位被两份以上档案匹配过（历史里共 {total} 个岗位）。",
+  "career.compare.column.profile": "匹配档案",
+  "career.compare.column.jobs": "覆盖岗位",
+  "career.compare.column.average": "平均分",
+  "career.compare.column.wins": "胜出",
+  "career.compare.job": "{title} · {company}",
+  "career.compare.score": "{profile} {score} 分",
+  "career.compare.spread": "最高与最低差 {spread} 分",
+  "career.compare.tie": "两份档案同分，没有更匹配的一方",
+  "career.compare.hint":
+    "只统计这台设备上的匹配历史；同一个岗位换一份档案匹配后才会出现在这里。差距大的几行最值得先看。",
   "career.backup.export": "导出备份",
   "career.backup.exportHint":
     "把匹配档案、匹配历史和收藏记录导出成一个 JSON 文件（只在这台设备上生成，不上传）",

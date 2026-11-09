@@ -3,6 +3,7 @@ import { Alert, App } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { findCareerMatches, getCareerMarket, refreshCareerMarket } from "../api/career";
 import CareerProfileForm from "../features/career/CareerProfileForm";
+import CareerComparePanel from "../features/career/CareerComparePanel";
 import CareerProfileSwitcher from "../features/career/CareerProfileSwitcher";
 import {
   buildBackup,
@@ -377,6 +378,8 @@ export default function CareerPage() {
           <CareerMaterialCheck key={draftVersion} profile={draft} />
         </>
       )}
+      {/* 对比只依赖匹配历史：刷新页面后即使没有当前结果，也能看到"哪个方向更有胜算"。 */}
+      <CareerComparePanel snapshots={snapshots} />
     </div>
   );
 }

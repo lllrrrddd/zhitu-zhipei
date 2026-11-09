@@ -62,6 +62,19 @@ const career = {
     "Only this local profile is deleted. Your profile library and saved jobs stay untouched.",
   "career.profiles.deleteConfirm": "Delete",
   "career.profiles.deleteDisabled": "Keep at least one profile",
+  "career.compare.title": "Direction comparison",
+  "career.compare.summary":
+    "{compared} jobs were matched by two or more profiles ({total} jobs in history).",
+  "career.compare.column.profile": "Profile",
+  "career.compare.column.jobs": "Jobs",
+  "career.compare.column.average": "Average",
+  "career.compare.column.wins": "Wins",
+  "career.compare.job": "{title} at {company}",
+  "career.compare.score": "{profile} {score}",
+  "career.compare.spread": "{spread} points between best and worst",
+  "career.compare.tie": "Both profiles scored the same here",
+  "career.compare.hint":
+    "Only local match history counts. A job shows up once the same posting has been matched with another profile. Start with the rows that differ the most.",
   "career.backup.export": "Export",
   "career.backup.exportHint":
     "Download matching profiles, match history and saved-job context as one JSON file. Created on this device, never uploaded.",

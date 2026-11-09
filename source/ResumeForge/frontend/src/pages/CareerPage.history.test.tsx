@@ -205,3 +205,38 @@ it("导入备份只补缺的档案，不覆盖现有画像", async () => {
     profile.label,
   );
 });
+
+it("本机已有两份档案的匹配记录时，页面直接给出方向对比", async () => {
+  const key = "https://example.com/job/1";
+  window.localStorage.setItem(
+    MATCH_HISTORY_KEY,
+    JSON.stringify([
+      {
+        id: "m1",
+        jobKey: key,
+        jobTitle: "平台运维工程师",
+        company: "测试公司",
+        score: 88,
+        profileId: "p1",
+        profileLabel: profile.label,
+        createdAt: "2026-11-09T01:00:00Z",
+        matchedSkills: 2,
+      },
+      {
+        id: "m2",
+        jobKey: key,
+        jobTitle: "平台运维工程师",
+        company: "测试公司",
+        score: 70,
+        profileId: "p2",
+        profileLabel: "测试方向",
+        createdAt: "2026-11-09T02:00:00Z",
+        matchedSkills: 1,
+      },
+    ]),
+  );
+  const { container } = renderPage();
+  await screen.findByText(t("career.profile.search"));
+  expect(container.querySelector(".career-compare")).not.toBeNull();
+  expect(screen.getByText(t("career.compare.title"))).toBeInTheDocument();
+});
