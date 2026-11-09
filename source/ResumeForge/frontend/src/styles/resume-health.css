@@ -20,7 +20,7 @@
   font-size: 34px;
   font-weight: 700;
   line-height: 1;
-  color: var(--rf-text-primary);
+  color: var(--rf-text-body);
 }
 
 .resume-health-meta {
@@ -41,7 +41,7 @@
 
 .resume-health-subscores b {
   margin-left: 6px;
-  color: var(--rf-text-primary);
+  color: var(--rf-text-body);
 }
 
 .resume-health-issues {
