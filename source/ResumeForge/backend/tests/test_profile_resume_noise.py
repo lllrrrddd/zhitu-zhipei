@@ -261,3 +261,90 @@ Python、SQL、Docker
     assert result.name == "吴某"
     assert len(result.educations) == 1
     assert any("重复粘贴" in warning for warning in result.warnings)
+
+
+def test_emoji_prefixed_section_headings_are_recognized():
+    """模板简历把 emoji 放在标题前（``🎓教育背景``）：不剥掉就整段错位。
+
+    真实样本里三份网页打印件因此把学校取到后面副本、把技能混进项目名。
+    """
+    text = """姓名：陈某
+🎓教育背景
+北华大学 软件工程 (本科) 2024.09 - 2028.06
+⚙专业技能
+熟悉 Java，掌握 MySQL、Redis
+💼实习经历
+某公司 后端开发 2026.06 - 2026.10
+负责订单接口
+"""
+    result = parse_profile_text(text)
+    assert [item.school for item in result.educations] == ["北华大学"]
+    assert result.educations[0].major == "软件工程"
+    assert result.educations[0].degree == "本科"
+    names = [skill.name for skill in result.skills]
+    assert "Java" in names and "MySQL" in names
+    # 标题行本身不能变成技能
+    assert not [name for name in names if "技能" in name or "教育" in name]
+
+
+def test_bracketed_skill_group_is_not_split_into_fragments():
+    """``并发（线程池、锁、AQS）`` 是一个技能：括号里的顿号不是技能分隔符。"""
+    text = """姓名：孙某
+专业技能
+熟悉 Java，掌握集合、并发（线程池、锁、AQS）、JVM 内存与 GC
+熟悉 MySQL，掌握索引、事务与 MVCC
+"""
+    names = [skill.name for skill in parse_profile_text(text).skills]
+    assert "并发（线程池、锁、AQS）" in names
+    # 拆分产生的半边括号残片不再是技能
+    assert not [name for name in names if name.count("（") != name.count("）")]
+    assert "锁" not in names
+
+
+def test_scored_language_certificates_are_not_skills():
+    """``雅思 7.0`` / ``CET-6 585 分`` 是证书成绩，不是技能名。"""
+    text = """姓名：周某
+专业技能
+Java、SQL
+语言能力：雅思 7.0，CET-6 585 分
+"""
+    names = [skill.name for skill in parse_profile_text(text).skills]
+    assert "Java" in names and "SQL" in names
+    assert not [name for name in names if "雅思" in name or "CET" in name]
+
+
+def test_education_row_without_school_keeps_major_and_warns():
+    """学历行原文没写学校（PDF 文字层丢列）：保留专业与学历并提示补学校。"""
+    text = """姓名：李某
+个人简历
+出生年月：2005.07
+求职意向：软件测试工程师
+计算机科学与技术 | 本科 2023.09 - 至今
+专业技能
+Python、SQL
+"""
+    result = parse_profile_text(text)
+    assert len(result.educations) == 1
+    entry = result.educations[0]
+    assert entry.school == ""
+    assert entry.major == "计算机科学与技术"
+    assert entry.degree == "本科"
+    assert any("没有学校名" in warning for warning in result.warnings)
+
+
+def test_resume_title_line_marks_where_the_resume_starts():
+    """聊天记录导出：正文文章之后的一行"个人简历"才是简历起点，表头不能被当文章剪掉。"""
+    article = "\n".join(
+        [
+            "去哪里找一些人的简历",
+            "找简历的渠道选择，取决于你找人的目的：是企业 HR、猎头，还是个人想学习参考。",
+            "不同场景下，最高效的路径不太一样。下面按招聘方与个人两类分别说明。",
+            "主流招聘平台覆盖面最广，适合中基层和通用型岗位的初步筛选工作。",
+        ]
+    )
+    text = f"{article}\n个人简历\n计算机科学与技术 | 本科 2023.09 - 至今\n专业技能\nPython、SQL\n"
+    result = parse_profile_text(text)
+    # 表头活下来了：学历行没被当作文章剪掉
+    assert len(result.educations) == 1
+    assert result.educations[0].major == "计算机科学与技术"
+    assert [skill.name for skill in result.skills] == ["Python", "SQL"]

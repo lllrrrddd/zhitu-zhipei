@@ -15,12 +15,26 @@ _SKILL_LABEL_LEAK_RE = re.compile(r"[：:]")
 _SKILL_DATE_PREFIX_RE = re.compile(r"^(?:\d{4}\s*[.\-/年]|\d{1,2}\s*月)")
 # 被截断的句子：``完善支付安全 ...``、``RAG 检索优化 …``。项目要点被当成技能时常见。
 _SKILL_ELLIPSIS_RE = re.compile(r"(?:\.{2,}|…+)\s*$")
+# 括号不配对：``并发（线程池`` / ``AQS）``——这是把"熟悉 X（A、B、C）"按顿号拆开的产物，
+# 半边括号一定不是技能名。真实技能名里的括号总是成对（``Vue（全家桶）``）。
+_SKILL_UNBALANCED_BRACKET_RE = re.compile(r"^(?:[^（(]*[）)]|[（(][^）)]*)$")
+# 语言证书的**带分数**写法：``雅思 7.0``、``CET-6 585 分``、``IELTS 7``。
+# 只丢带分数的：``日语``、``英语`` 这类光秃秃的语言是能力，留在技能栏里没问题。
+_SKILL_CERT_SCORE_RE = re.compile(
+    r"^(?:ielts|toefl|gre|gmat|cet[- ]?[46]|雅思|托福|英语[四六]级|日语|韩语|法语|德语)"
+    r"\s*[:：]?\s*\d",
+    re.IGNORECASE,
+)
+# 单字汉字 token：``锁``、``索引``被拆出来的残片。单字符 ASCII 不在此列——
+# ``C``、``R`` 都是真实语言名。
+_SINGLE_CJK_RE = re.compile(r"^[\u4e00-\u9fff]$")
 _SKILL_CLAUSE_PREFIXES = (
     "负责",
     "实现",
     "完成",
     "保障",
     "能够",
+    "能",
     "可以",
     "可独立",
     "通过",
@@ -56,6 +70,14 @@ _MAX_SKILL_NAME_CHARS = 32
 def _looks_like_skill_fragment(name: str) -> bool:
     if len(name) > _MAX_SKILL_NAME_CHARS:
         return True
+    if name.count("（") != name.count("）") or name.count("(") != name.count(")"):
+        return True
+    if _SKILL_UNBALANCED_BRACKET_RE.match(name):
+        return True
+    if _SKILL_CERT_SCORE_RE.match(name):
+        return True
+    if _SINGLE_CJK_RE.match(name):
+        return True
     if _SKILL_SENTENCE_END_RE.search(name):
         return True
     if _SKILL_LABEL_LEAK_RE.search(name):
@@ -67,12 +89,37 @@ def _looks_like_skill_fragment(name: str) -> bool:
     return bool(name.startswith(_SKILL_CLAUSE_PREFIXES))
 
 
+# 括号内分隔符的占位符：私用区字符，正常文本里不会出现。
+_BRACKET_PLACEHOLDER = "\ue000"
+_BRACKETED_GROUP_RE = re.compile(r"[（(][^）)]*[）)]")
+
+
+def _protect_bracketed_separators(value: str) -> str:
+    """把括号组内的 ``,，、/|`` 换成占位符，避免被当作技能分隔符。"""
+
+    def _guard(match: re.Match[str]) -> str:
+        group = match.group(0)
+        for separator in (",", "，", "、", "/", "|", "｜", ";", "；", "&"):
+            group = group.replace(separator, _BRACKET_PLACEHOLDER)
+        return group
+
+    return _BRACKETED_GROUP_RE.sub(_guard, value)
+
+
 def _split_tokens(value: str) -> list[str]:
     # 斜杠通常是分隔符，但 CI/CD 是一个完整技能；先保护它，避免被拆成
     # 两个无意义的 “CI”/“CD” 标签。
     protected = re.sub(r"\bCI\s*/\s*CD\b", "CI_CD", value, flags=re.IGNORECASE)
+    # 括号里的顿号是**一个技能的组成项**，不是技能之间的分隔符：
+    # 「掌握集合、并发（线程池、锁、AQS）、JVM」按顿号一刀切会产出
+    # 「并发（线程池」「锁」「AQS）」三条残片（真实样本里就是这样混进技能栏的）。
+    # 先把括号内的分隔符换成占位符，拆完再还原。
+    protected = _protect_bracketed_separators(protected)
     return [
-        token.strip().replace("CI_CD", "CI/CD").replace("ci_cd", "CI/CD")
+        token.strip()
+        .replace(_BRACKET_PLACEHOLDER, "、")
+        .replace("CI_CD", "CI/CD")
+        .replace("ci_cd", "CI/CD")
         for token in re.split(
             r"[,，、/|｜;；&\n]+|(?<!\s)\s++(?:and|以及|及)\s++",
             protected,

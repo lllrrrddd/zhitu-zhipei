@@ -294,6 +294,10 @@ def parse_profile_text(text: str) -> ProfileTextParseResult:
         warnings.append("未识别到姓名，请手动填写。")
     if not result.educations and any(_heading_key(line) == "educations" for line in lines):
         warnings.append("发现教育标题但未识别到教育条目，请核对原文与版面顺序。")
+    if any(item.school == "" for item in result.educations):
+        # 「计算机科学与技术 | 本科 2023.09 - 至今」这类学历行：专业和学历读到了，学校那一栏
+        # 原文里就没有（PDF 文字层常丢列）。留着空学校让用户补，比整条丢掉更有用。
+        warnings.append("教育条目里没有学校名，请在核对页补上。")
     if not any(
         (
             result.educations,

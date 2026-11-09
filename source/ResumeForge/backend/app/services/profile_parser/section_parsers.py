@@ -173,6 +173,16 @@ def _parse_education(lines: list[str]) -> list[dict[str, str]]:
         start, end = _find_date_range(
             block, compact.get("start_date", start), compact.get("end_date", end)
         )
+        # 「计算机科学与技术 | 本科 2023.09 - 至今」：学历行写了专业与学历、却没写学校。
+        # 不修的话 school 会取到专业名、major 变成"本科"，用户看到的是"学校=计算机科学与技术"。
+        # 判据：没有校名后缀，且 major 只是学历词（本科/硕士…）。
+        if (
+            school
+            and len(school) <= 24
+            and not _SCHOOL_SUFFIX_RE.search(school)
+            and (not major or (len(major) <= 4 and any(t in major for t in _DEGREE_TERMS)))
+        ):
+            school, major = "", school
         school = _collapse_cjk_spaces(school)
         major = _collapse_cjk_spaces(major)
         degree = _unwrap_degree(_collapse_cjk_spaces(degree))

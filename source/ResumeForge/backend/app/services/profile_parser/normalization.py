@@ -74,8 +74,27 @@ def _normalize_lines(text: str) -> list[str]:
     return _dedupe_repeated_lines(lines)
 
 
+# 行首装饰符号：emoji（🎓 ⚙ 💼）、箭头、勾叉、几何图形。模板简历常把它们放在
+# 分区标题前（"🎓教育背景"），不剥掉就认不出这是标题——真实样本里三份导出件的
+# 教育与技能区因此整体错位（学校取到后面副本的、技能混进项目名）。
+_LEADING_SYMBOL_RE = re.compile(
+    "|".join(
+        [
+            r"[\U0001F000-\U0001FAFF]",
+            r"[\u2190-\u21FF]",
+            r"[\u2600-\u27BF]",
+            r"[\u2B00-\u2BFF]",
+            r"[\u25A0-\u25FF]",
+            r"[\uFE0F\u200D]",
+        ]
+    )
+    + "+"
+)
+
+
 def _clean_line(line: str) -> str:
-    return _BULLET_RE.sub("", line.lstrip("# ")).strip()
+    stripped = _LEADING_SYMBOL_RE.sub("", line.lstrip("# "))
+    return _BULLET_RE.sub("", stripped).strip()
 
 
 # 正文起点：简历前面被塞进整篇网页文章、封面说明或聊天记录时，这些文字会被当成
@@ -83,6 +102,10 @@ def _clean_line(line: str) -> str:
 # 至少两段 40 字以上的长句、且完全没有电话/邮箱/"姓名"。真实简历的表头无论怎么
 # 排都带联系方式，因此不会命中。
 _PREFIX_MIN_CHARS = 800
+# 简历自带的标题行：聊天记录导出里，正文文章之后往往紧跟一行「简历 / 个人简历」，
+# 那一行才是简历真正的起点。只按"第一个分区标题"定位会跳过标题与表头（出生年月、
+# 求职意向、学历行），把整段表头当文章剪掉——真实样本里一份文件的学历行就是这样丢的。
+_RESUME_TITLE_RE = re.compile(r"^(?:个?人?简历|求职简历|简历|resume|curriculum\s+vitae|cv)$", re.I)
 _PREFIX_MIN_PROSE_LINES = 2
 _PREFIX_PROSE_LINE_CHARS = 40
 
@@ -106,6 +129,18 @@ def _trim_non_resume_prefix(text: str) -> tuple[str, int]:
     )
     if prose < _PREFIX_MIN_PROSE_LINES:
         return text, 0
+    # 有标题行就以标题行为起点（取最后一处：前面可能还有"帮我看看这份简历"之类的引用）。
+    title_index = next(
+        (
+            index
+            for index in range(first_heading - 1, -1, -1)
+            if _RESUME_TITLE_RE.match(_clean_line(lines[index]))
+        ),
+        None,
+    )
+    if title_index is not None:
+        cut = "\n".join(lines[:title_index])
+        return "\n".join(lines[title_index:]), len(cut)
     return "\n".join(lines[first_heading:]), len(prefix)
 
 
