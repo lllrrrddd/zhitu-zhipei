@@ -34,6 +34,7 @@ const componentsMisc = {
     "Show the text the model recognized (check it against the screenshot)",
 
   "componentsMisc.qualityModal.title": "Quality check",
+  "componentsMisc.qualityModal.tab.health": "Health",
   "componentsMisc.qualityModal.tab.risk": "Risk scan",
   "componentsMisc.qualityModal.tab.ats": "ATS check",
 

@@ -30,6 +30,7 @@ const componentsMisc = {
   "componentsMisc.recognitionOutcome.recognizedText": "查看模型识别到的原文（请对照截图核对）",
 
   "componentsMisc.qualityModal.title": "质量检测",
+  "componentsMisc.qualityModal.tab.health": "体检单",
   "componentsMisc.qualityModal.tab.risk": "风险扫描",
   "componentsMisc.qualityModal.tab.ats": "ATS 检测",
 

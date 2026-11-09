@@ -1,0 +1,87 @@
+/* 简历体检：分数头部 + 待办清单。 */
+
+.resume-health {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resume-health-score {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 10px;
+  background: var(--rf-surface-alt);
+}
+
+.resume-health-total {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--rf-text-primary);
+}
+
+.resume-health-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.resume-health-subscores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--rf-text-secondary);
+}
+
+.resume-health-subscores b {
+  margin-left: 6px;
+  color: var(--rf-text-primary);
+}
+
+.resume-health-issues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resume-health-issue {
+  padding: 10px 12px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 8px;
+}
+
+/* 已处理/已忽略的条目降权但不隐藏：用户要能看到"这条我看过了"。 */
+.resume-health-issue.is-done,
+.resume-health-issue.is-ignored {
+  opacity: 0.6;
+}
+
+.resume-health-issue-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.resume-health-issue p {
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.resume-health-issue-actions {
+  margin-top: 4px;
+}
+
+.resume-health-actions {
+  align-items: center;
+}

@@ -4,6 +4,7 @@ import { Modal, Tabs } from "antd";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import AtsCheckPanel from "./AtsCheckPanel";
+import ResumeHealthPanel from "./ResumeHealthPanel";
 import ResumeRiskPanel from "./ResumeRiskPanel";
 
 interface Props {
@@ -37,6 +38,11 @@ export default function ResumeQualityModal({
       {resumeId != null && (
         <Tabs
           items={[
+            {
+              key: "health",
+              label: t("componentsMisc.qualityModal.tab.health"),
+              children: <ResumeHealthPanel resumeId={resumeId} signature={contentSignature} />,
+            },
             {
               key: "risk",
               label: t("componentsMisc.qualityModal.tab.risk"),
