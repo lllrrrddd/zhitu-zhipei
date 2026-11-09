@@ -60,6 +60,12 @@ function isSnapshot(value: unknown): value is MatchSnapshot {
   );
 }
 
+/** 把任意数组归一成合法快照（坏数据丢掉）——备份导入与读存储共用同一条口径。 */
+export function normalizeSnapshots(items: unknown): MatchSnapshot[] {
+  if (!Array.isArray(items)) return [];
+  return items.filter(isSnapshot).slice(-MATCH_HISTORY_LIMIT);
+}
+
 /** 读快照；坏数据丢掉，不抛。 */
 export function loadSnapshots(storage: Storage | null): MatchSnapshot[] {
   if (!storage) return [];
@@ -68,7 +74,7 @@ export function loadSnapshots(storage: Storage | null): MatchSnapshot[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isSnapshot).slice(-MATCH_HISTORY_LIMIT);
+    return normalizeSnapshots(parsed);
   } catch {
     return [];
   }

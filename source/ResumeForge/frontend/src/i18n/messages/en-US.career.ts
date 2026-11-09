@@ -62,6 +62,18 @@ const career = {
     "Only this local profile is deleted. Your profile library and saved jobs stay untouched.",
   "career.profiles.deleteConfirm": "Delete",
   "career.profiles.deleteDisabled": "Keep at least one profile",
+  "career.backup.export": "Export",
+  "career.backup.exportHint":
+    "Download matching profiles, match history and saved-job context as one JSON file. Created on this device, never uploaded.",
+  "career.backup.import": "Import",
+  "career.backup.importHint":
+    "Import a backup from another device. Profiles with the same id are kept as they are; only missing ones are added.",
+  "career.backup.exported": "Exported {count} matching profiles.",
+  "career.backup.imported": "Imported: {profiles} profiles and {snapshots} match records added.",
+  "career.backup.importedNothing": "Everything in this backup is already here; nothing was added.",
+  "career.backup.invalid": "This file is not a ResumeForge matching-profile backup.",
+  "career.backup.version": "Unknown backup version. Update the app before importing.",
+  "career.backup.empty": "The file is empty.",
   "career.profiles.note":
     "Profiles live in this browser only; importing someone else's resume creates a new one and never overwrites your own.",
   "career.profile.title": "2. Review your details and search",

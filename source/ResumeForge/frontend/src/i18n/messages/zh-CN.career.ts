@@ -52,6 +52,17 @@ const career = {
   "career.profiles.deleteHint": "只删掉这份本机档案，不影响「我的资料」，也不影响已保存的岗位。",
   "career.profiles.deleteConfirm": "删除",
   "career.profiles.deleteDisabled": "至少保留一份档案",
+  "career.backup.export": "导出备份",
+  "career.backup.exportHint":
+    "把匹配档案、匹配历史和收藏记录导出成一个 JSON 文件（只在这台设备上生成，不上传）",
+  "career.backup.import": "导入备份",
+  "career.backup.importHint": "导入这台设备之外的备份；同 id 的档案不会被覆盖，只补缺的",
+  "career.backup.exported": "已导出 {count} 份匹配档案。",
+  "career.backup.imported": "导入完成：新增 {profiles} 份档案、{snapshots} 条匹配记录。",
+  "career.backup.importedNothing": "这个备份里的记录本机都已经有了，没有新增。",
+  "career.backup.invalid": "这个文件不是职途智配的匹配档案备份。",
+  "career.backup.version": "备份版本不认识，请升级后再导入。",
+  "career.backup.empty": "文件是空的。",
   "career.profiles.note":
     "档案只存在这台设备的浏览器里；导入别人的简历会新建一份，不会覆盖你自己的资料。",
   "career.profile.title": "2. 检查信息并找岗位",

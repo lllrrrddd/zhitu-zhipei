@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { App, Button, Select, Tooltip } from "antd";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { t } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
 import type { CareerProfileRecord } from "./careerProfiles";
@@ -19,6 +25,8 @@ export default function CareerProfileSwitcher({
   onCreate,
   onRename,
   onDelete,
+  onExport,
+  onImport,
 }: {
   records: CareerProfileRecord[];
   currentId: string;
@@ -26,8 +34,11 @@ export default function CareerProfileSwitcher({
   onCreate: () => void;
   onRename: (id: string, label: string) => void;
   onDelete: (id: string) => void;
+  onExport: () => void;
+  onImport: (file: File) => void;
 }) {
   useLocale();
+  const fileInput = useRef<HTMLInputElement>(null);
   const { modal } = App.useApp();
   const [renaming, setRenaming] = useState(false);
 
@@ -105,7 +116,9 @@ export default function CareerProfileSwitcher({
           {t("career.profiles.rename")}
         </Button>
       </Tooltip>
-      <Tooltip title={canDelete ? t("career.profiles.deleteHint") : t("career.profiles.deleteDisabled")}>
+      <Tooltip
+        title={canDelete ? t("career.profiles.deleteHint") : t("career.profiles.deleteDisabled")}
+      >
         <Button
           size="small"
           danger
@@ -117,6 +130,39 @@ export default function CareerProfileSwitcher({
           {t("career.profiles.delete")}
         </Button>
       </Tooltip>
+      <Tooltip title={t("career.backup.exportHint")}>
+        <Button
+          size="small"
+          icon={<DownloadOutlined />}
+          onClick={onExport}
+          aria-label={t("career.backup.export")}
+        >
+          {t("career.backup.export")}
+        </Button>
+      </Tooltip>
+      <Tooltip title={t("career.backup.importHint")}>
+        <Button
+          size="small"
+          icon={<UploadOutlined />}
+          onClick={() => fileInput.current?.click()}
+          aria-label={t("career.backup.import")}
+        >
+          {t("career.backup.import")}
+        </Button>
+      </Tooltip>
+      <input
+        ref={fileInput}
+        type="file"
+        accept=".json,application/json"
+        hidden
+        aria-label={t("career.backup.import")}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) onImport(file);
+          // 清掉选中的文件：同一个文件连续导入两次也要能触发 change。
+          event.target.value = "";
+        }}
+      />
       <span className="career-help">{t("career.profiles.note")}</span>
     </div>
   );

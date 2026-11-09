@@ -31,6 +31,8 @@ function renderSwitcher(list: CareerProfileRecord[], handlers = {}) {
     onCreate: vi.fn(),
     onRename: vi.fn(),
     onDelete: vi.fn(),
+    onExport: vi.fn(),
+    onImport: vi.fn(),
     ...handlers,
   };
   render(
@@ -68,4 +70,19 @@ it("多份档案时点删除先弹确认，不会直接删掉", async () => {
   const dialog = await screen.findByRole("dialog");
   expect(dialog.textContent).toContain("档案 1");
   expect(props.onDelete).not.toHaveBeenCalled();
+});
+
+it("导出按钮直接可用，导入走隐藏的文件选择框", () => {
+  const onExport = vi.fn();
+  const onImport = vi.fn();
+  renderSwitcher(records(1), { onExport, onImport });
+
+  fireEvent.click(screen.getByRole("button", { name: t("career.backup.export") }));
+  expect(onExport).toHaveBeenCalledTimes(1);
+
+  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  expect(input).not.toBeNull();
+  const file = new File(["{}"], "backup.json", { type: "application/json" });
+  fireEvent.change(input!, { target: { files: [file] } });
+  expect(onImport).toHaveBeenCalledWith(file);
 });

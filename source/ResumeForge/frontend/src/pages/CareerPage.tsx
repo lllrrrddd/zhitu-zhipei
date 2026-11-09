@@ -5,6 +5,12 @@ import { findCareerMatches, getCareerMarket, refreshCareerMarket } from "../api/
 import CareerProfileForm from "../features/career/CareerProfileForm";
 import CareerProfileSwitcher from "../features/career/CareerProfileSwitcher";
 import {
+  buildBackup,
+  downloadBackup,
+  importBackup as applyBackup,
+  parseBackup,
+} from "../features/career/careerBackup";
+import {
   loadRecords,
   newRecordId,
   removeRecord,
@@ -257,6 +263,46 @@ export default function CareerPage() {
     });
   }
 
+  /** 把匹配档案（含历史与收藏上下文）导出成一个 JSON 文件，不上传任何地方。 */
+  function exportBackup() {
+    const backup = buildBackup(readStorage());
+    downloadBackup(backup);
+    message.success(t("career.backup.exported", { count: backup.profiles.length }));
+  }
+
+  /**
+   * 导入备份：**按 id 合并**，本地已有的档案、历史、收藏上下文一律保留。
+   *
+   * 导错文件（旧备份、别的应用导出的 JSON）不该把用户现在的画像冲掉，所以只补不覆盖。
+   */
+  async function importBackup(file: File) {
+    const parsed = parseBackup(await file.text());
+    if (!parsed.ok) {
+      const reason =
+        parsed.code === "empty"
+          ? t("career.backup.empty")
+          : parsed.code === "version"
+            ? t("career.backup.version")
+            : t("career.backup.invalid");
+      message.error(reason);
+      return;
+    }
+    const result = applyBackup(readStorage(), parsed.backup);
+    setRecords(loadRecords(readStorage()));
+    setSnapshots(loadSnapshots(readStorage()));
+    setDraftVersion((value) => value + 1);
+    if (result.added.profiles === 0 && result.added.snapshots === 0) {
+      message.info(t("career.backup.importedNothing"));
+      return;
+    }
+    message.success(
+      t("career.backup.imported", {
+        profiles: result.added.profiles,
+        snapshots: result.added.snapshots,
+      }),
+    );
+  }
+
   /** 技能栏没写、经历里提到过的那一档：加一行技能名就够了，不编造新经历。 */
   async function addSkill(term: string) {
     const skill = term.trim();
@@ -301,6 +347,8 @@ export default function CareerPage() {
             onCreate={createRecord}
             onRename={renameRecord}
             onDelete={deleteRecord}
+            onExport={exportBackup}
+            onImport={(file) => void importBackup(file)}
           />
           <CareerProfileForm
             key={draftVersion}

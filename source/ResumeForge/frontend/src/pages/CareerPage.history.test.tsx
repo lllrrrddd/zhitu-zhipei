@@ -10,7 +10,11 @@ import { App } from "antd";
 import { beforeEach, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { t } from "../i18n";
-import { CAREER_PROFILES_KEY, type CareerProfileRecord } from "../features/career/careerProfiles";
+import {
+  CAREER_PROFILES_KEY,
+  loadRecords,
+  type CareerProfileRecord,
+} from "../features/career/careerProfiles";
 import type { CareerMatches, MatchedJob } from "../features/career/types";
 import { MATCH_HISTORY_KEY, loadSnapshots } from "../features/career/matchHistory";
 import CareerPage from "./CareerPage";
@@ -163,4 +167,41 @@ it("点「加入技能栏」把技能写回当前档案，并用新画像重新�
   expect(stored[0].profile.skills).toContain("Docker");
   // 分数变化也进了历史：这次记的是涨完分之后的那条。
   await waitFor(() => expect(loadSnapshots(window.localStorage)).toHaveLength(2));
+});
+
+it("导入备份只补缺的档案，不覆盖现有画像", async () => {
+  renderPage();
+  await screen.findByText(t("career.profile.search"));
+
+  const backup = {
+    kind: "resumeforge.career.backup",
+    version: 1,
+    exportedAt: "2026-11-09T00:00:00Z",
+    profiles: [
+      // 同 id：本地已有一份，导入不该覆盖
+      { ...profile, label: "备份里的旧名字" },
+      { ...profile, id: "p2", label: "测试方向" },
+    ],
+    snapshots: [],
+    savedMatches: {},
+  };
+  // 页面里还有"上传简历"的文件框：必须限定在匹配档案条内部，否则导入的是简历。
+  const input = document.querySelector<HTMLInputElement>('.career-profiles input[type="file"]')!;
+  fireEvent.change(input, {
+    target: {
+      files: [new File([JSON.stringify(backup)], "backup.json", { type: "application/json" })],
+    },
+  });
+
+  await waitFor(() =>
+    expect(
+      loadRecords(window.localStorage)
+        .map((item) => item.id)
+        .sort(),
+    ).toEqual(["p1", "p2"]),
+  );
+  // 本地那份标签没被改掉
+  expect(loadRecords(window.localStorage).find((item) => item.id === "p1")?.label).toBe(
+    profile.label,
+  );
 });

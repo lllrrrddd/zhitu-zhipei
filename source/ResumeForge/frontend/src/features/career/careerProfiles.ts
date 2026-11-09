@@ -37,7 +37,7 @@ function isProfile(value: unknown): value is CareerProfile {
   );
 }
 
-function normalize(item: unknown): CareerProfileRecord | null {
+export function normalizeRecord(item: unknown): CareerProfileRecord | null {
   if (!item || typeof item !== "object") return null;
   const candidate = item as Partial<CareerProfileRecord>;
   if (typeof candidate.id !== "string" || !candidate.id) return null;
@@ -49,7 +49,8 @@ function normalize(item: unknown): CareerProfileRecord | null {
         ? candidate.label
         : FALLBACK_LABEL,
     profile: candidate.profile,
-    updatedAt: typeof candidate.updatedAt === "string" ? candidate.updatedAt : new Date(0).toISOString(),
+    updatedAt:
+      typeof candidate.updatedAt === "string" ? candidate.updatedAt : new Date(0).toISOString(),
   };
 }
 
@@ -62,7 +63,7 @@ export function loadRecords(storage: Storage | null): CareerProfileRecord[] {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .map(normalize)
+      .map(normalizeRecord)
       .filter((item): item is CareerProfileRecord => item !== null)
       .slice(0, CAREER_PROFILES_LIMIT);
   } catch {
@@ -96,10 +97,7 @@ export function upsertRecord(
   return next;
 }
 
-export function removeRecord(
-  records: CareerProfileRecord[],
-  id: string,
-): CareerProfileRecord[] {
+export function removeRecord(records: CareerProfileRecord[], id: string): CareerProfileRecord[] {
   return records.filter((item) => item.id !== id);
 }
 
@@ -109,11 +107,7 @@ export function removeRecord(
  * 兜底文案由组件传进来（`t("career.profiles.untitled")`）——这个模块是纯函数，
  * 不直接引用 i18n，否则语言切换时已存的名字不会跟着变。
  */
-export function suggestedLabel(
-  profile: CareerProfile,
-  index: number,
-  untitled: string,
-): string {
+export function suggestedLabel(profile: CareerProfile, index: number, untitled: string): string {
   const direction = profile.direction.trim();
   if (direction) return direction.slice(0, 24);
   const city = profile.cities.find((item) => item.trim());
