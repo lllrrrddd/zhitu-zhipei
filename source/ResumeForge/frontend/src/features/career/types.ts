@@ -77,6 +77,12 @@ export interface MatchGap {
   values: string[];
 }
 
+/** 岗位要求技能相对"这份画像"的三态（口径见后端 SkillState）。 */
+export interface SkillState {
+  term: string;
+  state: "found" | "mentioned" | "missing";
+}
+
 export interface MatchedJob {
   job: MarketJob;
   checked_at: string;
@@ -88,12 +94,11 @@ export interface MatchedJob {
   city_match: boolean;
   degree_floor: CareerDegree;
   eligibility_notes: (
-    | "degree_unspecified"
-    | "degree_unconfirmed"
-    | "graduation_check"
-    | "experience_check"
+    "degree_unspecified" | "degree_unconfirmed" | "graduation_check" | "experience_check"
   )[];
   check_skills: string[];
+  /** 旧后端没有这个字段：空数组时界面退回只显示 check_skills 那一句。 */
+  skill_states?: SkillState[];
   score: number;
   score_parts: ScorePart[];
   gaps: MatchGap[];

@@ -37,7 +37,7 @@ const profile: CareerProfileRecord = {
   },
 };
 
-function match(score: number): MatchedJob {
+function match(score: number, skillStates: MatchedJob["skill_states"] = []): MatchedJob {
   return {
     job: {
       id: "job-1",
@@ -63,6 +63,7 @@ function match(score: number): MatchedJob {
     degree_floor: "master",
     eligibility_notes: [],
     check_skills: [],
+    skill_states: skillStates,
     score,
     score_parts: [],
     gaps: [],
@@ -70,10 +71,10 @@ function match(score: number): MatchedJob {
   };
 }
 
-function results(score: number): CareerMatches {
+function results(score: number, skillStates: MatchedJob["skill_states"] = []): CareerMatches {
   return {
     market: { count: 1, current_count: 1, sources: [] },
-    matches: [match(score)],
+    matches: [match(score, skillStates)],
     relevant_count: 1,
     method: "semantic",
   };
@@ -132,4 +133,34 @@ it("匹配失败不写历史（不给用户一条没算出来的分数）", asyn
   fireEvent.click((await screen.findByText(t("career.profile.search"))).closest("button")!);
   expect(await screen.findByText("network down")).toBeInTheDocument();
   expect(loadSnapshots(window.localStorage)).toEqual([]);
+});
+
+it("点「加入技能栏」把技能写回当前档案，并用新画像重新匹配", async () => {
+  careerApi.findCareerMatches.mockResolvedValueOnce(
+    results(60, [
+      { term: "Linux", state: "found" },
+      { term: "Docker", state: "mentioned" },
+    ]),
+  );
+  renderPage();
+  fireEvent.click((await screen.findByText(t("career.profile.search"))).closest("button")!);
+
+  const add = await screen.findByRole("button", { name: t("career.skills.add") });
+  careerApi.findCareerMatches.mockResolvedValueOnce(
+    results(72, [
+      { term: "Linux", state: "found" },
+      { term: "Docker", state: "found" },
+    ]),
+  );
+  fireEvent.click(add);
+
+  await waitFor(() => expect(careerApi.findCareerMatches).toHaveBeenCalledTimes(2));
+  // 第二次调用必须带着新技能，而不是又拿旧画像算一遍。
+  const profileArg = careerApi.findCareerMatches.mock.calls[1][0];
+  expect(profileArg.skills).toContain("Docker");
+  // 写回的是**档案**（刷新后还在），不是只改了内存。
+  const stored = JSON.parse(window.localStorage.getItem(CAREER_PROFILES_KEY) ?? "[]");
+  expect(stored[0].profile.skills).toContain("Docker");
+  // 分数变化也进了历史：这次记的是涨完分之后的那条。
+  await waitFor(() => expect(loadSnapshots(window.localStorage)).toHaveLength(2));
 });

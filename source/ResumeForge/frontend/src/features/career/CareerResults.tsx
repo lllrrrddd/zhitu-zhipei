@@ -11,6 +11,7 @@ import { formatDateTime } from "../../utils/format";
 import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
 import CareerDiagnosisPanel from "./CareerDiagnosisPanel";
 import CareerMatchHistory from "./CareerMatchHistory";
+import CareerSkillGaps from "./CareerSkillGaps";
 import { jobKeyOf, type MatchSnapshot } from "./matchHistory";
 import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
 import "../../styles/career-score.css";
@@ -50,12 +51,16 @@ function ResultCard({
   profile,
   profileId,
   history,
+  addingSkill,
+  onAddSkill,
   onAcceptAdvice,
 }: {
   match: MatchedJob;
   profile: CareerProfile;
   profileId: string;
   history: MatchSnapshot[];
+  addingSkill: string | null;
+  onAddSkill: (term: string) => void;
   onAcceptAdvice: (draft: string) => void;
 }) {
   const { message } = App.useApp();
@@ -178,6 +183,11 @@ function ResultCard({
           <p className="career-help">{t("career.score.note")}</p>
         </div>
         <CareerMatchHistory snapshots={history} jobKey={jobKeyOf(match)} profileId={profileId} />
+        <CareerSkillGaps
+          states={match.skill_states ?? []}
+          adding={addingSkill}
+          onAddSkill={onAddSkill}
+        />
         <div className="career-reasons">
           <strong>{t("career.result.why")}</strong>
           {match.matched_skills.length > 0 && (
@@ -207,9 +217,14 @@ function ResultCard({
           <div className="career-gaps">
             <strong>{t("career.gap.title")}</strong>
             <ul>
-              {(match.gaps ?? []).map((gap) => (
-                <li key={gap.key}>{t(GAP_LABELS[gap.key], { values: gap.values.join("、") })}</li>
-              ))}
+              {(match.gaps ?? [])
+                // 有全量三态面板时，"缺技能"这一行是它的子集，重复显示只会让两条说法打架。
+                .filter(
+                  (gap) => !(gap.key === "missing_skills" && (match.skill_states ?? []).length),
+                )
+                .map((gap) => (
+                  <li key={gap.key}>{t(GAP_LABELS[gap.key], { values: gap.values.join("、") })}</li>
+                ))}
             </ul>
           </div>
         )}
@@ -274,12 +289,16 @@ export default function CareerResults({
   profile,
   profileId,
   history,
+  addingSkill,
+  onAddSkill,
   onAcceptAdvice,
 }: {
   result: CareerMatches;
   profile: CareerProfile;
   profileId: string;
   history: MatchSnapshot[];
+  addingSkill: string | null;
+  onAddSkill: (term: string) => void;
   onAcceptAdvice: (draft: string) => void;
 }) {
   useLocale();
@@ -323,6 +342,8 @@ export default function CareerResults({
               profile={profile}
               profileId={profileId}
               history={history}
+              addingSkill={addingSkill}
+              onAddSkill={onAddSkill}
               onAcceptAdvice={onAcceptAdvice}
             />
           ))}

@@ -127,3 +127,52 @@ def test_score_is_reproducible():
     assert [(part.key, part.value) for part in first.score_parts] == [
         (part.key, part.value) for part in second.score_parts
     ]
+
+
+def test_skill_states_split_found_mentioned_and_missing():
+    """岗位要求技能要全量三态可读：已具备 / 只在经历里提到 / 完全没提。"""
+    profile = CareerProfile(
+        degree="master",
+        graduation_year=2027,
+        direction="运维工程师",
+        cities=["深圳"],
+        skills=["Linux"],
+        experience=["负责校内系统容器化改造，使用 Docker 部署并接入监控"],
+    )
+    match = asyncio.run(
+        job_market_match.match_market(
+            profile,
+            _snapshot(_job("6", "云平台运维工程师", requirements="熟悉 Linux、Docker、Ansible。")),
+        )
+    ).matches[0]
+    states = {item.term: item.state for item in match.skill_states}
+    assert states["Linux"] == "found"
+    # 技能栏没写、经历里写过：这是"写进技能栏就能涨分"的那一档。
+    assert states["Docker"] == "mentioned"
+    assert states["Ansible"] == "missing"
+    order = [item.state for item in match.skill_states]
+    rank = {"found": 0, "mentioned": 1, "missing": 2}
+    assert order == sorted(order, key=lambda state: rank[state])
+    # 老契约不变：check_skills 只给"技能栏和经历都没有"的那几项（Docker 写在经历里，
+    # 算分口径上算命中，所以不在其中）。
+    assert "Linux" not in match.check_skills
+    assert set(match.check_skills) == {"Ansible"}
+    # 两者的差就是新加的那一档：Docker 在经历里、不在技能栏。
+    mentioned = {item.term for item in match.skill_states if item.state == "mentioned"}
+    assert mentioned == {"Docker"}
+
+
+def test_skill_states_are_capped_and_never_exceed_job_requirements():
+    """技能对比列表有上限，且只包含岗位要求里真的写了的词。"""
+    requirements = (
+        "熟悉 Linux、Docker、Kubernetes、Ansible、Prometheus、MySQL、Redis、"
+        "Nginx、Kafka、Grafana、Terraform、Jenkins、Git、Shell、Python。"
+    )
+    match = asyncio.run(
+        job_market_match.match_market(
+            PROFILE, _snapshot(_job("7", "云平台运维工程师", requirements=requirements))
+        )
+    ).matches[0]
+    assert 0 < len(match.skill_states) <= 12
+    required = job_market_match._mentions(job_market_match._normalize(requirements))
+    assert {item.term for item in match.skill_states} <= required

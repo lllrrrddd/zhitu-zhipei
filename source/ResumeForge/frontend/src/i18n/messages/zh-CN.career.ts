@@ -236,6 +236,16 @@ const career = {
   "career.history.hint":
     "改完简历或补了技能再匹配一次，这里就能看到分数变化（历史只存在这台设备上）。",
   "career.history.empty": "还没有历史记录。",
+  "career.skills.title": "技能差距",
+  "career.skills.group.found": "已具备 {count} 项",
+  "career.skills.group.mentioned": "只在经历里提到 {count} 项",
+  "career.skills.group.missing": "岗位要求但简历没提 {count} 项",
+  "career.skills.add": "加入技能栏",
+  "career.skills.added": "已把 {skill} 加入技能栏，分数已重新计算。",
+  "career.skills.mentionedHint":
+    "这些技能你写在经历里了，但技能栏没有：加到技能栏即可，不用编造任何新经历。",
+  "career.skills.missingHint": "简历里完全没有：确认这份岗位是否真的需要它，需要就补一段真实经历。",
+  "career.skills.hint": "只按岗位要求里写到的技能对比，口径与简历解析、缺技能提示一致。",
 } as const;
 
 export default career;

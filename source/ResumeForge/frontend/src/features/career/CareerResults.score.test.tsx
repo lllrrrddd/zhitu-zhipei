@@ -71,6 +71,8 @@ function renderResults(items: MatchedJob[]) {
           profile={profile}
           profileId="profile-1"
           history={[]}
+          addingSkill={null}
+          onAddSkill={() => undefined}
           onAcceptAdvice={() => undefined}
         />
       </App>
@@ -87,9 +89,7 @@ it("shows the rule score together with its four parts", () => {
   expect(screen.getByText(t("career.score.city"))).toBeInTheDocument();
   expect(screen.getByText(t("career.score.entry"))).toBeInTheDocument();
   // 语义相近度只做排序参考，必须与分数分开显示，避免被读成同一个指标。
-  expect(
-    screen.getByText(t("career.score.relatedness", { value: 64 })),
-  ).toBeInTheDocument();
+  expect(screen.getByText(t("career.score.relatedness", { value: 64 }))).toBeInTheDocument();
   expect(screen.getByText(t("career.score.note"))).toBeInTheDocument();
 });
 
@@ -110,4 +110,36 @@ it("lists gaps so a possible match never stays unexplained", () => {
   expect(
     screen.getByText(t("career.gap.missing_skills", { values: "Ansible、Prometheus" })),
   ).toBeInTheDocument();
+});
+
+it("技能三态存在时用面板替代「缺技能」那一行，避免两种说法打架", () => {
+  renderResults([
+    match({
+      skill_states: [
+        { term: "Linux", state: "found" },
+        { term: "Docker", state: "mentioned" },
+        { term: "Ansible", state: "missing" },
+      ],
+      gaps: [{ key: "missing_skills", values: ["Ansible"] }],
+    }),
+  ]);
+  expect(screen.getByText(t("career.skills.title"))).toBeInTheDocument();
+  expect(screen.getByText(t("career.skills.group.mentioned", { count: 1 }))).toBeInTheDocument();
+  // 老那句"缺技能：Ansible"不再出现（面板里已经逐项列出）。
+  expect(
+    screen.queryByText(t("career.gap.missing_skills", { values: "Ansible" })),
+  ).not.toBeInTheDocument();
+});
+
+it("旧后端没有 skill_states 时照旧显示「缺技能」那一行", () => {
+  renderResults([
+    match({
+      skill_states: undefined,
+      gaps: [{ key: "missing_skills", values: ["Ansible"] }],
+    }),
+  ]);
+  expect(
+    screen.getByText(t("career.gap.missing_skills", { values: "Ansible" })),
+  ).toBeInTheDocument();
+  expect(screen.queryByText(t("career.skills.title"))).not.toBeInTheDocument();
 });

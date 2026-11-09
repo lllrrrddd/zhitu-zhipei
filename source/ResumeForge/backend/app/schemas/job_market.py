@@ -122,6 +122,22 @@ class MatchGap(BaseModel):
     values: list[str] = Field(default_factory=list)
 
 
+class SkillState(BaseModel):
+    """岗位要求里的一项技能，相对"这份画像"处于什么状态。
+
+    - ``found``：技能栏里已经写了（匹配分算它的分）。
+    - ``mentioned``：技能栏没写，但**经历描述里提到过**——最划算的一档，写进技能栏分数就涨。
+    - ``missing``：简历里完全没提，要么补经历，要么确认这份岗位不需要它。
+
+    与 ``check_skills`` 的区别：``check_skills`` 只给"没命中的那几个"（历史契约，界面上
+    是一句"缺技能"），这里给**全量三态**并按 found→mentioned→missing 排序，界面据此
+    分组显示、并允许一键把 mentioned 的写进技能栏。
+    """
+
+    term: str
+    state: Literal["found", "mentioned", "missing"]
+
+
 class MatchedJob(BaseModel):
     job: MarketJob
     checked_at: datetime
@@ -136,6 +152,9 @@ class MatchedJob(BaseModel):
         Literal["degree_unspecified", "degree_unconfirmed", "graduation_check", "experience_check"]
     ]
     check_skills: list[str]
+    # 岗位要求技能的**全量三态**（上限 12 条，见 SkillState）。空列表 = 旧后端或该岗位
+    # 的任职要求里没有可识别的技能词，前端此时退回只显示 check_skills 那一句。
+    skill_states: list[SkillState] = Field(default_factory=list)
     # 规则匹配度：0–100，只由下面四项组成，权重固定，可复算。不是录取概率。
     score: int = Field(default=0, ge=0, le=100)
     score_parts: list[ScorePart] = Field(default_factory=list)

@@ -17,6 +17,7 @@ from ..schemas.job_market import (
     MatchedJob,
     MatchGap,
     ScorePart,
+    SkillState,
 )
 from .job_market_catalog import is_current, summarize_market
 from .job_market_embeddings import semantic_scores
@@ -163,6 +164,42 @@ def _domains(text: str) -> set[int]:
     return {
         index for index, words in enumerate(_DIRECTIONS) if any(_has(text, word) for word in words)
     }
+
+
+# 一个岗位最多展示多少项技能对比：再多就不是"看缺口"，是"读一遍 JD"。
+_SKILL_STATE_LIMIT = 12
+_SKILL_STATE_ORDER = {"found": 0, "mentioned": 1, "missing": 2}
+
+
+def _skill_states(
+    requirement_skills: set[str],
+    profile: CareerProfile,
+) -> list[SkillState]:
+    """把岗位要求的技能逐项判成 已具备 / 只在经历里提到 / 完全没提。
+
+    为什么值得单独算：技能栏没写、经历里却写过的技能，是**改简历最划算的一处**——
+    加一行技能名，匹配分的技能项立刻变化，不编造任何事实。反之"完全没提"的需要用户
+    自己判断是补经历还是放弃，界面只负责如实标出来。
+
+    只认 ``SKILL_TERMS`` 的词表口径（与简历解析、``check_skills`` 同一份），不在这里
+    再写一套匹配规则，避免三处算出三种结果。
+
+    注意这里**不能**复用算分用的 ``confirmed_skills``：那个集合是按"技能栏 + 经历"合并
+    算的（技能写在经历里也算命中），拿它判三态会把"只在经历里提到"整档吃掉、全部并进
+    "已具备"，界面就没有"写进技能栏"这一步可做了。
+    """
+    experience = [_normalize(line) for line in profile.experience if line.strip()]
+    declared = _mentions(_normalize("\n".join(profile.skills)))
+    states: list[SkillState] = []
+    for term in sorted(requirement_skills):
+        if term in declared:
+            states.append(SkillState(term=term, state="found"))
+            continue
+        aliases = _SKILL_TERMS.get(term, (term,))
+        mentioned = any(_has(line, alias) for line in experience for alias in aliases)
+        states.append(SkillState(term=term, state="mentioned" if mentioned else "missing"))
+    states.sort(key=lambda item: (_SKILL_STATE_ORDER[item.state], item.term))
+    return states[:_SKILL_STATE_LIMIT]
 
 
 def _mentions(text: str) -> set[str]:
@@ -387,6 +424,7 @@ def _assess(
             degree_floor=floor,
             eligibility_notes=notes,
             check_skills=missing,
+            skill_states=_skill_states(req_skills, profile),
             score=total,
             score_parts=parts,
             gaps=gaps,

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { Alert } from "antd";
+import { Alert, App } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { findCareerMatches, getCareerMarket, refreshCareerMarket } from "../api/career";
 import CareerProfileForm from "../features/career/CareerProfileForm";
@@ -42,6 +42,7 @@ function readStorage(): Storage | null {
 
 export default function CareerPage() {
   useLocale();
+  const { message } = App.useApp();
   const initialMarket = useApi(getCareerMarket);
   const [market, setMarket] = useState<MarketSummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,6 +60,8 @@ export default function CareerPage() {
   const [result, setResult] = useState<CareerMatches | null>(null);
   /** 匹配历史只在这台设备上：每次匹配成功后追加，卡片上据此显示「较上次」。 */
   const [snapshots, setSnapshots] = useState<MatchSnapshot[]>(() => loadSnapshots(readStorage()));
+  /** 正在"加入技能栏"的技能名：只给那一颗按钮转圈，避免连点写出重复技能。 */
+  const [addingSkill, setAddingSkill] = useState<string | null>(null);
   const resultSection = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -213,16 +216,13 @@ export default function CareerPage() {
     }
   }
 
-  async function acceptAdvice(line: string) {
-    if (searching || !draft || !line.trim()) return;
-    const updated = {
-      ...draft,
-      experience: [
-        ...draft.experience.filter((item) => item !== line.trim()).slice(-11),
-        line.trim(),
-      ],
-    };
-    // 采纳建议写回**当前档案**（而不是只改内存里的 draft），刷新后仍然在。
+  /**
+   * 把改过的画像写回**当前档案**（不是只改内存里的 draft，刷新后仍在），并重跑一次匹配。
+   *
+   * "采纳一条表达建议"和"把技能写进技能栏"都走这里：两者都是"改画像 → 立刻看分数变化"，
+   * 分两条路径写迟早会漂（一条忘了记历史、一条忘了报错）。
+   */
+  async function applyProfileChange(updated: CareerProfile) {
     setRecords((current) =>
       current.map((item) =>
         item.id === currentId
@@ -243,6 +243,31 @@ export default function CareerPage() {
       setResult(null);
     } finally {
       setSearching(false);
+    }
+  }
+
+  async function acceptAdvice(line: string) {
+    if (searching || !draft || !line.trim()) return;
+    await applyProfileChange({
+      ...draft,
+      experience: [
+        ...draft.experience.filter((item) => item !== line.trim()).slice(-11),
+        line.trim(),
+      ],
+    });
+  }
+
+  /** 技能栏没写、经历里提到过的那一档：加一行技能名就够了，不编造新经历。 */
+  async function addSkill(term: string) {
+    const skill = term.trim();
+    if (searching || addingSkill !== null || !draft || !skill) return;
+    if (draft.skills.includes(skill)) return;
+    setAddingSkill(skill);
+    try {
+      await applyProfileChange({ ...draft, skills: [...draft.skills, skill] });
+      message.success(t("career.skills.added", { skill }));
+    } finally {
+      setAddingSkill(null);
     }
   }
 
@@ -293,6 +318,8 @@ export default function CareerPage() {
             <CareerResults
               profileId={currentId}
               history={snapshots}
+              addingSkill={addingSkill}
+              onAddSkill={(term) => void addSkill(term)}
               result={result}
               profile={draft}
               onAcceptAdvice={(line) => void acceptAdvice(line)}

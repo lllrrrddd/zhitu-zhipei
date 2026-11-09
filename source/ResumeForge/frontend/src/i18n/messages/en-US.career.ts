@@ -261,6 +261,18 @@ const career = {
   "career.history.hint":
     "Re-run the match after editing your resume to see the change. History stays on this device only.",
   "career.history.empty": "No history yet.",
+  "career.skills.title": "Skill gaps",
+  "career.skills.group.found": "{count} you have",
+  "career.skills.group.mentioned": "{count} only in your experience",
+  "career.skills.group.missing": "{count} required but not mentioned",
+  "career.skills.add": "Add to skills",
+  "career.skills.added": "{skill} added to your skills; score recalculated.",
+  "career.skills.mentionedHint":
+    "These appear in your experience but not in your skills list. Adding the name is enough — no new claims needed.",
+  "career.skills.missingHint":
+    "Not mentioned anywhere. Check whether the role really needs it; if so, add a real piece of experience.",
+  "career.skills.hint":
+    "Only skills written in the job requirements are compared, using the same vocabulary as resume parsing.",
 } as const;
 
 export default career;
