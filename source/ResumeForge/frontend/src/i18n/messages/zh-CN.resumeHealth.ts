@@ -28,6 +28,18 @@ const resumeHealth = {
   "resumeHealth.issue.untitled": "（未命名问题）",
   "resumeHealth.state.done": "已改好",
   "resumeHealth.state.ignored": "已忽略",
+  "resumeHealth.quality.category": "内容质量",
+  "resumeHealth.quality.ratio": "量化 {quantified}/{bullets} 条",
+  "resumeHealth.quality.weak": "弱动词开头 {count} 条",
+  "resumeHealth.quality.noNumbers.title": "成果条目缺少量化：{quantified} / {bullets} 条带数字",
+  "resumeHealth.quality.noNumbers.detail":
+    "招聘方先找结果、再找职责；没有数字的条目很难判断工作量与效果。",
+  "resumeHealth.quality.noNumbers.suggestion":
+    "给每条成果补一个可证明的数字：数据量、耗时、人数、提升百分比。写不出来说明这条经历还缺证据，不要编。",
+  "resumeHealth.quality.weak.title": "{count} 条以弱动词开头",
+  "resumeHealth.quality.weak.detail": "例如：{examples}",
+  "resumeHealth.quality.weak.suggestion":
+    "把「负责 X」改成本人做了什么、产出了什么：「把接口耗时从 800ms 降到 300ms」。",
   "resumeHealth.hint": "改完再体检一次，分数会更新；标记与体检记录只存在这台设备上。",
 } as const;
 

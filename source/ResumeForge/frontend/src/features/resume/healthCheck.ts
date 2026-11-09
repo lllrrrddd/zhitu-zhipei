@@ -17,7 +17,7 @@
 import type { AtsCheckResult, AtsIssue, AtsSeverity } from "../../types/ats";
 import type { ResumeRiskScan } from "../../types/resumeRisk";
 
-export type HealthSource = "ats" | "risk";
+export type HealthSource = "ats" | "risk" | "quality";
 export type HealthSeverity = AtsSeverity;
 export type HealthIssueState = "todo" | "done" | "ignored";
 
@@ -46,6 +46,8 @@ export interface HealthEntry {
   issueCount: number;
   /** 参与体检的风险点数量（风险扫描没跑过时为 0）。 */
   riskCount: number;
+  /** 内容质量指标快照（正文条目数、量化数、弱动词数）：老记录没有这一项。 */
+  quality?: { bullets: number; quantified: number; ratio: number; weakCount: number };
 }
 
 export type HealthHistory = Record<string, HealthEntry[]>;
@@ -59,7 +61,7 @@ export const HEALTH_HISTORY_LIMIT = 30;
 const SEVERITY_ORDER: Record<HealthSeverity, number> = { high: 0, medium: 1, low: 2 };
 
 /** 短指纹（FNV-1a 32 位）：只要稳定，不需要密码学强度。 */
-function shortHash(value: string): string {
+export function shortHash(value: string): string {
   let hash = 0x811c9dc5;
   for (let index = 0; index < value.length; index += 1) {
     hash ^= value.charCodeAt(index);
@@ -74,6 +76,16 @@ function atsFingerprint(issue: AtsIssue): string {
 
 function riskFingerprint(category: string, text: string, location: string): string {
   return shortHash([category, text.slice(0, 40), location].join("|"));
+}
+
+/** 统一排序：严重程度优先，同级 ATS 在前（本地规则更确定），最后按标题。 */
+export function sortIssues(issues: HealthIssue[]): HealthIssue[] {
+  return [...issues].sort(
+    (left, right) =>
+      SEVERITY_ORDER[left.severity] - SEVERITY_ORDER[right.severity] ||
+      (left.source === right.source ? 0 : left.source === "ats" ? -1 : 1) ||
+      left.title.localeCompare(right.title),
+  );
 }
 
 /** 把 ATS 问题与风险点合并成一张清单：严重程度优先，同级别 ATS 在前（本地规则更确定）。 */
@@ -108,12 +120,7 @@ export function buildIssues(
       location: point.location,
     });
   }
-  return issues.sort(
-    (left, right) =>
-      SEVERITY_ORDER[left.severity] - SEVERITY_ORDER[right.severity] ||
-      (left.source === right.source ? 0 : left.source === "ats" ? -1 : 1) ||
-      left.title.localeCompare(right.title),
-  );
+  return sortIssues(issues);
 }
 
 /** 合并后的清单里还有多少条待处理（未标记、未忽略）。 */

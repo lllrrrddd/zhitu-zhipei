@@ -9,6 +9,46 @@ import type { AtsCheckResult } from "../types/ats";
 
 const apiMocks = vi.hoisted(() => ({ runAtsCheck: vi.fn() }));
 vi.mock("../api/ats", () => apiMocks);
+
+// 内容质量指标要读简历正文：这里给一份最小文档（两条弱动词、一条带数字）。
+const resumeMocks = vi.hoisted(() => ({ getResume: vi.fn() }));
+vi.mock("../api/resumes", () => resumeMocks);
+
+const CONTENT = {
+  version: 2,
+  language: "zh-CN",
+  header: { name: { value: "某人" } },
+  sections: [
+    {
+      key: "experience",
+      title: "实习经历",
+      kind: "entries",
+      layout: "stacked",
+      entries: ["负责订单接口开发", "参与需求评审", "上线 3 个接口"].map((text, index) => ({
+        id: `e${index}`,
+        hidden: false,
+        lock_content: false,
+        lock_layout: false,
+        layout: "stacked" as const,
+        items: [
+          {
+            kind: "field",
+            id: `i${index}`,
+            key: "summary",
+            label: "",
+            value: text,
+            format: "text",
+            wrap: "none",
+            body_style: "bullet",
+            placement: "body",
+            show_label: false,
+            solo: false,
+          },
+        ],
+      })),
+    },
+  ],
+};
 // 风险扫描是另一个面板的事：这里只验证"没跑过时给出提示"，不触发任务。
 vi.mock("../features/resume/riskScanStore", () => ({
   useRiskScan: () => ({ status: "idle" }),
@@ -53,6 +93,7 @@ function renderPanel(signature?: string) {
 beforeEach(() => {
   window.localStorage.clear();
   apiMocks.runAtsCheck.mockReset();
+  resumeMocks.getResume.mockReset().mockResolvedValue({ content: CONTENT });
 });
 
 it("挂载不发请求：先给说明卡与「开始体检」", () => {
@@ -68,7 +109,8 @@ it("体检后显示分数、问题清单与待处理条数，并把结果记进�
   fireEvent.click(screen.getByRole("button", { name: t("resumeHealth.action.run") }));
 
   expect(await screen.findByText("62")).toBeInTheDocument();
-  expect(screen.getByText(t("resumeHealth.open", { count: 2 }))).toBeInTheDocument();
+  // ATS 给了 2 条，内容质量再补 2 条（缺量化 + 弱动词）
+  expect(screen.getByText(t("resumeHealth.open", { count: 4 }))).toBeInTheDocument();
   expect(screen.getByText(issueTitle(1))).toBeInTheDocument();
   await waitFor(() => expect(window.localStorage.getItem(HEALTH_HISTORY_KEY)).not.toBeNull());
 });
@@ -81,7 +123,7 @@ it("标记「已改好」后待处理条数减少，并记住这条", async () =
 
   fireEvent.click(screen.getAllByRole("button", { name: t("resumeHealth.action.markDone") })[0]);
 
-  expect(screen.getByText(t("resumeHealth.open", { count: 1 }))).toBeInTheDocument();
+  expect(screen.getByText(t("resumeHealth.open", { count: 3 }))).toBeInTheDocument();
   expect(screen.getByText(t("resumeHealth.state.done"))).toBeInTheDocument();
   const stored = JSON.parse(window.localStorage.getItem(HEALTH_TODO_KEY) ?? "{}");
   expect(Object.values(stored["1"] ?? {})).toEqual(["done"]);
@@ -124,4 +166,35 @@ it("体检失败时显示错误并可重试", async () => {
       screen.getByRole("button", { name: new RegExp(t("resumeHealth.action.run")) }),
     ).toBeEnabled(),
   );
+});
+
+it("把量化比例与弱动词并进清单，并在头部给出两个指标", async () => {
+  apiMocks.runAtsCheck.mockResolvedValue(ats(62, 0));
+  renderPanel();
+  fireEvent.click(screen.getByRole("button", { name: t("resumeHealth.action.run") }));
+
+  // 3 条正文里 1 条带数字 → 33%，低于 40% 下限，于是出现"缺量化"这一条
+  expect(
+    await screen.findByText(
+      t("resumeHealth.quality.noNumbers.title", { quantified: 1, bullets: 3 }),
+    ),
+  ).toBeInTheDocument();
+  expect(screen.getByText(t("resumeHealth.quality.weak.title", { count: 2 }))).toBeInTheDocument();
+  // 头部两项指标
+  expect(
+    screen.getByText(t("resumeHealth.quality.ratio", { quantified: 1, bullets: 3 })),
+  ).toBeInTheDocument();
+  expect(screen.getByText("33%")).toBeInTheDocument();
+  expect(screen.getByText(t("resumeHealth.quality.weak", { count: 2 }))).toBeInTheDocument();
+  // 共 3 条待处理（ATS 0 条 + 质量 2 条？此处 ATS 给了 0 条，所以是 2 条）
+  expect(screen.getByText(t("resumeHealth.open", { count: 2 }))).toBeInTheDocument();
+});
+
+it("简历内容取不到时体检失败并给出错误，不写入历史", async () => {
+  apiMocks.runAtsCheck.mockResolvedValue(ats(70, 1));
+  resumeMocks.getResume.mockRejectedValue(new Error("content unavailable"));
+  renderPanel();
+  fireEvent.click(screen.getByRole("button", { name: t("resumeHealth.action.run") }));
+  expect(await screen.findByText("content unavailable")).toBeInTheDocument();
+  expect(window.localStorage.getItem(HEALTH_HISTORY_KEY)).toBeNull();
 });

@@ -13,11 +13,13 @@
 import { Alert, App, Button, Empty, Space, Tag, Typography } from "antd";
 import { useMemo, useState } from "react";
 import { runAtsCheck } from "../api/ats";
+import { getResume } from "../api/resumes";
 import { t, type MessageKey } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import type { AtsCheckResult } from "../types/ats";
 import { formatDateTime } from "../utils/format";
 import { useRiskScan } from "../features/resume/riskScanStore";
+import { analyzeContent, type QualityFindings } from "../features/resume/qualityMetrics";
 import {
   appendEntry,
   buildIssues,
@@ -26,6 +28,8 @@ import {
   loadHistory,
   loadIssueStates,
   saveHistory,
+  shortHash,
+  sortIssues,
   saveIssueStates,
   setIssueState,
   type HealthIssue,
@@ -52,6 +56,12 @@ const ATS_CATEGORY_LABEL: Record<string, MessageKey> = {
   position: "atsCheck.category.position.label",
 };
 
+/** 内容质量两类：量化与动词。都归到「内容质量」这一栏显示。 */
+const QUALITY_CATEGORY_LABEL: Record<string, MessageKey> = {
+  quantified: "resumeHealth.quality.category",
+  verb: "resumeHealth.quality.category",
+};
+
 const RISK_CATEGORY_LABEL: Record<string, MessageKey> = {
   duplicate: "riskPanel.category.duplicate.label",
   sensitive: "riskPanel.category.sensitive.label",
@@ -69,9 +79,53 @@ function readStorage(): Storage | null {
 }
 
 function categoryLabel(issue: HealthIssue): string {
-  const key = issue.source === "ats" ? ATS_CATEGORY_LABEL : RISK_CATEGORY_LABEL;
+  const key =
+    issue.source === "ats"
+      ? ATS_CATEGORY_LABEL
+      : issue.source === "quality"
+        ? QUALITY_CATEGORY_LABEL
+        : RISK_CATEGORY_LABEL;
   const label = key[issue.category as keyof typeof key];
   return label ? t(label) : issue.category;
+}
+
+/** 把「量化不足 / 弱动词」两条判定变成清单条目；文案走语言包。 */
+function qualityIssues(finding: QualityFindings): HealthIssue[] {
+  const issues: HealthIssue[] = [];
+  if (finding.lowQuantified) {
+    issues.push({
+      fingerprint: shortHash(
+        ["quality", "no_numbers", String(finding.quantified), String(finding.bullets)].join("|"),
+      ),
+      source: "quality",
+      severity: "medium",
+      category: "quantified",
+      title: t("resumeHealth.quality.noNumbers.title", {
+        quantified: finding.quantified,
+        bullets: finding.bullets,
+      }),
+      detail: t("resumeHealth.quality.noNumbers.detail"),
+      suggestion: t("resumeHealth.quality.noNumbers.suggestion"),
+      evidence: [],
+      location: "",
+    });
+  }
+  if (finding.manyWeakVerbs) {
+    issues.push({
+      fingerprint: shortHash(["quality", "weak_verb", String(finding.weakCount)].join("|")),
+      source: "quality",
+      severity: "low",
+      category: "verb",
+      title: t("resumeHealth.quality.weak.title", { count: finding.weakCount }),
+      detail: t("resumeHealth.quality.weak.detail", {
+        examples: finding.weakExamples.join("；"),
+      }),
+      suggestion: t("resumeHealth.quality.weak.suggestion"),
+      evidence: finding.weakExamples,
+      location: finding.weakSections[0] ?? "",
+    });
+  }
+  return issues;
 }
 
 export default function ResumeHealthPanel({
@@ -86,6 +140,7 @@ export default function ResumeHealthPanel({
   const { message } = App.useApp();
   const risk = useRiskScan(resumeId);
   const [ats, setAts] = useState<AtsCheckResult | null>(null);
+  const [quality, setQuality] = useState<QualityFindings | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState(() => loadHistory(readStorage()));
@@ -95,7 +150,11 @@ export default function ResumeHealthPanel({
   const latest = entries[entries.length - 1];
   const previous = entries[entries.length - 2];
   const delta = healthDelta(entries);
-  const issues = useMemo(() => buildIssues(ats, risk.result), [ats, risk.result]);
+  const issues = useMemo(
+    () =>
+      sortIssues([...buildIssues(ats, risk.result), ...(quality ? qualityIssues(quality) : [])]),
+    [ats, risk.result, quality],
+  );
   const counts = countOpen(issues, states[String(resumeId)]);
   const stale = Boolean(latest && signature && latest.signature && latest.signature !== signature);
 
@@ -104,16 +163,26 @@ export default function ResumeHealthPanel({
     setRunning(true);
     setError("");
     try {
-      const result = await runAtsCheck(resumeId, "");
+      // ATS 是本地规则、简历内容是同一台后端的一次 GET：并行取，不串行等两次往返。
+      const [result, detail] = await Promise.all([runAtsCheck(resumeId, ""), getResume(resumeId)]);
+      const finding = analyzeContent(detail.content);
       setAts(result);
+      setQuality(finding);
       const riskCount = risk.result?.points.length ?? 0;
+      const qualityCount = qualityIssues(finding).length;
       const next = appendEntry(history, resumeId, {
         at: new Date().toISOString(),
         signature: signature ?? "",
         score: result.score,
         subscores: result.subscores ?? {},
-        issueCount: result.issues.length + riskCount,
+        issueCount: result.issues.length + riskCount + qualityCount,
         riskCount,
+        quality: {
+          bullets: finding.bullets,
+          quantified: finding.quantified,
+          ratio: finding.ratio,
+          weakCount: finding.weakCount,
+        },
       });
       setHistory(next);
       saveHistory(readStorage(), next);
@@ -192,6 +261,23 @@ export default function ResumeHealthPanel({
               <b>{value}</b>
             </span>
           ))}
+        </div>
+      )}
+
+      {(quality ?? latest?.quality) && (
+        <div className="resume-health-subscores">
+          <span>
+            {t("resumeHealth.quality.ratio", {
+              quantified: (quality ?? latest?.quality)!.quantified,
+              bullets: (quality ?? latest?.quality)!.bullets,
+            })}
+            <b>{Math.round(((quality ?? latest?.quality)!.ratio ?? 0) * 100)}%</b>
+          </span>
+          <span>
+            {t("resumeHealth.quality.weak", {
+              count: (quality ?? latest?.quality)!.weakCount,
+            })}
+          </span>
         </div>
       )}
 
