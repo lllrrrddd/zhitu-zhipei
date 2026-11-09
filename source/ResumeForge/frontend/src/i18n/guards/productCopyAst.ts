@@ -7,6 +7,7 @@ import {
 } from "./productCopyReferences";
 import {
   COPY_PROPERTIES,
+  collectDataValueKeys,
   hasCopyText,
   isCopyCall,
   isTechnicalContext,
@@ -69,10 +70,12 @@ export function scanProductCopy(source: string, fileName = "source.tsx"): Produc
   const resolve = createReferenceResolver(sourceFile);
   const findings: ProductCopyFinding[] = [];
   const recorded = new Set<ts.Node>();
+  /** 本文件里的「数据值 → 展示名」表：回显数据值的字面量不是新文案（见 collectDataValueKeys）。 */
+  const dataValues = collectDataValueKeys(sourceFile);
 
   const add = (node: ts.Node, text: string, kind: string, referenced = false): void => {
-    if (recorded.has(node) || !hasCopyText(text) || (!referenced && isTechnicalContext(node)))
-      return;
+    if (recorded.has(node) || !hasCopyText(text) || dataValues.has(text)) return;
+    if (!referenced && isTechnicalContext(node)) return;
     recorded.add(node);
     findings.push({
       text,

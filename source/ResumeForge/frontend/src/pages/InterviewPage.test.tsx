@@ -161,7 +161,7 @@ describe("InterviewPage：自动轮数提交契约", () => {
     apiMocks.createInterview.mockResolvedValue(makeDetail({ rounds: 12, rounds_min: 8 }));
     renderPage();
 
-    fireEvent.click(await screen.findByText("自动开始（桩）"));
+    fireEvent.click(await screen.findByRole("button", { name: /自动开始/ }));
 
     await waitFor(() => expect(apiMocks.createInterview).toHaveBeenCalledTimes(1));
     expect(apiMocks.createInterview).toHaveBeenCalledWith(
@@ -183,7 +183,7 @@ describe("InterviewPage：自动轮数提交契约", () => {
     apiMocks.createInterview.mockResolvedValue(makeDetail());
     renderPage();
 
-    fireEvent.click(await screen.findByText("固定开始（桩）"));
+    fireEvent.click(await screen.findByRole("button", { name: /固定开始/ }));
 
     await waitFor(() => expect(apiMocks.createInterview).toHaveBeenCalledTimes(1));
     expect(apiMocks.createInterview).toHaveBeenCalledWith(
@@ -200,14 +200,14 @@ describe("InterviewPage：创建失败与提交回答的错误链路", () => {
     );
     renderPage();
 
-    fireEvent.click(await screen.findByText("自动开始（桩）"));
+    fireEvent.click(await screen.findByRole("button", { name: /自动开始/ }));
 
     expect(
       await screen.findByText("Input should be greater than or equal to 3"),
     ).toBeInTheDocument();
     // 关键不变量：失败绝不乐观进入面试房间（否则之后的回答必然 404）。
     expect(screen.queryByText("回到设置")).toBeNull();
-    expect(screen.getByText("自动开始（桩）")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /自动开始/ })).toBeInTheDocument();
   });
 
   it("提交回答：流式请求带 /api 前缀；后端 404 detail 原样展示，回答放回输入框", async () => {
@@ -215,7 +215,7 @@ describe("InterviewPage：创建失败与提交回答的错误链路", () => {
     streamMocks.consumeSSE.mockRejectedValue(new ApiError("面试不存在或已被删除", 404));
     renderPage();
 
-    fireEvent.click(await screen.findByText("固定开始（桩）"));
+    fireEvent.click(await screen.findByRole("button", { name: /固定开始/ }));
     // 0066：进房间先过「准备好了」闸门，作答区才出现（计时也从这一刻开始）。
     fireEvent.click(await screen.findByRole("button", { name: /准备好了/ }));
     const textarea = await screen.findByPlaceholderText(/像真实面试那样回答/);

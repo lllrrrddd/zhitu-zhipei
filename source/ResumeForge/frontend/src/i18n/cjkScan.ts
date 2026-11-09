@@ -50,6 +50,21 @@ import { join, relative, sep } from "node:path";
  */
 const CJK_PATTERN = /[\u2e80-\u9fff\uff00-\uffef\u3000-\u303f]/;
 
+/**
+ * "这一行有汉字"的判据（CJK 统一表意文字 + 扩展 A）。
+ *
+ * 为什么 `countCjkLines` 除了 `CJK_PATTERN` 还要看这个：`CJK_PATTERN` 把**全角标点**
+ * （`、` `，` `；` `：`）也算成 CJK，于是 `cities.join("、")` / `tokenSeparators={[",", "，"]}`
+ * 这种**分隔符**行被算成"界面文案"。标点不是文案——一条只有冒号的行不可能承载产品语义，
+ * 而任何真正的中文文案必然含汉字。所以计数口径是「含 CJK 标点 **且** 含汉字」：
+ * 少了这半个判据，守卫会持续为"分隔符"报违规，逼着人给分隔符写 `i18n-ok`，
+ * 那才是真正把豁免用成后门。
+ *
+ * 注意不动 `CJK_PATTERN` 本身：`hasExemption`／自测与 `barLabelLayout` 的宽字符口径
+ * 依赖它对全角的覆盖。
+ */
+const CJK_LETTER = /[\u3400-\u4dbf\u4e00-\u9fff]/;
+
 /** 匹配 `screen.getByText("保存")` 这一族查询。 */
 const BY_TEXT_CALL = /(get|find|query)(All)?ByText\s*\(/;
 
@@ -250,6 +265,8 @@ export function countCjkLines(text: string): number {
   let count = 0;
   for (let index = 0; index < strippedLines.length; index += 1) {
     if (!CJK_PATTERN.test(strippedLines[index])) continue;
+    // 只有全角标点（`join("、")`、`tokenSeparators={["，"]}`）不算文案，见 `CJK_LETTER`。
+    if (!CJK_LETTER.test(strippedLines[index])) continue;
     if (isExempt(rawLines[index] ?? "", rawLines[index - 1])) continue;
     count += 1;
   }
@@ -289,7 +306,8 @@ export function countCjkAssertions(text: string): number {
     const start = cursor + match.index;
     const args = readCallArguments(stripped, start + match[0].length - 1);
     cursor += line.length + 1;
-    if (!CJK_PATTERN.test(args)) continue;
+    // 与 `countCjkLines` 同一口径：只有全角标点的断言（`getByText("：")`）不算中文断言。
+    if (!CJK_PATTERN.test(args) || !CJK_LETTER.test(args)) continue;
     if (isExempt(rawLines[index] ?? "", rawLines[index - 1])) continue;
     count += 1;
   }

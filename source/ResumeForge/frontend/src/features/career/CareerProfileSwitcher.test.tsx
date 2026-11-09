@@ -42,8 +42,10 @@ function renderSwitcher(list: CareerProfileRecord[], handlers = {}) {
 }
 
 it("显示全部档案名，并说明档案只存在本机", () => {
-  renderSwitcher(records(2));
-  expect(screen.getByText("档案 1")).toBeInTheDocument();
+  const list = records(2);
+  renderSwitcher(list);
+  // 断言的是**用户数据**（档案名由 records() 生成），不是界面文案：直接引用同一条记录。
+  expect(screen.getByText(list[0].label)).toBeInTheDocument();
   expect(screen.getByText(t("career.profiles.note"))).toBeInTheDocument();
 });
 
@@ -55,9 +57,7 @@ it("点新建会创建一份新档案", () => {
 
 it("只有一份档案时删除按钮不可用", () => {
   renderSwitcher(records(1));
-  expect(
-    screen.getByRole("button", { name: t("career.profiles.delete") }),
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: t("career.profiles.delete") })).toBeDisabled();
 });
 
 it("多份档案时点删除先弹确认，不会直接删掉", async () => {

@@ -162,6 +162,24 @@ describe("technical syntax is not a translation task", () => {
     expect(scan("<span>100%</span>")).toEqual(["100%"]);
   });
 
+  it("ignores label values that echo a data-value key declared in the same file", () => {
+    // types/job.ts 的 JOB_STATUS_META 形态：键是后端 job.status 的落库值，
+    // label 只是**把同一个数据值显示出来**——两个串都必须一个字不改，翻了界面就和数据对不上。
+    const statusMeta = [
+      "const JOB_STATUS_META = {",
+      '  \u5f85\u6838\u5b9e: { label: "\u5f85\u6838\u5b9e", color: "gold" },',
+      '  \u5f00\u653e\u4e2d: { label: "\u5f00\u653e\u4e2d", color: "green" },',
+      "};",
+    ].join("\n");
+    expect(scan(statusMeta)).toEqual([]);
+    // 不放宽：本文件里没有同名键的字面量照旧算文案（真改了叫法就该进语言包）。
+    expect(
+      scan('const META = { \u5f85\u6838\u5b9e: { label: "\u7b49\u5f85\u6838\u5b9e\u4e2d" } };'),
+    ).toEqual(["\u7b49\u5f85\u6838\u5b9e\u4e2d"]);
+    // 只认含汉字的键：ASCII 键不参与这条豁免（`name` 等由 RESUME_ROLE_VALUES 单独覆盖）。
+    expect(scan('const META = { index: { label: "index" } };')).toEqual(["index"]);
+  });
+
   it("ignores backend resume-role enum values in record mappings, not real copy", () => {
     // textLevels.ts 的 FIELD_PATH_SCOPE 形态：右侧是后端 resume_style_schema.ROLES
     // 的枚举值（该纸面字段属于哪个段落角色），是技术标识不是界面文案。

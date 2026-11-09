@@ -16,6 +16,7 @@ export const EMPTY_CAREER_PROFILE: CareerProfile = {
 
 const degreeRank = { unknown: 0, bachelor: 1, master: 2, doctor: 3 };
 const ROLE_HINTS =
+  // i18n-ok: 匹配简历原文（中文）里的岗位方向词，是识别用的词表，不是界面文案
   /运维|后端|前端|算法|测试工程|数据分析|软件开发|网络安全|嵌入式|财务|供应链|设计师/;
 
 function directionFromExperience(resume: Pick<Profile, "experiences">): string {
@@ -82,10 +83,7 @@ export function resumeToCareerProfile(
   };
 }
 
-export function exampleToCareerProfile(
-  profile: GraduateProfile,
-  direction: string,
-): CareerProfile {
+export function exampleToCareerProfile(profile: GraduateProfile, direction: string): CareerProfile {
   return {
     degree: profile.degree,
     graduation_year: profile.graduation_year,

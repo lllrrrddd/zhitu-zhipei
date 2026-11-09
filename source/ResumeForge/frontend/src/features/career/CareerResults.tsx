@@ -74,14 +74,14 @@ function ResultCard({
           title,
           company: job.company,
           location: job.cities.join(" / ").slice(0, 64),
-          job_type: job.kind === "full_time" ? "社招" : "校招",
+          job_type: job.kind === "full_time" ? "社招" : "校招", // i18n-ok: 落库值：岗位类型，与后端 job_type 同值
           description: job.responsibilities,
           requirements: job.requirements,
           source_url: job.url,
           posted_at: job.listed_date ?? "",
-          status: "待核实",
+          status: "待核实", // i18n-ok: 落库值：岗位状态，与后端白名单同值
           note: formatDateTime(match.checked_at),
-          origin_source: "企业官网",
+          origin_source: "企业官网", // i18n-ok: 落库值：来源字段
           favorite: true,
         }));
       setSavedId(saved.id);
@@ -97,25 +97,25 @@ function ResultCard({
     setStartingInterview(true);
     try {
       const resumeText = [
-        `学历：${profile.degree}；毕业年份：${profile.graduation_year ?? "待确认"}`,
-        `专业：${profile.major}；目标岗位：${profile.direction}`,
-        `意向城市：${profile.cities.join("、")}`,
-        `已确认技能：${profile.skills.join("、")}`,
-        ...profile.experience.map((line) => `经历：${line}`),
+        `学历：${profile.degree}；毕业年份：${profile.graduation_year ?? "待确认"}`, // i18n-ok: 面试训练请求体：画像摘要原文，随会话持久化
+        `专业：${profile.major}；目标岗位：${profile.direction}`, // i18n-ok: 面试训练请求体：同上
+        `意向城市：${profile.cities.join("、")}`, // i18n-ok: 面试训练请求体：同上
+        `已确认技能：${profile.skills.join("、")}`, // i18n-ok: 面试训练请求体：同上
+        ...profile.experience.map((line) => `经历：${line}`), // i18n-ok: 面试训练请求体：同上
       ].join("\n");
       const session = await createInterview({
-        title: `${job.company} · ${job.title} · 五轮求职训练`.slice(0, 128),
+        title: `${job.company} · ${job.title} · 五轮求职训练`.slice(0, 128), // i18n-ok: 面试训练请求体：会话标题
         job_material: {
           name: `${job.company} · ${job.title}`.slice(0, 256),
-          text: `招聘原文：${job.url}\n岗位职责：${job.responsibilities}\n任职要求：${job.requirements}`,
+          text: `招聘原文：${job.url}\n岗位职责：${job.responsibilities}\n任职要求：${job.requirements}`, // i18n-ok: 面试训练请求体：岗位原文
         },
-        resume_material: { name: "本人确认的求职画像", text: resumeText },
-        interview_type: "综合面",
-        difficulty: "中级",
-        interviewer_style: "温和引导",
+        resume_material: { name: "本人确认的求职画像", text: resumeText }, // i18n-ok: 面试训练请求体：简历材料名
+        interview_type: "综合面", // i18n-ok: 面试类型是后端枚举值（综合面/专业面…）
+        difficulty: "中级", // i18n-ok: 难度是后端枚举值
+        interviewer_style: "温和引导", // i18n-ok: 面试官风格是后端枚举值
         rounds: 5,
         rounds_min: null,
-        focus: `围绕${job.title}的岗位要求和候选人实际经历提问，不编造经历。`.slice(0, 255),
+        focus: `围绕${job.title}的岗位要求和候选人实际经历提问，不编造经历。`.slice(0, 255), // i18n-ok: 面试训练请求体：聚焦提示词
       });
       navigate(`/interview?session_id=${session.id}`);
     } catch (error) {

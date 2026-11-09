@@ -160,3 +160,33 @@ export function hasCopyText(value: string): boolean {
   if (LOCALE_KEY.test(value.trim())) return false;
   return /[\p{L}\p{N}]/u.test(value);
 }
+
+/** 汉字（含扩展 A）：用来把"像数据值的中文键"与 `label: "name"` 这类 ASCII 键分开。 */
+const CJK = /[\u3400-\u4dbf\u4e00-\u9fff]/;
+
+/**
+ * 同一文件里被当作**对象键**的中文串 = 落库的数据值（协议值）。
+ *
+ * 为什么需要这条：`types/job.ts` 的 `JOB_STATUS_META` 是「数据值 → 展示名 + 颜色」表，
+ * 形如 `待核实: { label: "待核实", color: "gold" }`。`label` 在 COPY_PROPERTIES 里，
+ * 于是右侧那个 **回显数据值** 的字面量被判成"新增界面文案"；可它一个字都不能翻——
+ * 它就是后端 `JOB_STATUS_UNVERIFIED` 的中文值，翻了界面就和数据对不上。
+ *
+ * 判据是**值的全等集合匹配 + 该串在本文件里确实是对象键**，不是"看着像中文就放过"：
+ * - 真正的新文案不会碰巧和一个对象键逐字相同（真相同反而是同一份数据复用了同一串，
+ *   依然不是"新文案"）；
+ * - 只认含汉字的键。`label: "name"` 这种 ASCII 值仍走原有逻辑（`RESUME_ROLE_VALUES`
+ *   已经覆盖排版角色枚举），不放宽成"任何键都能豁免"。
+ */
+export function collectDataValueKeys(sourceFile: ts.SourceFile): ReadonlySet<string> {
+  const keys = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isPropertyAssignment(node)) {
+      const name = propertyName(node.name);
+      if (name && CJK.test(name)) keys.add(name);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return keys;
+}

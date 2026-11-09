@@ -7,6 +7,15 @@ import pkg from "../package.json";
 import { APP_NAME_KEY, GITHUB_REPO } from "./config";
 import { t } from "./i18n";
 
+/**
+ * 桩页面文本的**断言用**常量。
+ *
+ * `vi.mock` 的工厂会被提升，工厂体里只能写字面量；断言侧引用这些常量而不是重复写字面量，
+ * 一来 mock 与断言同源，二来棘轮不必把"桩页面内容"当成需要翻译的中文文案。
+ */
+const STUB_CAREER = "找岗位内容";
+const STUB_JOBS = "岗位广场内容";
+
 vi.mock("./pages/HomePage", () => ({ default: () => <div>首页内容</div> }));
 vi.mock("./pages/CareerPage", () => ({ default: () => <div>找岗位内容</div> }));
 vi.mock("./pages/JobsPage", () => ({ default: () => <div>岗位广场内容</div> }));
@@ -41,7 +50,7 @@ describe("guide entry", () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText("找岗位内容");
+    await screen.findByText(STUB_CAREER);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
     expect(await screen.findByRole("dialog", { name: "欢迎使用职途智配" })).toBeInTheDocument();
@@ -55,7 +64,7 @@ describe("guide entry", () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText("找岗位内容");
+    await screen.findByText(STUB_CAREER);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
@@ -71,7 +80,7 @@ describe("application navigation", () => {
         <App />
       </MemoryRouter>,
     );
-    await screen.findByText("找岗位内容");
+    await screen.findByText(STUB_CAREER);
 
     const skip = screen.getByRole("link", { name: "跳到主要内容" });
     fireEvent.click(skip);
@@ -92,7 +101,7 @@ describe("application navigation", () => {
     const drawer = await screen.findByRole("dialog", { name: "功能导航" });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(within(drawer).getByRole("menuitem", { name: "已保存岗位" }));
-    expect(await screen.findByText("岗位广场内容")).toBeInTheDocument();
+    expect(await screen.findByText(STUB_JOBS)).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "功能导航" })).toBeNull());
     expect(screen.getByRole("main")).toHaveFocus();
     expect(document.title).toBe(`已保存岗位 · ${t(APP_NAME_KEY)}`);
@@ -174,8 +183,9 @@ describe("application navigation", () => {
     expect(repoLink).not.toBeNull();
     expect(repoLink).toHaveAttribute("href", GITHUB_REPO);
     expect(repoLink).toHaveAttribute("aria-label", `在 GitHub 上查看 ${t(APP_NAME_KEY)} 源码`);
-    // 页头里必须和「退出」并排，且页脚不再有第二个源码入口。
-    expect(headerActions?.textContent).toContain("退出");
+    // 页头里必须和「关闭应用」并排，且页脚不再有第二个源码入口。
+    expect(headerActions?.textContent).toContain(t("common.exitApp.aria"));
+    expect(headerActions?.querySelector(".app-exit-button")).not.toBeNull();
     expect(container.querySelector(".app-sider-footer .app-repo-button")).toBeNull();
 
     // 点击除直跳仓库外，还要弹出 Star 提示（Modal 挂在 document.body 上）。
@@ -218,6 +228,6 @@ describe("application navigation", () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
     // 页面是懒加载的（`lazy()` + Suspense），这里必须等它解析出来：用 getByText 的话
     // 成败取决于"这一拍跑得够不够快"——本机过、CI 的慢机器挂（2026-10-01 红过一次）。
-    expect(await screen.findByText("岗位广场内容")).toBeInTheDocument();
+    expect(await screen.findByText(STUB_JOBS)).toBeInTheDocument();
   });
 });

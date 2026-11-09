@@ -203,7 +203,8 @@ export default function JobDetailDrawer({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {job.origin_source === "企业官网"
+                {job.origin_source ===
+                "企业官网" /* i18n-ok: 与落库值比较（来源字段由后端按此值写入），不是界面文案 */
                   ? t("jobDetail.action.officialPosting")
                   : t("jobDetail.action.originalPosting")}
               </Button>

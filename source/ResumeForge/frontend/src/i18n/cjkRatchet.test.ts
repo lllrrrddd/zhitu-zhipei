@@ -191,6 +191,16 @@ describe("扫描器自测（不读仓库）", () => {
     expect(isExempt('const a = "\u4f60\u597d";', undefined)).toBe(false);
   });
 
+  it("只有全角标点的行不算文案（分隔符不是界面文案）", () => {
+    // `join("、")` / `tokenSeparators={["，"]}` 这类行曾把守卫逼成"给分隔符写豁免"。
+    expect(countCjkLines('const text = cities.join("\u3001");')).toBe(0);
+    expect(countCjkLines('tokenSeparators={[",", "\uff0c", "\u3001"]}')).toBe(0);
+    // 含汉字才算：同一行里既有分隔符又有文案，仍然计 1。
+    expect(countCjkLines('const label = `\u57ce\u5e02\uff1a${cities.join("\u3001")}`;')).toBe(1);
+    // 断言口径一致：只断标点不算"中文断言"。
+    expect(countCjkAssertions('screen.getByText("\uff1a")')).toBe(0);
+  });
+
   it("ByText 家族：参数里含 CJK 的计 1，用 t() 的不计", () => {
     expect(countCjkAssertions(`screen.getByText("${SAVE}")`)).toBe(1);
     expect(countCjkAssertions('screen.getByText(t("save"))')).toBe(0);

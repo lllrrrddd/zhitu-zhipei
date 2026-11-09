@@ -131,7 +131,8 @@ export default function JobTable({
               >
                 {job.title}
               </Button>
-              {job.origin_source === "企业官网" ? (
+              {job.origin_source ===
+              "企业官网" /* i18n-ok: 与落库值比较，同上；展示名走语言包 */ ? (
                 <Tag color="blue" style={{ marginInlineEnd: 0 }}>
                   {/^https?:\/\//i.test(job.source_url) ? (
                     <a

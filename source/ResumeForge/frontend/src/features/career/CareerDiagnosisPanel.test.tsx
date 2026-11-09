@@ -55,6 +55,9 @@ const job = {
   experience_requirement: "",
 } as MarketJob;
 
+/** 简历样例：诊断面板会把这段经历原文回显进问题描述（断言与样例同源）。 */
+const SAMPLE_EXPERIENCE = "负责日常运维工作。";
+
 it("只有在点击后才发请求，并把分数、关键词三态与问题清单渲染出来", async () => {
   const api = await import("../../api/career");
   render(
@@ -78,8 +81,11 @@ it("只有在点击后才发请求，并把分数、关键词三态与问题清�
   expect(
     screen.getByText(t("career.check.issue.missing_keyword", { values: "Ansible" })),
   ).toBeInTheDocument();
+  // excerpt 是**简历样例文本**（后端原样回显的那句），不是界面文案：用同一条样例断言。
   expect(
-    screen.getByText(t("career.check.issue.no_numbers", { values: "", excerpt: "负责日常运维工作。" })),
+    screen.getByText(
+      t("career.check.issue.no_numbers", { values: "", excerpt: SAMPLE_EXPERIENCE }),
+    ),
   ).toBeInTheDocument();
   expect(screen.getByText(t("career.check.scope"))).toBeInTheDocument();
 });
