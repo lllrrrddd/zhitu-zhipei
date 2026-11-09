@@ -4,7 +4,9 @@ import {
   appendEntry,
   buildIssues,
   countOpen,
+  diffEntries,
   healthDelta,
+  summarizeIssues,
   HEALTH_HISTORY_KEY,
   HEALTH_TODO_KEY,
   loadHistory,
@@ -166,5 +168,66 @@ describe("体检历史", () => {
     const states = setIssueState({}, 1, "fp", "done");
     saveIssueStates(storage, states);
     expect(loadIssueStates(storage)).toEqual({ "1": { fp: "done" } });
+  });
+});
+
+describe("两次体检的逐条对比", () => {
+  const issue = (fingerprint: string, title: string) => ({
+    fingerprint,
+    title,
+    severity: "high" as const,
+  });
+
+  it("按指纹分出来：已解决 / 新出现 / 仍在", () => {
+    const previous: HealthEntry = {
+      at: "2026-11-09T01:00:00Z",
+      signature: "s",
+      score: 60,
+      subscores: {},
+      issueCount: 3,
+      riskCount: 0,
+      issues: [issue("a", "A"), issue("b", "B"), issue("c", "C")],
+    };
+    const latest: HealthEntry = {
+      ...previous,
+      at: "2026-11-09T02:00:00Z",
+      score: 72,
+      issues: [issue("b", "B"), issue("d", "D")],
+    };
+    const diff = diffEntries(previous, latest);
+    expect(diff).not.toBeNull();
+    expect(diff!.resolved.map((item) => item.fingerprint)).toEqual(["a", "c"]);
+    expect(diff!.added.map((item) => item.fingerprint)).toEqual(["d"]);
+    expect(diff!.remaining.map((item) => item.fingerprint)).toEqual(["b"]);
+  });
+
+  it("老记录没有存问题摘要时不出对比", () => {
+    const base: HealthEntry = {
+      at: "2026-11-09T01:00:00Z",
+      signature: "s",
+      score: 60,
+      subscores: {},
+      issueCount: 1,
+      riskCount: 0,
+    };
+    expect(diffEntries(base, { ...base, at: "2026-11-09T02:00:00Z" })).toBeNull();
+    expect(diffEntries(undefined, base)).toBeNull();
+  });
+
+  it("摘要只留标题与指纹，并限制条数", () => {
+    const issues = Array.from({ length: 70 }, (_, index) => ({
+      fingerprint: `f${index}`,
+      source: "ats" as const,
+      severity: "low" as const,
+      category: "format",
+      title: `T${index}`,
+      detail: "很长的说明",
+      suggestion: "很长的建议",
+      evidence: [],
+      location: "",
+    }));
+    const summary = summarizeIssues(issues);
+    expect(summary).toHaveLength(60);
+    expect(Object.keys(summary[0]).sort()).toEqual(["fingerprint", "severity", "title"]);
   });
 });

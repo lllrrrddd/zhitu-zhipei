@@ -48,6 +48,51 @@ export interface HealthEntry {
   riskCount: number;
   /** 内容质量指标快照（正文条目数、量化数、弱动词数）：老记录没有这一项。 */
   quality?: { bullets: number; quantified: number; ratio: number; weakCount: number };
+  /**
+   * 这次体检的问题指纹与标题（最多 60 条）。
+   *
+   * 存它只为一件事：**两次体检逐条对比**——"上次那几条改了没有、有没有新冒出来的"。
+   * 只存指纹与标题（不存整段建议），体积可控，也不会把用户原文大量复制进 localStorage。
+   */
+  issues?: { fingerprint: string; title: string; severity: HealthSeverity }[];
+}
+
+/** 体检记录里最多留多少条问题摘要。 */
+const ENTRY_ISSUE_LIMIT = 60;
+
+export interface HealthDiff {
+  resolved: { fingerprint: string; title: string; severity: HealthSeverity }[];
+  added: { fingerprint: string; title: string; severity: HealthSeverity }[];
+  remaining: { fingerprint: string; title: string; severity: HealthSeverity }[];
+}
+
+/** 把本次清单压成可入历史的摘要。 */
+export function summarizeIssues(issues: HealthIssue[]): NonNullable<HealthEntry["issues"]> {
+  return issues.slice(0, ENTRY_ISSUE_LIMIT).map((issue) => ({
+    fingerprint: issue.fingerprint,
+    title: issue.title,
+    severity: issue.severity,
+  }));
+}
+
+/**
+ * 两次体检逐条对比：按指纹认"还是不是同一条"。
+ *
+ * 指纹由 source + 类别 + 关键证据算出来，所以重排顺序、改措辞都不影响；
+ * 但**数量变化**（如"缺 3 个关键词"变"缺 2 个"）会改变指纹——那本来就该算"这一条变了"。
+ */
+export function diffEntries(
+  previous: HealthEntry | undefined,
+  latest: HealthEntry | undefined,
+): HealthDiff | null {
+  if (!previous?.issues || !latest?.issues) return null;
+  const latestKeys = new Set(latest.issues.map((issue) => issue.fingerprint));
+  const previousKeys = new Set(previous.issues.map((issue) => issue.fingerprint));
+  return {
+    resolved: previous.issues.filter((issue) => !latestKeys.has(issue.fingerprint)),
+    added: latest.issues.filter((issue) => !previousKeys.has(issue.fingerprint)),
+    remaining: latest.issues.filter((issue) => previousKeys.has(issue.fingerprint)),
+  };
 }
 
 export type HealthHistory = Record<string, HealthEntry[]>;

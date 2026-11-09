@@ -198,3 +198,18 @@ it("简历内容取不到时体检失败并给出错误，不写入历史", asyn
   expect(await screen.findByText("content unavailable")).toBeInTheDocument();
   expect(window.localStorage.getItem(HEALTH_HISTORY_KEY)).toBeNull();
 });
+
+it("复检后列出「与上次相比」：已解决几条、新出现几条", async () => {
+  apiMocks.runAtsCheck.mockResolvedValueOnce(ats(60, 2));
+  renderPanel();
+  fireEvent.click(screen.getByRole("button", { name: t("resumeHealth.action.run") }));
+  await screen.findByText("60");
+
+  // 第二次只剩 1 条 ATS 问题：上次的「问题 2」消失，其它（含量化/弱动词）仍在
+  apiMocks.runAtsCheck.mockResolvedValueOnce(ats(72, 1));
+  fireEvent.click(screen.getByRole("button", { name: t("resumeHealth.action.rerun") }));
+
+  expect(await screen.findByText(t("resumeHealth.diff.title"))).toBeInTheDocument();
+  expect(screen.getByText(t("resumeHealth.diff.resolved", { count: 1 }))).toBeInTheDocument();
+  expect(screen.getByText(t("resumeHealth.diff.added", { count: 0 }))).toBeInTheDocument();
+});

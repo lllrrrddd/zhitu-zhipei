@@ -40,6 +40,10 @@ const resumeHealth = {
   "resumeHealth.quality.weak.detail": "For example: {examples}",
   "resumeHealth.quality.weak.suggestion":
     "Rewrite “responsible for X” as what you did and produced: “cut API latency from 800ms to 300ms”.",
+  "resumeHealth.diff.title": "Compared with last time",
+  "resumeHealth.diff.resolved": "{count} resolved",
+  "resumeHealth.diff.added": "{count} new",
+  "resumeHealth.diff.remaining": "{count} still open",
   "resumeHealth.hint":
     "Re-check after editing to refresh the score. Marks and history stay on this device.",
 } as const;

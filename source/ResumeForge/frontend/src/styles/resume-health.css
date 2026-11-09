@@ -85,3 +85,18 @@
 .resume-health-actions {
   align-items: center;
 }
+
+/* 两次体检的逐条对比：默认折叠，只有复检过才出现。 */
+.resume-health-diff {
+  font-size: 13px;
+}
+
+.resume-health-diff summary {
+  cursor: pointer;
+  color: var(--rf-text-secondary);
+}
+
+.resume-health-diff ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}

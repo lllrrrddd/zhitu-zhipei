@@ -40,6 +40,10 @@ const resumeHealth = {
   "resumeHealth.quality.weak.detail": "例如：{examples}",
   "resumeHealth.quality.weak.suggestion":
     "把「负责 X」改成本人做了什么、产出了什么：「把接口耗时从 800ms 降到 300ms」。",
+  "resumeHealth.diff.title": "与上次相比",
+  "resumeHealth.diff.resolved": "已解决 {count} 条",
+  "resumeHealth.diff.added": "新出现 {count} 条",
+  "resumeHealth.diff.remaining": "仍在 {count} 条",
   "resumeHealth.hint": "改完再体检一次，分数会更新；标记与体检记录只存在这台设备上。",
 } as const;
 

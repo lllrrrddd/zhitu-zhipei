@@ -20,6 +20,7 @@ import type { AtsCheckResult } from "../types/ats";
 import { formatDateTime } from "../utils/format";
 import { useRiskScan } from "../features/resume/riskScanStore";
 import { analyzeContent, type QualityFindings } from "../features/resume/qualityMetrics";
+import { diffEntries, summarizeIssues } from "../features/resume/healthCheck";
 import {
   appendEntry,
   buildIssues,
@@ -150,6 +151,7 @@ export default function ResumeHealthPanel({
   const latest = entries[entries.length - 1];
   const previous = entries[entries.length - 2];
   const delta = healthDelta(entries);
+  const diff = diffEntries(previous, latest);
   const issues = useMemo(
     () =>
       sortIssues([...buildIssues(ats, risk.result), ...(quality ? qualityIssues(quality) : [])]),
@@ -169,13 +171,13 @@ export default function ResumeHealthPanel({
       setAts(result);
       setQuality(finding);
       const riskCount = risk.result?.points.length ?? 0;
-      const qualityCount = qualityIssues(finding).length;
+      const merged = sortIssues([...buildIssues(result, risk.result), ...qualityIssues(finding)]);
       const next = appendEntry(history, resumeId, {
         at: new Date().toISOString(),
         signature: signature ?? "",
         score: result.score,
         subscores: result.subscores ?? {},
-        issueCount: result.issues.length + riskCount + qualityCount,
+        issueCount: merged.length,
         riskCount,
         quality: {
           bullets: finding.bullets,
@@ -183,6 +185,7 @@ export default function ResumeHealthPanel({
           ratio: finding.ratio,
           weakCount: finding.weakCount,
         },
+        issues: summarizeIssues(merged),
       });
       setHistory(next);
       saveHistory(readStorage(), next);
@@ -262,6 +265,31 @@ export default function ResumeHealthPanel({
             </span>
           ))}
         </div>
+      )}
+
+      {diff && (
+        <details className="resume-health-diff">
+          <summary>{t("resumeHealth.diff.title")}</summary>
+          <ul>
+            <li>
+              {t("resumeHealth.diff.resolved", { count: diff.resolved.length })}
+              {diff.resolved.length > 0 && (
+                <span className="career-help">
+                  ：{diff.resolved.map((issue) => issue.title).join("；")}
+                </span>
+              )}
+            </li>
+            <li>
+              {t("resumeHealth.diff.added", { count: diff.added.length })}
+              {diff.added.length > 0 && (
+                <span className="career-help">
+                  ：{diff.added.map((issue) => issue.title).join("；")}
+                </span>
+              )}
+            </li>
+            <li>{t("resumeHealth.diff.remaining", { count: diff.remaining.length })}</li>
+          </ul>
+        </details>
       )}
 
       {(quality ?? latest?.quality) && (
