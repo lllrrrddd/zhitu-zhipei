@@ -14,6 +14,7 @@
  */
 import {
   BulbOutlined,
+  DiffOutlined,
   FolderOpenOutlined,
   MessageOutlined,
   SafetyCertificateOutlined,
@@ -54,6 +55,9 @@ interface Props {
   onOpenJob: () => void;
   onOpenAssistant: () => void;
   onOpenQuality: () => void;
+  /** 这一版是否由上一版派生而来：有才显示「版本对比」。 */
+  hasParentRevision: boolean;
+  onOpenRevisionDiff: () => void;
   onOpenSharePackage: () => void;
   onOpenExportOptions: () => void;
 }
@@ -72,6 +76,8 @@ export default function ResumeDetailFooter({
   onOpenJob,
   onOpenAssistant,
   onOpenQuality,
+  hasParentRevision,
+  onOpenRevisionDiff,
   onOpenSharePackage,
   onOpenExportOptions,
 }: Props) {
@@ -111,6 +117,11 @@ export default function ResumeDetailFooter({
         <Button block icon={<SafetyCertificateOutlined />} onClick={onOpenQuality}>
           {t("resume.footer.quality")}
         </Button>
+        {hasParentRevision && (
+          <Button block icon={<DiffOutlined />} onClick={onOpenRevisionDiff}>
+            {t("resume.footer.revisionDiff")}
+          </Button>
+        )}
         <Button block icon={<ShareAltOutlined />} onClick={onOpenSharePackage}>
           {t("resume.footer.share")}
         </Button>

@@ -179,6 +179,7 @@ import enumsReferral from "./zh-CN.enumsReferral";
 import enumsResumeCatalog from "./zh-CN.enumsResumeCatalog";
 import enumsTracker from "./zh-CN.enumsTracker";
 import resumeHealth from "./zh-CN.resumeHealth";
+import revisionDiff from "./zh-CN.revisionDiff";
 
 const namespaces = {
   /** 简历制作台（2026-10-23）。 */
@@ -422,6 +423,7 @@ const namespaces = {
   ...enumsResumeCatalog,
   ...enumsTracker,
   ...resumeHealth,
+  ...revisionDiff,
 } as const;
 
 export default namespaces;

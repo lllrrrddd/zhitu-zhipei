@@ -1,0 +1,65 @@
+/* 版本对比：按分区 → 条目分组，改前/改后并列。 */
+
+.revision-diff-summary {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--rf-text-secondary);
+}
+
+.revision-diff-section {
+  margin-bottom: 14px;
+}
+
+.revision-diff-section h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.revision-diff-entry {
+  padding-left: 10px;
+  border-left: 3px solid var(--rf-border-subtle);
+  margin-bottom: 8px;
+}
+
+.revision-diff-entry h5 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--rf-text-secondary);
+}
+
+.revision-diff-entry ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.revision-diff-entry li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.revision-diff-pair {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.revision-diff-pair del {
+  color: var(--rf-text-secondary);
+}
+
+.revision-diff-pair ins {
+  text-decoration: none;
+  color: var(--rf-text-body);
+  font-weight: 600;
+}
+
+.revision-diff-single {
+  color: var(--rf-text-body);
+}

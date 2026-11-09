@@ -16,6 +16,7 @@ import fonts from "./en-US.fonts";
 import graduate from "./en-US.graduate";
 import career from "./en-US.career";
 import resumeHealth from "./en-US.resumeHealth";
+import revisionDiff from "./en-US.revisionDiff";
 import optimizer from "./en-US.optimizer";
 import outline from "./en-US.outline";
 import pagination from "./en-US.pagination";
@@ -343,6 +344,7 @@ const enUS = {
   ...enumsResumeCatalog,
   ...enumsTracker,
   ...resumeHealth,
+  ...revisionDiff,
 } as const satisfies Record<keyof ZhCNMessages, string>;
 
 export default enUS;

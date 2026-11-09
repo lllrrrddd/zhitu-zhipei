@@ -25,6 +25,7 @@ import ResumeMeasureControls from "./ResumeMeasureControls";
 import ResumeTemplateControls from "./ResumeTemplateControls";
 import { useShortcut } from "../../features/shortcuts/useShortcutKeymap";
 import ResumeQualityModal from "../ResumeQualityModal";
+import RevisionDiffModal from "../RevisionDiffModal";
 import ResumeSuggestionsModal from "../ResumeSuggestionsModal";
 import ResumeReviseModal from "./ResumeReviseModal";
 import SharePackageModal from "../SharePackageModal";
@@ -78,6 +79,7 @@ export default function ResumeDetailPreview({
   const [reviseOpen, setReviseOpen] = useState(false);
   const [reviseInstructions, setReviseInstructions] = useState("");
   const [qualityOpen, setQualityOpen] = useState(false);
+  const [revisionOpen, setRevisionOpen] = useState(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState(false);
   // W19：制作台动作条的「导出」打开「导出交付包」弹层（旧面板仍留给主预览入口）。
   const [deliveryExportOpen, setDeliveryExportOpen] = useState(false);
@@ -324,6 +326,8 @@ export default function ResumeDetailPreview({
         }}
         onOpenAssistant={() => navigate(`/assistant?resume_id=${detail.id}&new=1`)}
         onOpenQuality={() => setQualityOpen(true)}
+        hasParentRevision={detail.parent_revision_id !== null}
+        onOpenRevisionDiff={() => setRevisionOpen(true)}
         onOpenSharePackage={() => setSharePackageOpen(true)}
         onOpenExportOptions={openExportByFlow}
       />
@@ -346,6 +350,14 @@ export default function ResumeDetailPreview({
           onApplied={(detail) => onResumeRevised?.(detail)}
         />
       ) : null}
+      <RevisionDiffModal
+        // 每次打开都重新挂载：清掉上一份对比结果，避免又打开时先闪一眼旧差异。
+        key={`revision-diff-${detail.id}-${revisionOpen ? "open" : "closed"}`}
+        open={revisionOpen}
+        resumeId={detail.id}
+        parentRevisionId={detail.parent_revision_id}
+        onClose={() => setRevisionOpen(false)}
+      />
       <ResumeQualityModal
         open={qualityOpen}
         resumeId={detail.id}
