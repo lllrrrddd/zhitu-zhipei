@@ -9,6 +9,7 @@ import { App as AntdApp } from "antd";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation } from "react-router-dom";
+import { t } from "../i18n";
 import type { Job } from "../types";
 import JobDetailDrawer from "./JobDetailDrawer";
 
@@ -128,7 +129,7 @@ describe("JobDetailDrawer 投递来源闸门", () => {
   it("打开网申时禁用按钮并显示加载态，避免重复拉起浏览器", () => {
     renderDrawer({ ...BASE_JOB, source_url: "https://example.com/apply" });
 
-    const button = screen.getByRole("button", { name: /前往投递/ });
+    const button = screen.getByRole("button", { name: new RegExp(t("jobDetail.action.goApply")) });
     expect(button).toBeEnabled();
 
     cleanup();
@@ -153,7 +154,9 @@ describe("JobDetailDrawer 投递来源闸门", () => {
       </AntdApp>,
     );
 
-    expect(screen.getByRole("button", { name: /前往投递/ })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: new RegExp(t("jobDetail.action.goApply")) }),
+    ).toBeDisabled();
   });
 });
 

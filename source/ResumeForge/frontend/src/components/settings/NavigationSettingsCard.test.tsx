@@ -3,6 +3,8 @@ import { App as AntdApp } from "antd";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetNavigationVisibilityForTests } from "../../utils/navigationVisibility";
+import { t } from "../../i18n";
+import { NAVIGATION_ITEMS } from "../navigation/navigationConfig";
 import NavigationSettingsCard from "./NavigationSettingsCard";
 
 const apiMocks = vi.hoisted(() => ({
@@ -18,6 +20,18 @@ function renderCard() {
       <NavigationSettingsCard />
     </AntdApp>,
   );
+}
+
+/**
+ * 开关的可访问名由**导航项自己的标签**拼出来（`{name}导航入口`）。
+ *
+ * 硬编码「首页导航入口」会在首页改名时静默失效（首页现在叫「找岗位」），
+ * 所以这里从配置里取标签，断言与界面同源。
+ */
+function switchName(key: string): string {
+  const item = NAVIGATION_ITEMS.find((candidate) => candidate.key === key);
+  if (!item) throw new Error(`no navigation item for ${key}`);
+  return t("navigation.settings.switchAria", { name: t(item.labelKey) });
 }
 
 beforeEach(() => {
@@ -40,15 +54,15 @@ describe("NavigationSettingsCard", () => {
     expect(await screen.findByText("核心入口")).toBeInTheDocument();
     expect(screen.getByText("我的空间")).toBeInTheDocument();
     // 两组里的入口各自渲染了开关（核心入口如首页，我的空间如求职统计）。
-    expect(screen.getByRole("switch", { name: "首页导航入口" })).toBeInTheDocument();
-    expect(screen.getByRole("switch", { name: "求职统计导航入口" })).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: switchName("/") })).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: switchName("/analytics") })).toBeInTheDocument();
   });
 
   it("允许隐藏可选模块，但核心入口始终固定显示", async () => {
     renderCard();
 
-    const assistant = await screen.findByRole("switch", { name: "求职助手导航入口" });
-    const home = screen.getByRole("switch", { name: "首页导航入口" });
+    const assistant = await screen.findByRole("switch", { name: switchName("/assistant") });
+    const home = screen.getByRole("switch", { name: switchName("/") });
     expect(assistant).toBeChecked();
     expect(home).toBeChecked();
     expect(home).toBeDisabled();
@@ -65,7 +79,7 @@ describe("NavigationSettingsCard", () => {
     apiMocks.getNavigationVisibility.mockResolvedValue({ hidden: ["/assistant", "/analytics"] });
     renderCard();
 
-    expect(await screen.findByRole("switch", { name: "求职助手导航入口" })).not.toBeChecked();
+    expect(await screen.findByRole("switch", { name: switchName("/assistant") })).not.toBeChecked();
     // 卡片挂载时会异步拉取可见性配置，loading 期间按钮是 disabled 的，React 会吞掉
     // disabled 按钮上的 click（Linux CI 上 mock 解析慢于下面的点击，此前把用例打挂）；
     // 等按钮真正可用再点，断言本身不变。

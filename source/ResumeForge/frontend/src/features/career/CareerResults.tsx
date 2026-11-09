@@ -10,6 +10,8 @@ import { useLocale } from "../../i18n/i18nContext";
 import { formatDateTime } from "../../utils/format";
 import GraduateResearchAdvice from "../graduate/GraduateResearchAdvice";
 import CareerDiagnosisPanel from "./CareerDiagnosisPanel";
+import CareerMatchHistory from "./CareerMatchHistory";
+import { jobKeyOf, type MatchSnapshot } from "./matchHistory";
 import type { CareerMatches, CareerProfile, MatchedJob } from "./types";
 import "../../styles/career-score.css";
 
@@ -46,10 +48,14 @@ const GAP_LABELS = {
 function ResultCard({
   match,
   profile,
+  profileId,
+  history,
   onAcceptAdvice,
 }: {
   match: MatchedJob;
   profile: CareerProfile;
+  profileId: string;
+  history: MatchSnapshot[];
   onAcceptAdvice: (draft: string) => void;
 }) {
   const { message } = App.useApp();
@@ -171,6 +177,7 @@ function ResultCard({
           </ul>
           <p className="career-help">{t("career.score.note")}</p>
         </div>
+        <CareerMatchHistory snapshots={history} jobKey={jobKeyOf(match)} profileId={profileId} />
         <div className="career-reasons">
           <strong>{t("career.result.why")}</strong>
           {match.matched_skills.length > 0 && (
@@ -265,10 +272,14 @@ function ResultCard({
 export default function CareerResults({
   result,
   profile,
+  profileId,
+  history,
   onAcceptAdvice,
 }: {
   result: CareerMatches;
   profile: CareerProfile;
+  profileId: string;
+  history: MatchSnapshot[];
   onAcceptAdvice: (draft: string) => void;
 }) {
   useLocale();
@@ -310,6 +321,8 @@ export default function CareerResults({
               key={match.job.id}
               match={match}
               profile={profile}
+              profileId={profileId}
+              history={history}
               onAcceptAdvice={onAcceptAdvice}
             />
           ))}

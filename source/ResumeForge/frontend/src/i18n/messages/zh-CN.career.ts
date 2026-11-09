@@ -181,7 +181,8 @@ const career = {
   "career.check.state.mentioned": "只在经历里提到",
   "career.check.state.missing": "还没提",
   "career.check.issue.missing_keyword": "岗位要求这些关键词，简历里还没写：{values}",
-  "career.check.issue.mentioned_only": "这些词只出现在经历描述里，补进技能栏更容易被筛选看到：{values}",
+  "career.check.issue.mentioned_only":
+    "这些词只出现在经历描述里，补进技能栏更容易被筛选看到：{values}",
   "career.check.issue.no_numbers": "这条经历没有量化结果：{excerpt}",
   "career.check.issue.weak_verb": "这条经历以「负责/参与」开头，看不出你主导了什么：{excerpt}",
   "career.check.issue.no_experience": "还没有填写项目或实习经历。",
@@ -227,6 +228,14 @@ const career = {
   "career.material.confirmDifferent": "对照原件后发现不一致",
   "career.material.reviewed": "已人工核对 {reviewed} / {total} 项。",
   "career.material.export": "下载本次核对记录",
+  "career.history.title": "匹配历史",
+  "career.history.delta": "较上次 {delta} 分",
+  "career.history.same": "与上次同分",
+  "career.history.previous": "上次 {score} 分",
+  "career.history.item": "{time} · {score} 分 · 命中 {skills} 项技能",
+  "career.history.hint":
+    "改完简历或补了技能再匹配一次，这里就能看到分数变化（历史只存在这台设备上）。",
+  "career.history.empty": "还没有历史记录。",
 } as const;
 
 export default career;

@@ -422,6 +422,8 @@
   gap: 6px;
 }
 
+/* antd-override: 布局无 token —— 材料核对卡里"核对结果"复选框与按钮要各自独占一行
+   （antd 默认按钮是 inline-flex，并排会出现半个按钮换行），作用域已由 #career-material-check 限定。 */
 #career-material-check > .ant-card-body > .ant-checkbox-wrapper,
 #career-material-check > .ant-card-body > .ant-btn {
   display: flex;

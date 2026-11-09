@@ -6,7 +6,8 @@ const career = {
     "Search public employer postings and see why each job matches, what to check, and where to read the original.",
   "career.resume.title": "1. Add a resume",
   "career.resume.upload": "Click or drop a PDF or Word resume",
-  "career.resume.uploadHint": "PDF up to 15 MB; DOCX up to 10 MB. Large PDFs are read as text only.",
+  "career.resume.uploadHint":
+    "PDF up to 15 MB; DOCX up to 10 MB. Large PDFs are read as text only.",
   "career.resume.reading": "Reading your resume…",
   "career.resume.read": "Read {file}. Review the information below.",
   "career.resume.local": "Your resume is read locally for this search.",
@@ -48,15 +49,17 @@ const career = {
   "career.profiles.label": "Match profile",
   "career.profiles.untitled": "Resume",
   "career.profiles.create": "New",
-  "career.profiles.createHint": "Copy the current profile — for another direction, or to match for someone else",
+  "career.profiles.createHint":
+    "Copy the current profile — for another direction, or to match for someone else",
   "career.profiles.rename": "Rename",
-  "career.profiles.renameHint": "Give it a name you can recognise, e.g. \"Alex · Backend\"",
+  "career.profiles.renameHint": 'Give it a name you can recognise, e.g. "Alex · Backend"',
   "career.profiles.renaming": "Renaming…",
   "career.profiles.renameTitle": "Rename this match profile",
   "career.profiles.renameSave": "Save",
   "career.profiles.delete": "Delete",
-  "career.profiles.deleteTitle": "Delete profile \"{label}\"?",
-  "career.profiles.deleteHint": "Only this local profile is deleted. Your profile library and saved jobs stay untouched.",
+  "career.profiles.deleteTitle": 'Delete profile "{label}"?',
+  "career.profiles.deleteHint":
+    "Only this local profile is deleted. Your profile library and saved jobs stay untouched.",
   "career.profiles.deleteConfirm": "Delete",
   "career.profiles.deleteDisabled": "Keep at least one profile",
   "career.profiles.note":
@@ -164,10 +167,13 @@ const career = {
   "career.gap.title": "Gaps to verify",
   "career.gap.degree_unspecified": "The posting does not state a degree; check the original page.",
   "career.gap.degree_unconfirmed": "Confirm your degree before judging this match.",
-  "career.gap.experience_required": "The posting requires work experience; graduates rarely qualify.",
-  "career.gap.missing_skills": "Skills the posting asks for without evidence in your profile: {values}.",
+  "career.gap.experience_required":
+    "The posting requires work experience; graduates rarely qualify.",
+  "career.gap.missing_skills":
+    "Skills the posting asks for without evidence in your profile: {values}.",
   "career.gap.city_mismatch": "The work city is not among your preferred cities ({values}).",
-  "career.gap.no_evidence": "Matched on direction and skill names only — no resume excerpt backs it up.",
+  "career.gap.no_evidence":
+    "Matched on direction and skill names only — no resume excerpt backs it up.",
   "career.gap.graduation_check": "Campus posting: verify the graduation window.",
   "career.check.title": "Job-specific resume check",
   "career.check.run": "Check this resume",
@@ -182,10 +188,13 @@ const career = {
   "career.check.state.found": "in skills",
   "career.check.state.mentioned": "only in experience",
   "career.check.state.missing": "not mentioned",
-  "career.check.issue.missing_keyword": "The posting asks for these and your resume does not mention them: {values}",
-  "career.check.issue.mentioned_only": "These words appear only in your experience text — adding them to skills makes them visible: {values}",
+  "career.check.issue.missing_keyword":
+    "The posting asks for these and your resume does not mention them: {values}",
+  "career.check.issue.mentioned_only":
+    "These words appear only in your experience text — adding them to skills makes them visible: {values}",
   "career.check.issue.no_numbers": "This bullet has no quantified result: {excerpt}",
-  "career.check.issue.weak_verb": "This bullet starts with a passive verb; what did you own? {excerpt}",
+  "career.check.issue.weak_verb":
+    "This bullet starts with a passive verb; what did you own? {excerpt}",
   "career.check.issue.no_experience": "No project or internship entries yet.",
   "career.check.issue.few_skills": "Only {values} skills listed; aim for five or more.",
   "career.check.scope":
@@ -244,6 +253,14 @@ const career = {
   "career.material.confirmDifferent": "Differs from the original after review",
   "career.material.reviewed": "Human reviewed {reviewed} of {total} fields.",
   "career.material.export": "Download review record",
+  "career.history.title": "Match history",
+  "career.history.delta": "{delta} points vs last time",
+  "career.history.same": "Same score as last time",
+  "career.history.previous": "Last: {score}",
+  "career.history.item": "{time} · {score} points · {skills} skills matched",
+  "career.history.hint":
+    "Re-run the match after editing your resume to see the change. History stays on this device only.",
+  "career.history.empty": "No history yet.",
 } as const;
 
 export default career;

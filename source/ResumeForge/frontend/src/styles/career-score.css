@@ -141,3 +141,36 @@
   margin: 0;
   flex-basis: 100%;
 }
+
+/* 匹配历史：一行「较上次 ±N 分」，展开是最近几次记录。 */
+.career-history {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.career-history-delta {
+  font-weight: 600;
+  color: var(--rf-text-secondary);
+}
+
+.career-history-delta.is-up {
+  color: var(--rf-success, #237804);
+}
+
+.career-history-delta.is-down {
+  color: var(--rf-warning, #ad6800);
+}
+
+.career-history-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--rf-text-secondary);
+}
+
+.career-history-list li + li {
+  margin-top: 4px;
+}

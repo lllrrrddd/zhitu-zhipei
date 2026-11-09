@@ -15,6 +15,12 @@ import {
 } from "../features/career/careerProfiles";
 import CareerMaterialCheck from "../features/career/CareerMaterialCheck";
 import CareerResults from "../features/career/CareerResults";
+import {
+  loadSnapshots,
+  recordMatches,
+  saveSnapshots,
+  type MatchSnapshot,
+} from "../features/career/matchHistory";
 import CareerResumePanel from "../features/career/CareerResumePanel";
 import CareerSourcePanel from "../features/career/CareerSourcePanel";
 import type { CareerMatches, CareerProfile, MarketSummary } from "../features/career/types";
@@ -41,9 +47,7 @@ export default function CareerPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState(false);
   const refreshBusy = useRef(false);
-  const [records, setRecords] = useState<CareerProfileRecord[]>(() =>
-    loadRecords(readStorage()),
-  );
+  const [records, setRecords] = useState<CareerProfileRecord[]>(() => loadRecords(readStorage()));
   const [currentId, setCurrentId] = useState<string>(() => {
     const initial = loadRecords(readStorage());
     return initial[0]?.id ?? "";
@@ -53,11 +57,33 @@ export default function CareerPage() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [result, setResult] = useState<CareerMatches | null>(null);
+  /** 匹配历史只在这台设备上：每次匹配成功后追加，卡片上据此显示「较上次」。 */
+  const [snapshots, setSnapshots] = useState<MatchSnapshot[]>(() => loadSnapshots(readStorage()));
   const resultSection = useRef<HTMLElement>(null);
 
   useEffect(() => {
     saveRecords(readStorage(), records);
   }, [records]);
+
+  useEffect(() => {
+    saveSnapshots(readStorage(), snapshots);
+  }, [snapshots]);
+
+  /**
+   * 记一次匹配结果。
+   *
+   * 快照里的 `profileLabel` 用**匹配当时**的名字：用户之后改名，历史仍能说清"那次用的是哪份"。
+   */
+  const rememberMatches = useCallback(
+    (matches: CareerMatches) => {
+      const record = records.find((item) => item.id === currentId);
+      if (!record) return;
+      setSnapshots((current) =>
+        recordMatches(current, matches.matches, { id: record.id, label: record.label }),
+      );
+    },
+    [records, currentId],
+  );
 
   const refresh = useCallback(async (force: boolean) => {
     if (refreshBusy.current) return;
@@ -111,7 +137,11 @@ export default function CareerPage() {
     setRecords((current) =>
       current.map((item) =>
         item.id === currentId
-          ? { ...item, profile: { ...item.profile, ...change }, updatedAt: new Date().toISOString() }
+          ? {
+              ...item,
+              profile: { ...item.profile, ...change },
+              updatedAt: new Date().toISOString(),
+            }
           : item,
       ),
     );
@@ -146,9 +176,7 @@ export default function CareerPage() {
   }
 
   function renameRecord(id: string, label: string) {
-    setRecords((current) =>
-      current.map((item) => (item.id === id ? { ...item, label } : item)),
-    );
+    setRecords((current) => current.map((item) => (item.id === id ? { ...item, label } : item)));
   }
 
   function deleteRecord(id: string) {
@@ -177,6 +205,7 @@ export default function CareerPage() {
       const matches = await findCareerMatches(draft);
       setMarket(matches.market);
       setResult(matches);
+      rememberMatches(matches);
     } catch (error) {
       setSearchError(error instanceof Error ? error.message : t("career.result.failed"));
     } finally {
@@ -208,6 +237,7 @@ export default function CareerPage() {
       const matches = await findCareerMatches(updated);
       setMarket(matches.market);
       setResult(matches);
+      rememberMatches(matches);
     } catch (error) {
       setSearchError(error instanceof Error ? error.message : t("career.result.failed"));
       setResult(null);
@@ -261,6 +291,8 @@ export default function CareerPage() {
         <>
           <section className="career-results" ref={resultSection}>
             <CareerResults
+              profileId={currentId}
+              history={snapshots}
               result={result}
               profile={draft}
               onAcceptAdvice={(line) => void acceptAdvice(line)}

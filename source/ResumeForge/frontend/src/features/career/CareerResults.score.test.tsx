@@ -66,7 +66,13 @@ function renderResults(items: MatchedJob[]) {
   return render(
     <MemoryRouter>
       <App>
-        <CareerResults result={data} profile={profile} onAcceptAdvice={() => undefined} />
+        <CareerResults
+          result={data}
+          profile={profile}
+          profileId="profile-1"
+          history={[]}
+          onAcceptAdvice={() => undefined}
+        />
       </App>
     </MemoryRouter>,
   );

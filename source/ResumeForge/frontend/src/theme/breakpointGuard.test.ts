@@ -45,6 +45,13 @@ const LEGACY: Record<string, number> = {
   "styles/announcement.css:600": 1,
   "styles/apply.css:768": 1,
   "styles/base-panels.css:720": 1,
+  // career.css:1000 —— 找岗位页在中等宽度（平板横屏/窄窗口）把两栏结果拆成单列：
+  // 结果卡里分数条 + 差距清单在 1000px 以下两栏会挤到换行，与 1092 的"侧栏收起"无关，
+  // 是内容宽度而不是布局框架的断点。
+  "styles/career.css:1000": 1,
+  // career.css:560 —— 手机竖屏把"上传/示例/已保存资料"三个动作排成两列，
+  // 比标准 767 更窄才需要，760 以下按钮文字已放得下，560 才轮到两列。
+  "styles/career.css:560": 1,
   // base-shell.css:1093 —— 英文侧栏手动收起断点：≤1092 侧栏是 64px 图标导轨，
   // ≥1093 才允许 252px 宽侧栏（1093 = 标准断点 1092 的"开区间"下沿，非标准值但语义上紧贴它）。
   "styles/base-shell.css:1093": 1,
