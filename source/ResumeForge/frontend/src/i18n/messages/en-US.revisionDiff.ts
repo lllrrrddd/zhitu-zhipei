@@ -2,7 +2,7 @@
 /** Resume revision diff (current vs its parent). */
 
 const revisionDiff = {
-  "revisionDiff.title": "Compare with a previous save",
+  "revisionDiff.title": "Edit history",
   "revisionDiff.loading": "Comparing the two versions…",
   "revisionDiff.error": "Could not load the versions. Try again.",
   "revisionDiff.counts": "{added} added · {removed} removed · {changed} changed",

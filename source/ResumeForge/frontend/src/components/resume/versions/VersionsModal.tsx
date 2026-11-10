@@ -47,20 +47,24 @@ export default function VersionsModal({
       key: "versions",
       label: t("versions.tab.versions"),
       children: (
-        <VersionList
-          versions={versions.versions}
-          loading={versions.loading}
-          error={versions.error}
-          actionError={versions.actionError}
-          restoringId={versions.restoringId}
-          conflict={versions.conflict}
-          currentRevision={currentRevision}
-          onCreate={versions.create}
-          onFreeze={versions.setFrozen}
-          onRestore={versions.restore}
-          onCompare={versions.compare}
-          onRefresh={() => void versions.reload()}
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* 两个"版本"入口的分工写在这里：快照要手动拍，血缘对比在简历详情底部。 */}
+          <p className="career-help">{t("versions.hint.lineage")}</p>
+          <VersionList
+            versions={versions.versions}
+            loading={versions.loading}
+            error={versions.error}
+            actionError={versions.actionError}
+            restoringId={versions.restoringId}
+            conflict={versions.conflict}
+            currentRevision={currentRevision}
+            onCreate={versions.create}
+            onFreeze={versions.setFrozen}
+            onRestore={versions.restore}
+            onCompare={versions.compare}
+            onRefresh={() => void versions.reload()}
+          />
+        </div>
       ),
     },
     {

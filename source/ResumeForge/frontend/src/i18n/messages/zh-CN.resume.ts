@@ -49,7 +49,7 @@ const resume = {
   "resume.footer.assistant": "咨询求职助手",
   /** 打开质量检测（风险扫描 + ATS 检测同用一个面板）。 */
   "resume.footer.quality": "质量检测",
-  "resume.footer.revisionDiff": "版本对比",
+  "resume.footer.revisionDiff": "修改记录",
   /** 打开离线分享包。 */
   "resume.footer.share": "离线分享",
 

@@ -25,7 +25,7 @@ const resume = {
   "resume.footer.openJob": "View the linked Job",
   "resume.footer.assistant": "Ask the assistant",
   "resume.footer.quality": "Quality check",
-  "resume.footer.revisionDiff": "Compare versions",
+  "resume.footer.revisionDiff": "Edit history",
   "resume.footer.share": "Offline share",
 
   "resume.diagnosis.title": "Page layout diagnosis",
