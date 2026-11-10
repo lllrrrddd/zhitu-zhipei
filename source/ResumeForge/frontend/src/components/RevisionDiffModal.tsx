@@ -1,18 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
- * 版本对比弹窗：把「这一版」和它的上一版按字段列出来。
+ * 版本对比弹窗：把「当前版本」和它的**某一代上一版**按字段列出来。
  *
- * 只读：不改任何数据，也不允许从这里回滚（回滚要重新走修订流程，避免"看着像撤销"变成
- * 悄悄改内容）。数据来源就是现有两个详情接口——本版 `resumeId` 与 `parentRevisionId`。
+ * 与制作台「版本」面板的分工（两件事，别混淆）：
+ * - **命名版本**（`/resumes/{id}/versions`）是用户主动拍的快照，可以任意两版互比、还能恢复；
+ * - 这里走的是**保存血缘**（`parent_revision_id`）：即使从没拍过命名版本，每次修订都会留下
+ *   上一代，所以"这一版到底改了哪句话"随时能看。默认比上一版，也可以顺着血缘再往前选。
+ *
+ * 只读：不改数据、不能回滚（回滚走命名版本的恢复，或 AI 修改 / 重新生成）。
  */
 
-import { Alert, Empty, Modal, Tag, Typography } from "antd";
+import { Alert, Button, Empty, Modal, Select, Space, Tag, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { getResume } from "../api/resumes";
 import { t, type MessageKey } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import { diffDocuments, type DiffKind, type DiffLine } from "../features/resume/revisionDiff";
 import type { ResumeDocument } from "../types/resumeDocument";
+import { formatDateTime } from "../utils/format";
 import "../styles/revision-diff.css";
 
 const KIND_COLOR: Record<DiffKind, string> = {
@@ -29,10 +34,20 @@ const KIND_LABEL: Record<DiffKind, MessageKey> = {
 
 /** 单值展示上限：真正的长文本差异交给用户去编辑器里看，这里只给"哪句变了"。 */
 const VALUE_CHARS = 80;
+/** 顺着血缘最多再往前取几代：再多就不是"看改动"，是"翻族谱"。 */
+const MAX_ANCESTORS = 3;
 
 function shorten(value: string): string {
   const text = value.replace(/\s+/g, " ").trim();
   return text.length > VALUE_CHARS ? `${text.slice(0, VALUE_CHARS)}…` : text;
+}
+
+interface LoadedRevision {
+  id: number;
+  title: string;
+  at: string;
+  parentId: number | null;
+  content: ResumeDocument;
 }
 
 /** 条目显示名：有标题用标题，没有就用「第 n 条」（文案在语言包）。 */
@@ -86,12 +101,14 @@ export default function RevisionDiffModal({
   onClose: () => void;
 }) {
   useLocale();
-  const [before, setBefore] = useState<ResumeDocument | null>(null);
-  const [after, setAfter] = useState<ResumeDocument | null>(null);
+  const [current, setCurrent] = useState<ResumeDocument | null>(null);
+  const [ancestors, setAncestors] = useState<LoadedRevision[]>([]);
+  const [baseId, setBaseId] = useState<number | null>(parentRevisionId);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
-  // 加载态由数据推导（组件每次打开都重新挂载，见父组件的 key）：effect 里只写 promise
-  // 回调中的 setState，避免"在 effect 里同步 setState"引发的额外渲染与 lint 警告。
-  const loading = open && parentRevisionId !== null && !error && !before;
+
+  // 加载态由数据推导（组件每次打开都重新挂载，见父组件的 key），effect 里只写 promise 回调。
+  const loading = open && parentRevisionId !== null && !error && !current;
 
   useEffect(() => {
     if (!open || parentRevisionId === null) return;
@@ -99,8 +116,16 @@ export default function RevisionDiffModal({
     void Promise.all([getResume(parentRevisionId), getResume(resumeId)])
       .then(([parentDetail, currentDetail]) => {
         if (cancelled) return;
-        setBefore(parentDetail.content);
-        setAfter(currentDetail.content);
+        setAncestors([
+          {
+            id: parentDetail.id,
+            title: parentDetail.title,
+            at: parentDetail.created_at ?? "",
+            parentId: parentDetail.parent_revision_id,
+            content: parentDetail.content,
+          },
+        ]);
+        setCurrent(currentDetail.content);
       })
       .catch((cause: unknown) => {
         if (!cancelled) setError(cause instanceof Error ? cause.message : t("revisionDiff.error"));
@@ -110,9 +135,35 @@ export default function RevisionDiffModal({
     };
   }, [open, resumeId, parentRevisionId]);
 
+  const oldest = ancestors[ancestors.length - 1];
+  const canExtend = Boolean(oldest?.parentId) && ancestors.length < MAX_ANCESTORS;
+
+  async function extend() {
+    if (!oldest?.parentId || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const detail = await getResume(oldest.parentId);
+      setAncestors((list) => [
+        ...list,
+        {
+          id: detail.id,
+          title: detail.title,
+          at: detail.created_at ?? "",
+          parentId: detail.parent_revision_id,
+          content: detail.content,
+        },
+      ]);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("revisionDiff.error"));
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  const before = ancestors.find((item) => item.id === baseId)?.content ?? null;
   const diff = useMemo(
-    () => (before && after ? diffDocuments(before, after) : null),
-    [before, after],
+    () => (before && current ? diffDocuments(before, current) : null),
+    [before, current],
   );
 
   return (
@@ -129,6 +180,33 @@ export default function RevisionDiffModal({
       {error && <Alert type="error" showIcon title={error} />}
       {!loading && !error && diff && (
         <>
+          <Space className="revision-diff-toolbar" wrap>
+            <span className="career-help">{t("revisionDiff.base.label")}</span>
+            <Select
+              size="small"
+              value={baseId ?? undefined}
+              onChange={(value) => setBaseId(value)}
+              style={{ minWidth: 260 }}
+              aria-label={t("revisionDiff.base.label")}
+              options={ancestors.map((item, index) => ({
+                value: item.id,
+                label: t("revisionDiff.base.option", {
+                  title: item.title || t("revisionDiff.base.untitled"),
+                  time: formatDateTime(item.at),
+                  generation: index + 1,
+                }),
+              }))}
+            />
+            <Button
+              size="small"
+              loading={loadingMore}
+              disabled={!canExtend}
+              onClick={() => void extend()}
+            >
+              {canExtend ? t("revisionDiff.extend") : t("revisionDiff.extendNone")}
+            </Button>
+          </Space>
+
           <p className="revision-diff-summary">
             {t("revisionDiff.counts", {
               added: diff.counts.added,
@@ -175,6 +253,7 @@ export default function RevisionDiffModal({
             </div>
           )}
           <p className="career-help">{t("revisionDiff.hint")}</p>
+          <p className="career-help">{t("revisionDiff.namedHint")}</p>
         </>
       )}
     </Modal>

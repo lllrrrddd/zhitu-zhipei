@@ -2,7 +2,7 @@
 /** 简历版本对比（与上一版比）。 */
 
 const revisionDiff = {
-  "revisionDiff.title": "与上一版的差异",
+  "revisionDiff.title": "版本对比（保存血缘）",
   "revisionDiff.loading": "正在对比两个版本…",
   "revisionDiff.error": "读取版本失败，请重试。",
   "revisionDiff.counts": "新增 {added} 处 · 删除 {removed} 处 · 修改 {changed} 处",
@@ -11,6 +11,13 @@ const revisionDiff = {
   "revisionDiff.kind.added": "新增",
   "revisionDiff.kind.removed": "删除",
   "revisionDiff.kind.changed": "修改",
+  "revisionDiff.base.label": "对比基准",
+  "revisionDiff.base.option": "第 {generation} 代前 · {title} · {time}",
+  "revisionDiff.base.untitled": "未命名版本",
+  "revisionDiff.extend": "再往前一版",
+  "revisionDiff.extendNone": "已经到最早一版",
+  "revisionDiff.namedHint":
+    "想比较任意两个命名版本（或恢复旧版本），用制作台「版本」面板：那里的快照由你手动拍，可互比也可恢复。",
   "revisionDiff.entryN": "第 {index} 条",
   "revisionDiff.fieldN": "字段 {index}",
   "revisionDiff.textN": "段落 {index}",

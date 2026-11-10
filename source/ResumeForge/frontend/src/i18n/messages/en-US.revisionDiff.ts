@@ -2,7 +2,7 @@
 /** Resume revision diff (current vs its parent). */
 
 const revisionDiff = {
-  "revisionDiff.title": "Changes vs previous version",
+  "revisionDiff.title": "Compare with a previous save",
   "revisionDiff.loading": "Comparing the two versions…",
   "revisionDiff.error": "Could not load the versions. Try again.",
   "revisionDiff.counts": "{added} added · {removed} removed · {changed} changed",
@@ -11,6 +11,13 @@ const revisionDiff = {
   "revisionDiff.kind.added": "Added",
   "revisionDiff.kind.removed": "Removed",
   "revisionDiff.kind.changed": "Changed",
+  "revisionDiff.base.label": "Compare against",
+  "revisionDiff.base.option": "Save −{generation} · {title} · {time}",
+  "revisionDiff.base.untitled": "Untitled version",
+  "revisionDiff.extend": "Go one save further back",
+  "revisionDiff.extendNone": "Already the earliest save",
+  "revisionDiff.namedHint":
+    "To compare any two named snapshots (or restore one), use the Versions panel in the workbench: those snapshots are taken manually and can be compared or restored.",
   "revisionDiff.entryN": "Entry {index}",
   "revisionDiff.fieldN": "Field {index}",
   "revisionDiff.textN": "Paragraph {index}",
