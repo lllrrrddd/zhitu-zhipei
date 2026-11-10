@@ -30,8 +30,11 @@
   min-width: 0;
 }
 
+/* 统计行降为 meta：它和页头标题并列时会变成"第二个大标题"，层级反而乱。 */
 .career-browse-toolbar strong {
-  font-size: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rf-text-secondary);
 }
 
 .career-browse-filters {
@@ -56,7 +59,7 @@
 .career-browse-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
 }
 
 .career-browse-card,
@@ -76,18 +79,44 @@
   color: var(--rf-text-description);
 }
 
+/* 标题 19px 品牌蓝链接是"门户网站"的做法：一条列表里十几个大号彩字，噪音压过内容。
+   改成正文色 + 加粗，靠 hover 变蓝并加下划线表达可点。 */
 .career-browse-card h2 {
   margin: 0;
-  font-size: 19px;
-  line-height: 1.4;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.career-browse-card h2 a {
+  color: var(--rf-text);
+  text-decoration: none;
+}
+
+.career-browse-card h2 a:hover {
+  color: var(--rf-info);
+  text-decoration: underline;
+}
+
+.career-browse-card h2 .anticon {
+  font-size: 11px;
+  color: var(--rf-text-tertiary);
 }
 
 .career-browse-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 5px 12px;
+  font-size: 12.5px;
+  color: var(--rf-text-tertiary);
 }
 
+.career-browse-meta strong {
+  color: var(--rf-text-secondary);
+  font-weight: 600;
+}
+
+/* 摘要三行 + 12.5px：两行时卡片下半截是空的，三行在等高的网格里更饱满。 */
 .career-browse-excerpt {
   overflow: hidden;
   display: -webkit-box;
@@ -95,6 +124,8 @@
   -webkit-line-clamp: 3;
   line-clamp: 3;
   margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
   color: var(--rf-text-description);
 }
 

@@ -141,9 +141,10 @@ export default function MarketPage() {
           {data.items.map((item) => (
             <Card className="career-browse-card" key={`${item.job.source_id}-${item.job.id}`}>
               <div className="career-browse-card-head">
-                <Tag color={item.current ? "green" : "default"}>
+                {/* 状态用圆点 + 文字，不用彩色胶囊：一屏十几个彩块，读起来像模板。 */}
+                <span className="career-source-state" data-current={item.current ? "yes" : "no"}>
                   {t(item.current ? "career.market.updated" : "career.market.stale")}
-                </Tag>
+                </span>
                 <span>{item.source_name}</span>
               </div>
               <h2>
