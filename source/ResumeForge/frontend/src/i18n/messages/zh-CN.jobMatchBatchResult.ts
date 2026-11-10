@@ -44,6 +44,21 @@ const jobMatchBatchResult = {
   "jobMatchBatchResult.summary.modelMissing": "本批未配置模型，使用本地降级结果。",
 
   "jobMatchBatchResult.empty.results": "没有可展示的分析结果",
+  "jobMatchBatchResult.table.title": "横向对比表",
+  "jobMatchBatchResult.table.column.job": "岗位",
+  "jobMatchBatchResult.table.column.rank": "名次",
+  "jobMatchBatchResult.table.column.score": "参考分",
+  "jobMatchBatchResult.table.column.hard": "硬性条件",
+  "jobMatchBatchResult.table.column.core": "核心能力",
+  "jobMatchBatchResult.table.column.bonus": "加分项",
+  "jobMatchBatchResult.table.tally": "{matched}/{total}",
+  "jobMatchBatchResult.table.blocked": "未满足 {count}",
+  "jobMatchBatchResult.table.copy": "复制为表格",
+  "jobMatchBatchResult.table.copied": "已复制成 Markdown 表格，可直接粘到文档里。",
+  "jobMatchBatchResult.table.copyFailed": "复制失败，请手动选择表格内容。",
+  "jobMatchBatchResult.table.empty": "还没有可对比的结果。",
+  "jobMatchBatchResult.table.hint":
+    "参考分来自本地规则、不参与名次推导；名次与结论来自对比批次。点列头可按分数排序。",
 } as const;
 
 export default jobMatchBatchResult;

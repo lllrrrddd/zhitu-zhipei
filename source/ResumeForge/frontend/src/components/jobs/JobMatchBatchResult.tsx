@@ -16,6 +16,7 @@ import { t, type MessageKey } from "../../i18n";
 import { ADMISSION_LABEL_KEYS, MATCH_STATUS_LABEL_KEYS } from "../../i18n/enum/apply";
 import { useLocale } from "../../i18n/i18nContext";
 import JobComparisonResult from "./JobComparisonResult";
+import JobComparisonTable from "./JobComparisonTable";
 
 type BatchMatchResult = NonNullable<JobMatchBatchItem["result"]>;
 
@@ -197,7 +198,11 @@ export function BatchResultView({ batch }: { batch: JobMatchBatchOut }) {
   return (
     <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
       {batch.comparison ? (
-        <JobComparisonResult comparison={batch.comparison} items={batch.items} />
+        <>
+          {/* 先给一张能横向扫读的表，再给"为什么排这儿"的排名说明，最后是逐岗细节。 */}
+          <JobComparisonTable items={batch.items} />
+          <JobComparisonResult comparison={batch.comparison} items={batch.items} />
+        </>
       ) : null}
       <Alert
         type={batch.failed_count > 0 ? "warning" : "success"}

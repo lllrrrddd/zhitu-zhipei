@@ -46,6 +46,21 @@ const jobMatchBatchResult = {
     "No model was configured for this batch; local fallback results were used.",
 
   "jobMatchBatchResult.empty.results": "No analysis results to show",
+  "jobMatchBatchResult.table.title": "Side-by-side table",
+  "jobMatchBatchResult.table.column.job": "Job",
+  "jobMatchBatchResult.table.column.rank": "Rank",
+  "jobMatchBatchResult.table.column.score": "Score",
+  "jobMatchBatchResult.table.column.hard": "Hard conditions",
+  "jobMatchBatchResult.table.column.core": "Core abilities",
+  "jobMatchBatchResult.table.column.bonus": "Bonus items",
+  "jobMatchBatchResult.table.tally": "{matched} of {total}",
+  "jobMatchBatchResult.table.blocked": "{count} unmet",
+  "jobMatchBatchResult.table.copy": "Copy as table",
+  "jobMatchBatchResult.table.copied": "Copied as a Markdown table — paste it anywhere.",
+  "jobMatchBatchResult.table.copyFailed": "Copy failed. Select the table manually.",
+  "jobMatchBatchResult.table.empty": "Nothing to compare yet.",
+  "jobMatchBatchResult.table.hint":
+    "Scores come from local rules and never drive the rank; ranks and verdicts come from the comparison batch. Click a column header to sort by score.",
 } as const;
 
 export default jobMatchBatchResult;
