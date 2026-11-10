@@ -55,6 +55,8 @@ interface Props {
   onOpenAssistant: () => void;
   /** 打开「检查」（体检单 / 风险 / ATS / 修改记录 同一个入口）。 */
   onOpenQuality: () => void;
+  /** 简历内容签名：导出前用它判断"上次体检分是否过期"。 */
+  contentSignature?: string;
   onOpenSharePackage: () => void;
   onOpenExportOptions: () => void;
 }
@@ -73,6 +75,7 @@ export default function ResumeDetailFooter({
   onOpenJob,
   onOpenAssistant,
   onOpenQuality,
+  contentSignature,
   onOpenSharePackage,
   onOpenExportOptions,
 }: Props) {
@@ -130,6 +133,8 @@ export default function ResumeDetailFooter({
                 recordId={resumeId}
                 layout={layout}
                 pdfDirectAvailable={pdfDirectAvailable}
+                contentSignature={contentSignature}
+                onOpenChecks={onOpenQuality}
                 onOpen={onOpenExportOptions}
               />
             </div>
@@ -140,6 +145,8 @@ export default function ResumeDetailFooter({
               recordId={resumeId}
               layout={layout}
               pdfDirectAvailable={pdfDirectAvailable}
+              contentSignature={contentSignature}
+              onOpenChecks={onOpenQuality}
               onOpen={onOpenExportOptions}
             />
           </div>

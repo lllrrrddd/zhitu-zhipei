@@ -324,6 +324,7 @@ export default function ResumeDetailPreview({
         }}
         onOpenAssistant={() => navigate(`/assistant?resume_id=${detail.id}&new=1`)}
         onOpenQuality={() => setQualityOpen(true)}
+        contentSignature={riskContentSignature}
         onOpenSharePackage={() => setSharePackageOpen(true)}
         onOpenExportOptions={openExportByFlow}
       />

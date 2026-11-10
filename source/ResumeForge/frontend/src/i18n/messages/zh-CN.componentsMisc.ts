@@ -40,6 +40,12 @@ const componentsMisc = {
   "componentsMisc.resumeDiff.stat.removed": "删除 {removed}",
   "componentsMisc.resumeDiff.stat.unchanged": "未变 {unchanged}",
 
+  "componentsMisc.exportButtons.gate.title": "体检分偏低，仍要导出？",
+  "componentsMisc.exportButtons.gate.body":
+    "上次体检 {score} 分（建议 {threshold} 分以上再投）。这只是建议——内容是否可用由你判断，导出不受影响。",
+  "componentsMisc.exportButtons.gate.stale": "这份简历在那次体检之后又改过，分数可能已经变了。",
+  "componentsMisc.exportButtons.gate.continue": "仍然导出",
+  "componentsMisc.exportButtons.gate.check": "先去检查",
   "componentsMisc.exportButtons.export": "导出",
 
   "componentsMisc.datasetScope.loading": "正在连接本地工作台",
