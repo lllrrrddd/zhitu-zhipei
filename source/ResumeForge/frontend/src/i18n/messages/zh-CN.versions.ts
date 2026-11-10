@@ -11,7 +11,7 @@ const versions = {
   "versions.title": "版本与变体",
   "versions.tab.versions": "命名版本",
   "versions.hint.lineage":
-    "这里的快照要你手动拍，可以互相比、也能恢复。只想看“每次保存到底改了什么”，用简历详情底部的「修改记录」——它走保存血缘，不用拍快照。",
+    "这里的快照要你手动拍，可以互相比、也能恢复。只想看“每次保存到底改了什么”，用简历详情底部的「检查 → 修改记录」——它走保存血缘，不用拍快照。",
   "versions.tab.variants": "岗位变体",
   "versions.hint": "命名版本是不可变快照；恢复会生成新的当前版本",
   "versions.error.title": "版本加载失败",

@@ -294,7 +294,7 @@ describe("ResumeDetailPreview 底部按钮排满整行", () => {
       "生成岗位优化建议",
       "查看对应岗位",
       "咨询求职助手",
-      "质量检测",
+      "检查",
       "离线分享",
     ]) {
       expect(screen.getByText(name)).toBeInTheDocument();

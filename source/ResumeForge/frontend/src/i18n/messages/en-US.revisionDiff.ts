@@ -3,6 +3,7 @@
 
 const revisionDiff = {
   "revisionDiff.title": "Edit history",
+  "revisionDiff.noParent": "This is the first save, so there is nothing to compare against.",
   "revisionDiff.loading": "Comparing the two versions…",
   "revisionDiff.error": "Could not load the versions. Try again.",
   "revisionDiff.counts": "{added} added · {removed} removed · {changed} changed",

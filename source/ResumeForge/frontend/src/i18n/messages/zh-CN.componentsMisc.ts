@@ -29,8 +29,9 @@ const componentsMisc = {
     "未调用大模型，按内置规则匹配得出；准确度低于 AI 识别，请重点核对后再保存",
   "componentsMisc.recognitionOutcome.recognizedText": "查看模型识别到的原文（请对照截图核对）",
 
-  "componentsMisc.qualityModal.title": "质量检测",
+  "componentsMisc.qualityModal.title": "检查",
   "componentsMisc.qualityModal.tab.health": "体检单",
+  "componentsMisc.qualityModal.tab.history": "修改记录",
   "componentsMisc.qualityModal.tab.risk": "风险扫描",
   "componentsMisc.qualityModal.tab.ats": "ATS 检测",
 

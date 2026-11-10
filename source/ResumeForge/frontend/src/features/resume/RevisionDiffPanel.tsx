@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
- * 「修改记录」弹窗：当前版本 vs 某一代保存（默认上一版）。
+ * 「修改记录」面板：当前版本 vs 某一代保存（默认上一版）。
+ *
+ * 为什么是面板不是弹窗：它现在作为「检查」弹窗的一个 Tab 使用（和体检单、风险扫描、ATS
+ * 并列），外壳由宿主提供。拆成面板后，取数逻辑只有这一份，弹窗/页面想嵌到哪都行。
  *
  * 与制作台「版本」面板的分工（两件事，别混淆）：
- * - **命名版本**（`/resumes/{id}/versions`）是用户主动拍的快照，可任意两版互比、可恢复；
- * - 这里走**保存血缘**（`parent_revision_id`）：即使从没拍过快照，每次修订都留下上一代，
- *   所以"这一版到底改了哪句话"随时能看，也能顺着血缘再往前选几代。
- *
- * 本文件只负责**取数与外壳**（打开时拉两版、切换基准、加载更早的血亲）；差异怎么渲染
- * 在 `features/resume/RevisionDiffView`，那份视图不依赖弹窗、可被别处复用。
+ * - **命名版本**是用户主动拍的快照，可任意两版互比、可恢复；
+ * - 这里走**保存血缘**（`parent_revision_id`）：即使从没拍过快照，每次修订都留下上一代。
  *
  * 只读：不改数据、不能回滚（回滚走命名版本的恢复，或 AI 修改 / 重新生成）。
  */
 
-import { Alert, Button, Modal, Select, Space, Typography } from "antd";
+import { Alert, Button, Select, Space, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
-import { getResume } from "../api/resumes";
-import { t } from "../i18n";
-import { useLocale } from "../i18n/i18nContext";
-import { diffDocuments } from "../features/resume/revisionDiff";
-import RevisionDiffView from "../features/resume/RevisionDiffView";
-import type { ResumeDocument } from "../types/resumeDocument";
-import { formatDateTime } from "../utils/format";
-import "../styles/revision-diff.css";
+import { getResume } from "../../api/resumes";
+import { t } from "../../i18n";
+import { useLocale } from "../../i18n/i18nContext";
+import { formatDateTime } from "../../utils/format";
+import type { ResumeDocument } from "../../types/resumeDocument";
+import RevisionDiffView from "./RevisionDiffView";
+import { diffDocuments } from "./revisionDiff";
 
 /** 顺着血缘最多再往前取几代：再多就不是"看改动"，是"翻族谱"。 */
 const MAX_ANCESTORS = 3;
@@ -35,16 +33,12 @@ interface LoadedRevision {
   content: ResumeDocument;
 }
 
-export default function RevisionDiffModal({
-  open,
+export default function RevisionDiffPanel({
   resumeId,
   parentRevisionId,
-  onClose,
 }: {
-  open: boolean;
   resumeId: number;
   parentRevisionId: number | null;
-  onClose: () => void;
 }) {
   useLocale();
   const [current, setCurrent] = useState<ResumeDocument | null>(null);
@@ -53,11 +47,11 @@ export default function RevisionDiffModal({
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
 
-  // 加载态由数据推导（每次打开都重新挂载，见父组件的 key），effect 里只写 promise 回调。
-  const loading = open && parentRevisionId !== null && !error && !current;
+  // 加载态由数据推导，effect 里只写 promise 回调（挂载即取数，本面板只在"检查"弹窗里出现）。
+  const loading = parentRevisionId !== null && !error && !current;
 
   useEffect(() => {
-    if (!open || parentRevisionId === null) return;
+    if (parentRevisionId === null) return;
     let cancelled = false;
     void Promise.all([getResume(parentRevisionId), getResume(resumeId)])
       .then(([parentDetail, currentDetail]) => {
@@ -79,7 +73,7 @@ export default function RevisionDiffModal({
     return () => {
       cancelled = true;
     };
-  }, [open, resumeId, parentRevisionId]);
+  }, [resumeId, parentRevisionId]);
 
   const oldest = ancestors[ancestors.length - 1];
   const canExtend = Boolean(oldest?.parentId) && ancestors.length < MAX_ANCESTORS;
@@ -112,16 +106,12 @@ export default function RevisionDiffModal({
     [before, current],
   );
 
+  if (parentRevisionId === null) {
+    return <Typography.Text type="secondary">{t("revisionDiff.noParent")}</Typography.Text>;
+  }
+
   return (
-    <Modal
-      open={open}
-      title={t("revisionDiff.title")}
-      onCancel={onClose}
-      footer={null}
-      width="min(820px, calc(100vw - 24px))"
-      destroyOnHidden
-      styles={{ body: { maxHeight: "var(--rf-modal-body-max-h)", overflowY: "auto" } }}
-    >
+    <div className="revision-diff-panel">
       {loading && <Typography.Text type="secondary">{t("revisionDiff.loading")}</Typography.Text>}
       {error && <Alert type="error" showIcon title={error} />}
       {!loading && !error && diff && (
@@ -159,6 +149,6 @@ export default function RevisionDiffModal({
           <p className="career-help">{t("revisionDiff.namedHint")}</p>
         </>
       )}
-    </Modal>
+    </div>
   );
 }

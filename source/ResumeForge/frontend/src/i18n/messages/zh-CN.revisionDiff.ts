@@ -3,6 +3,7 @@
 
 const revisionDiff = {
   "revisionDiff.title": "修改记录",
+  "revisionDiff.noParent": "这是第一版，没有可对比的上一版。",
   "revisionDiff.loading": "正在对比两个版本…",
   "revisionDiff.error": "读取版本失败，请重试。",
   "revisionDiff.counts": "新增 {added} 处 · 删除 {removed} 处 · 修改 {changed} 处",

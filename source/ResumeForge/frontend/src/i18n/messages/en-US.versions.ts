@@ -3,7 +3,7 @@ const versions = {
   "versions.title": "Versions and variants",
   "versions.tab.versions": "Named versions",
   "versions.hint.lineage":
-    "Snapshots here are taken by hand: compare or restore them freely. To see what each save changed, use Edit history at the bottom of the resume detail — it follows save lineage, no snapshot needed.",
+    "Snapshots here are taken by hand: compare or restore them freely. To see what each save changed, use Checks → Edit history at the bottom of the resume detail — it follows save lineage, no snapshot needed.",
   "versions.tab.variants": "Job variants",
   "versions.hint":
     "Named versions are immutable snapshots; restoring one creates a new current version",

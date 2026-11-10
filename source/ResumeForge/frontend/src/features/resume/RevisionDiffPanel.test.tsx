@@ -2,12 +2,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { App } from "antd";
 import { beforeEach, expect, it, vi } from "vitest";
-import { t } from "../i18n";
-import RevisionDiffModal from "./RevisionDiffModal";
-import type { ResumeDocument } from "../types/resumeDocument";
+import { t } from "../../i18n";
+import RevisionDiffPanel from "./RevisionDiffPanel";
+import type { ResumeDocument } from "../../types/resumeDocument";
 
 const apiMocks = vi.hoisted(() => ({ getResume: vi.fn() }));
-vi.mock("../api/resumes", () => apiMocks);
+vi.mock("../../api/resumes", () => apiMocks);
 
 const SECTION_LAYOUT = {
   columns: 1 as const,
@@ -99,15 +99,10 @@ function detailOf(id: number) {
   };
 }
 
-function renderModal(parentRevisionId: number | null = 2) {
+function renderPanel(parentRevisionId: number | null = 2) {
   return render(
     <App>
-      <RevisionDiffModal
-        open
-        resumeId={3}
-        parentRevisionId={parentRevisionId}
-        onClose={() => undefined}
-      />
+      <RevisionDiffPanel resumeId={3} parentRevisionId={parentRevisionId} />
     </App>,
   );
 }
@@ -117,7 +112,7 @@ beforeEach(() => {
 });
 
 it("默认与上一版对比，列出计数与逐条差异", async () => {
-  renderModal();
+  renderPanel();
   expect(
     await screen.findByText(t("revisionDiff.counts", { added: 0, removed: 0, changed: 1 })),
   ).toBeInTheDocument();
@@ -127,7 +122,7 @@ it("默认与上一版对比，列出计数与逐条差异", async () => {
 });
 
 it("可以顺着血缘再往前一版，并切换到那一版作为基准", async () => {
-  renderModal();
+  renderPanel();
   await screen.findByText(PARENT_TEXT);
 
   fireEvent.click(screen.getByRole("button", { name: t("revisionDiff.extend") }));
@@ -142,7 +137,7 @@ it("可以顺着血缘再往前一版，并切换到那一版作为基准", asyn
 
 it("上一版已是最早一版时，「再往前一版」不可点", async () => {
   // 基准取 id=1（它的 parent 为空），此时没有更早的血亲可加载
-  renderModal(1);
+  renderPanel(1);
   await screen.findByText(OLDEST_TEXT);
   expect(screen.getByRole("button", { name: t("revisionDiff.extendNone") })).toBeDisabled();
 });
@@ -151,30 +146,31 @@ it("两版文字完全一致时说清楚「没有差异」", async () => {
   apiMocks.getResume.mockImplementation((id: number) =>
     Promise.resolve({ ...detailOf(id), content: doc(CURRENT_TEXT) }),
   );
-  renderModal();
+  renderPanel();
   expect(await screen.findByText(t("revisionDiff.empty"))).toBeInTheDocument();
 });
 
 it("读取失败时显示错误", async () => {
   apiMocks.getResume.mockRejectedValueOnce(new Error("boom"));
-  renderModal();
+  renderPanel();
   expect(await screen.findByText("boom")).toBeInTheDocument();
 });
 
-it("没有上一版时不发请求", () => {
+it("没有上一版时不发请求，并说明原因", async () => {
   apiMocks.getResume.mockClear();
-  renderModal(null);
+  renderPanel(null);
   expect(apiMocks.getResume).not.toHaveBeenCalled();
+  expect(await screen.findByText(t("revisionDiff.noParent"))).toBeInTheDocument();
 });
 
 it("提示命名版本面板的存在，避免两套「版本对比」混淆", async () => {
-  renderModal();
+  renderPanel();
   await screen.findByText(PARENT_TEXT);
   expect(screen.getByText(t("revisionDiff.namedHint"))).toBeInTheDocument();
 });
 
 it("展开更早版本后仍有选择器可切换基准", async () => {
-  renderModal();
+  renderPanel();
   await screen.findByText(PARENT_TEXT);
   await waitFor(() => expect(screen.getByRole("combobox")).toBeInTheDocument());
 });
