@@ -134,15 +134,23 @@ body.is-slider-dragging iframe {
    几乎糊成一片）。现在每个分组是一张**轻卡片**——细边框 + 控制圆角 + 10/12 内边距 +
    与左栏同色的底（边框承担"这是一块独立功能"的唯一职责，不叠第二层底色）。
    分组之间 14px（左栏容器的 gap），卡片内部 12px。 */
+/* 分组不再各自"卡片化"：左栏本身已是独立区域，再给每组加边框+圆角+白底，
+   就变成"卡片套折叠面板再套控件"三层框。改成上边一条分隔线，层级靠标题字重表达。 */
 .resume-wb-group {
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--rf-border-subtle);
-  border-radius: var(--rf-radius-control);
-  background: var(--rf-surface);
+  padding: 10px 12px 2px;
+  border: 0;
+  border-top: 1px solid var(--rf-border-subtle);
+  border-radius: 0;
+  background: none;
+}
+
+.resume-wb-group:first-of-type {
+  border-top: 0;
+  padding-top: 2px;
 }
 
 /* 折叠标题：整行可点（32px 命中高度），文字 13px 正文色 + 600 字重，箭头靠右。
