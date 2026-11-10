@@ -5,7 +5,7 @@
  * 面板自己不直接调接口；后端未下发 content_hints 时只生成正文类候选（fail-soft）。
  */
 import { App as AntdApp } from "antd";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { t } from "../../i18n";
@@ -94,7 +94,7 @@ afterEach(() => {
 describe("诊断卡 · 内容精简候选", () => {
   it("生成候选 → 应用把新正文交给宿主一次（不直接写库）", async () => {
     const onApplyContent = vi.fn<(next: ResumeContent) => Promise<void>>(async () => undefined);
-    render(
+    const view = render(
       <AntdApp>
         <ResumeLayoutDiagnosisCard
           resumeId={7}
@@ -128,6 +128,10 @@ describe("诊断卡 · 内容精简候选", () => {
     expect((next.experience[0] as { id?: string }).id).toBe("exp_duplicate01");
     // 面板自己不写库：只走宿主的写回回调。
     expect(apiMocks.updateResumeLayout).not.toHaveBeenCalled();
-    expect(await screen.findByText(ot("optimizer.content.applied"))).toBeInTheDocument();
+    // 限定在组件容器内查询：同一句话也会出现在 antd 的 message 气泡里（body 级），
+    // 全量并行跑时时序不同就会撞成"找到多个"。这里要断言的是**面板里**那个可撤销标记。
+    expect(
+      await within(view.container).findByText(ot("optimizer.content.applied")),
+    ).toBeInTheDocument();
   });
 });
