@@ -9,6 +9,11 @@ import { t } from "../i18n";
 import { MATCH_HISTORY_KEY, SAVED_PROFILE_KEY } from "../features/career/matchHistory";
 import FavoritesPage from "./FavoritesPage";
 
+vi.mock("../components/JobMatchModal", () => ({
+  default: ({ job }: { job: { title: string } | null }) =>
+    job ? <div>{`MATCH_MODAL:${job.title}`}</div> : null,
+}));
+
 const apiMocks = vi.hoisted(() => ({
   listJobs: vi.fn(),
   updateJob: vi.fn(),
@@ -19,6 +24,8 @@ const apiMocks = vi.hoisted(() => ({
 vi.mock("../api/jobs", () => ({
   listJobs: apiMocks.listJobs,
   updateJob: apiMocks.updateJob,
+  // 收藏夹行内的「匹配分析」要先取一次完整岗位（列表项没有 JD）。
+  getJob: vi.fn().mockResolvedValue({ id: 1, title: "数据分析师", company: "示例公司" }),
 }));
 // 展开真实模块再覆盖：显式列导出时，生产代码新增一个导出就会让调用方直接抛
 // "export is not defined"，看起来像组件崩了。
@@ -296,5 +303,23 @@ describe("收藏与匹配档案联动", () => {
     const { container } = renderPage();
     expect(await screen.findByText(JOB_TITLE)).toBeInTheDocument();
     expect(container.querySelector(".career-favorite-match")).toBeNull();
+  });
+});
+
+describe("收藏夹 → 匹配分析", () => {
+  /** 岗位名是**用户数据**（后端返回），断言用常量避免新增中文 ByText 断言。 */
+  const TITLE = "数据分析师";
+
+  it("行内「匹配分析」先取岗位详情，再把完整岗位交给匹配弹窗", async () => {
+    const { getJob } = await import("../api/jobs");
+    renderPage();
+    await screen.findByText(TITLE);
+
+    // 打开行内「更多」菜单
+    fireEvent.click(screen.getByRole("button", { name: t("common.rowActions.more") }));
+    fireEvent.click(await screen.findByText(t("favorites.action.match")));
+
+    await waitFor(() => expect(getJob).toHaveBeenCalledWith(1));
+    expect(await screen.findByText(`MATCH_MODAL:${TITLE}`)).toBeInTheDocument();
   });
 });

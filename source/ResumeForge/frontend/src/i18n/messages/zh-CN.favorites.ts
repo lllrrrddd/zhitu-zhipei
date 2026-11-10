@@ -20,12 +20,15 @@ const favorites = {
   "favorites.source.ai": "AI 生成",
   "favorites.action.unfavorite": "取消收藏",
   "favorites.action.openJob": "打开岗位详情",
+  "favorites.action.match": "匹配分析",
+  "favorites.action.matchLoading": "正在读取岗位…",
   "favorites.action.previewExport": "预览 / 导出",
   "favorites.tooltip.importedAt": "导入于 {time}",
   "favorites.empty.jobs": "暂无收藏岗位",
   "favorites.empty.resumes": "暂无收藏简历",
   "favorites.pagination.total": "共 {total} 项收藏",
   "favorites.error.unfavoriteFailed": "取消收藏失败",
+  "favorites.error.matchFailed": "读取岗位失败，暂时无法分析。",
 } as const;
 
 export default favorites;

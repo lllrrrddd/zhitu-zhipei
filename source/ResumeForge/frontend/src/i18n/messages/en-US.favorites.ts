@@ -21,12 +21,15 @@ const favorites = {
   "favorites.source.ai": "AI-generated",
   "favorites.action.unfavorite": "Remove from favorites",
   "favorites.action.openJob": "Open job details",
+  "favorites.action.match": "Match analysis",
+  "favorites.action.matchLoading": "Loading job…",
   "favorites.action.previewExport": "Preview / export",
   "favorites.tooltip.importedAt": "Imported at {time}",
   "favorites.empty.jobs": "No saved jobs yet",
   "favorites.empty.resumes": "No saved resumes yet",
   "favorites.pagination.total": "{total} favorites in total",
   "favorites.error.unfavoriteFailed": "Could not remove this favorite",
+  "favorites.error.matchFailed": "Could not load the job, so analysis is unavailable.",
 } as const;
 
 export default favorites;

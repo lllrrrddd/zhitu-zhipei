@@ -6,14 +6,15 @@ import type { TableColumnsType } from "antd";
 import type { HTMLAttributes } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { listJobs, updateJob } from "../api/jobs";
+import { getJob, listJobs, updateJob } from "../api/jobs";
 import { listResumes, updateResumeFavorite } from "../api/resumes";
 import { RowActions, RowContextMenu, type RowActionItem } from "../components/common/RowActions";
 import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
+import JobMatchModal from "../components/JobMatchModal";
 import ResumeDetailModal from "../components/ResumeDetailModal";
 import { useApi } from "../hooks/useApi";
-import type { JobList, Page, ResumeBrief } from "../types";
+import type { Job, JobList, Page, ResumeBrief } from "../types";
 import { formatDateTime } from "../utils/format";
 import FavoriteMatchTags from "../features/career/FavoriteMatchTags";
 import {
@@ -51,6 +52,9 @@ export default function FavoritesPage() {
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [pageSize, setPageSize] = useState(Number(searchParams.get("page_size")) || 10);
   const [previewId, setPreviewId] = useState<number | null>(null);
+  /** 匹配分析用的**完整岗位**（列表项没有 JD，得先取详情）。 */
+  const [matchJob, setMatchJob] = useState<Job | null>(null);
+  const [matchLoadingId, setMatchLoadingId] = useState<number | null>(null);
   const [updatingKey, setUpdatingKey] = useState("");
   // 匹配上下文只在本机：收藏当时用哪份档案看的、各方向最近一次的分数。
   const [savedMatches] = useState<Record<string, SavedProfileMatch>>(() =>
@@ -125,6 +129,25 @@ export default function FavoritesPage() {
     [message, reload],
   );
 
+  /**
+   * 收藏的岗位往往就是"我想去、但不知道够不够"的那几个，所以行内直接给匹配分析入口，
+   * 不必先跳到岗位页再点一次。列表项没有 JD，这里按 id 取一次详情再打开弹窗。
+   */
+  const openMatchAnalysis = useCallback(
+    async (job: JobList) => {
+      if (matchLoadingId !== null) return;
+      setMatchLoadingId(job.id);
+      try {
+        setMatchJob(await getJob(job.id));
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : t("favorites.error.matchFailed"));
+      } finally {
+        setMatchLoadingId(null);
+      }
+    },
+    [matchLoadingId, message],
+  );
+
   const favoriteButton = (key: string, onClick: () => void) => (
     <Tooltip title={t("favorites.action.unfavorite")}>
       <Button
@@ -149,6 +172,14 @@ export default function FavoritesPage() {
             key: "open",
             label: t("favorites.action.openJob"),
             onClick: () => navigate(`/jobs?job_id=${item.id}`),
+          },
+          {
+            key: "match",
+            label:
+              matchLoadingId === item.id
+                ? t("favorites.action.matchLoading")
+                : t("favorites.action.match"),
+            onClick: () => void openMatchAnalysis(item as JobList),
           },
         ]
       : [
@@ -369,6 +400,8 @@ export default function FavoritesPage() {
         />
       )}
       <ResumeDetailModal recordId={previewId} onClose={() => setPreviewId(null)} />
+      {/* 匹配分析弹窗要看 JD 与资料，所以只在拿到完整岗位后才打开。 */}
+      <JobMatchModal job={matchJob} onClose={() => setMatchJob(null)} />
     </div>
   );
 }
