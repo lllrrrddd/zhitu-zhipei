@@ -38,20 +38,23 @@
 
 /* ── 条目三区卡 ───────────────────────────────────────────── */
 
+/* 条目不再画成"卡片"：中栏已经有板块标题与字段行，再给每条套一个圆角描边矩形，
+   就变成卡套卡。改成左侧一条竖线（选中时变品牌色），像结构树的一级缩进。 */
 .document-entry {
   /* R-14：纸面/结构树选中的条目滚到顶部时留 8px，避免卡贴上沿。 */
   scroll-margin-top: 8px;
-  border: 1px solid var(--rf-border-subtle);
-  border-radius: 8px;
-  background: var(--rf-surface-elevated);
-  padding: 10px 12px;
+  border: 0;
+  border-left: 2px solid var(--rf-border-subtle);
+  border-radius: 0;
+  background: none;
+  padding: 2px 0 2px 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .document-entry.is-selected {
-  border-color: var(--rf-brand);
+  border-left-color: var(--rf-brand);
 }
 
 .document-entry.is-hidden {

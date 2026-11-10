@@ -132,11 +132,17 @@
     gap: 8px;
   }
 
+  /* 只有"宽控件"（搜索框、下拉）独占一行；按钮按内容宽度并排换行。
+     以前所有控件都占满整行，8 个控件就吃掉一整屏，用户得先滚过工具栏才能看到列表。 */
   .rf-filter-bar > .ant-space-item {
+    flex: 0 1 auto;
+  }
+
+  .rf-filter-bar > .ant-space-item:has(:is(.ant-input-search, .ant-select)) {
     flex: 1 1 100%;
   }
 
-  .rf-filter-bar > .ant-space-item > :is(.ant-input-search, .ant-select, .ant-btn) {
+  .rf-filter-bar > .ant-space-item > :is(.ant-input-search, .ant-select) {
     width: 100% !important;
   }
 
@@ -185,5 +191,21 @@
   .ant-modal-footer .ant-btn,
   .ant-drawer-footer .ant-btn {
     min-height: 48px;
+  }
+}
+
+/* 窄屏提示条：正文与右侧动作按钮并排时，正文被压成竖排。
+   允许换行，让动作按钮掉到下一行——文字读得顺比"省一行高度"重要。 */
+@media (max-width: 640px) {
+  .ant-alert {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  /* antd v6 的内容容器是 `.ant-alert-section`（不是 v5 的 content/action）：
+     它被挤到几十像素宽时，正文会变成竖排。给它整行宽度，按钮自然换到下一行。 */
+  .ant-alert .ant-alert-section {
+    min-width: 0;
+    flex: 1 1 100%;
   }
 }

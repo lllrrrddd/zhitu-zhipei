@@ -18,16 +18,18 @@
   min-width: 0;
 }
 
-/* 页眉唯一的卡片层：与 `.document-entry` 同值（1px / 8px / 10px 12px / gap 8px）。
+/* 页眉与条目用同一种"竖线缩进"语言（同 `.document-entry`）：不再画圆角卡片，
+   中栏里就只剩板块标题、字段行和一条竖线，读起来像结构树而不是一叠卡片。
    刻意不复用 `.document-entry` 类名——那一份会被 `.is-selected` / `.is-hidden` 误伤。 */
 .document-header-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--rf-border-subtle);
-  border-radius: 8px;
-  background: var(--rf-surface-elevated);
+  padding: 2px 0 2px 10px;
+  border: 0;
+  border-left: 2px solid var(--rf-border-subtle);
+  border-radius: 0;
+  background: none;
   min-width: 0;
 }
 

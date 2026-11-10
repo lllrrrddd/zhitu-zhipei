@@ -150,7 +150,7 @@
 .resume-health-intro strong {
   font-size: 13px;
   font-weight: 600;
-  color: var(--rf-text);
+  color: var(--rf-text-body);
 }
 
 .resume-health-intro p {

@@ -89,7 +89,7 @@
 }
 
 .career-browse-card h2 a {
-  color: var(--rf-text);
+  color: var(--rf-text-body);
   text-decoration: none;
 }
 
