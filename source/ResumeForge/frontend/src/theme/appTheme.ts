@@ -22,7 +22,8 @@ export const appTheme: ThemeConfig = {
     colorError: palette.error,
     colorInfo: palette.link,
     colorBorderSecondary: palette.border,
-    borderRadius: 8,
+    // 6px：卡片与控件同一档，避免"每个圆角都不一样"的松散感。
+    borderRadius: 6,
     controlHeight: 40,
     fontSize: 14,
     lineHeight: 1.6,
@@ -32,8 +33,10 @@ export const appTheme: ThemeConfig = {
     motionEaseInOut: "ease-in-out",
   },
   components: {
-    Button: { primaryShadow: "0 2px 4px rgb(22 54 92 / 12%)" },
-    Card: { headerFontSize: 16, headerHeight: 56, borderRadiusLG: 16 },
+    // 主按钮不带投影：投影把按钮浮起来，读起来像落地页；工具界面靠颜色区分就够。
+    Button: { primaryShadow: "none" },
+    // 卡片圆角从 16 收到 8：16px 是"营销卡片"的比例，列表页连续多卡时显得松。
+    Card: { headerFontSize: 15, headerHeight: 48, borderRadiusLG: 8 },
     Table: {
       headerBg: palette.surfaceAlt,
       headerColor: palette.brand,
@@ -44,7 +47,8 @@ export const appTheme: ThemeConfig = {
       rowSelectedHoverBg: palette.brandTint,
     },
     Menu: {
-      itemSelectedBg: palette.brandTint,
+      // 选中态不用整块浅蓝底（那是模板感的主要来源），改由侧栏 CSS 画一条 2px 竖条。
+      itemSelectedBg: "transparent",
       itemSelectedColor: palette.brand,
       // 选中条由 antd 的 `::after` 画，原先用 `display: none` 抹掉；token 归零才是正确表达。
       // 注意：`itemHeight` / `itemMarginBlock` / `itemBorderRadius` **故意不迁**——

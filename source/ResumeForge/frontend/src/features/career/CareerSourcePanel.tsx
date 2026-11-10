@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { ReloadOutlined } from "@ant-design/icons";
-import { Alert, Button, Card, Input, Space, Tag } from "antd";
+import { Alert, Button, Card, Input, Space } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { checkCareerPosting } from "../../api/career";
@@ -30,7 +30,10 @@ function sourceItem(source: MarketSource) {
       <div className="career-source-status">
         <span>{t("career.market.sourceCount", { count: source.count })}</span>
         {source.checked_at && (
-          <Tag color={source.current ? "green" : "default"}>{sourceStatus(source)}</Tag>
+          // 状态用"圆点 + 文字"而不是彩色胶囊：一屏十来个彩块，是模板感最重的部分。
+          <span className="career-source-state" data-current={source.current ? "yes" : "no"}>
+            {sourceStatus(source)}
+          </span>
         )}
       </div>
     </li>

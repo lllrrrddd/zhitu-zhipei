@@ -14,9 +14,9 @@
    （尺寸刻意**不**迁 token：Menu 的 itemHeight 是组件级全局值，会把下拉菜单与
    移动端抽屉的菜单项高度一起改掉，而这份 44px 只属于侧栏）与字色字重。 */
 .app-nav-menu .ant-menu-item {
-  height: 44px;
-  margin: 4px 0;
-  border-radius: 8px;
+  height: 38px;
+  margin: 2px 0;
+  border-radius: 4px;
   color: var(--rf-text-secondary);
   font-weight: 500;
 }
@@ -26,8 +26,10 @@
   font-size: 17px;
 }
 
+/* 选中态：左侧 2px 竖条 + 加粗文字，像编辑器/IDE 的导航，而不是一块彩色按钮。 */
 .app-nav-menu .ant-menu-item-selected {
   font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--rf-brand);
 }
 
 .app-nav-menu .ant-menu-item-selected .anticon {

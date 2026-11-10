@@ -90,7 +90,8 @@ export const darkTheme: ThemeConfig = {
     colorBgElevated: darkPalette.surfaceElevated,
     colorBgSpotlight: darkPalette.surfaceElevated,
     // 几何：与浅色逐项一致（只换颜色，不改排版）。
-    borderRadius: 8,
+    // 几何与浅色主题保持一致（深色只换颜色，不改排版）。
+    borderRadius: 6,
     controlHeight: 40,
     fontSize: 14,
     lineHeight: 1.6,
@@ -103,7 +104,7 @@ export const darkTheme: ThemeConfig = {
   },
   components: {
     Button: { primaryShadow: "0 2px 4px rgb(0 0 0 / 30%)" },
-    Card: { headerFontSize: 16, headerHeight: 56, borderRadiusLG: 16 },
+    Card: { headerFontSize: 15, headerHeight: 48, borderRadiusLG: 8 },
     Table: {
       headerBg: darkPalette.tableHeaderBg,
       headerColor: darkPalette.tableHeaderText,

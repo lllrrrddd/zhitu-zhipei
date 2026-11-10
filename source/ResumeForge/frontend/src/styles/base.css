@@ -8,3 +8,31 @@
 @import "./base-header.css";
 @import "./base-tasks.css";
 @import "./base-panels.css";
+
+/* 信息类提示条：白底 + 左侧色条，不用整块浅蓝底。
+   浅蓝底 + 圆角 + 边框是"模板套件"最常见的组合，去掉后页面立刻安静下来。 */
+.ant-alert-info {
+  background: var(--rf-surface);
+  border: 0;
+  border-left: 3px solid var(--rf-info);
+  border-radius: 0;
+}
+
+/* 列表页筛选条：次要操作降成"文字按钮"。
+   一排四个等重的描边按钮会互相抢注意力，读起来像模板里的按钮展示区；
+   只留主按钮有底色，其余靠文字与悬停底色区分。 */
+.rf-filter-bar {
+  row-gap: 8px;
+}
+
+.rf-filter-bar .ant-btn-default {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 8px;
+}
+
+.rf-filter-bar .ant-btn-default:not(:disabled):hover {
+  background: var(--rf-surface-alt);
+  border-color: transparent;
+}

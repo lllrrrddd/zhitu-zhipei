@@ -4,7 +4,7 @@ const career = {
   "career.title": "上传简历，找合适的岗位",
   "career.intro":
     "从企业公开招聘信息里找适合你的机会。每条推荐都附上匹配理由、需要核对的条件和招聘原文。",
-  "career.resume.title": "1. 放入简历",
+  "career.resume.title": "放入简历",
   "career.resume.upload": "点击或拖入 PDF、Word 简历",
   "career.resume.uploadHint": "PDF 最多 15 MB；DOCX 最多 10 MB。大 PDF 只读取文字。",
   "career.resume.reading": "正在读取简历…",
@@ -77,7 +77,7 @@ const career = {
   "career.backup.empty": "文件是空的。",
   "career.profiles.note":
     "档案只存在这台设备的浏览器里；导入别人的简历会新建一份，不会覆盖你自己的资料。",
-  "career.profile.title": "2. 检查信息并找岗位",
+  "career.profile.title": "核对资料并找岗位",
   "career.profile.intro":
     "请改正读错的信息。简历没写求职意向时，目标岗位可能按工作经历推测，请核对。",
   "career.profile.direction": "想找的岗位",
@@ -133,7 +133,7 @@ const career = {
   "career.market.checkCached": "上次核对时查到了该岗位，请打开原文确认当前状态。",
   "career.market.checkMissing": "本次收录范围内未查到这个链接，请以招聘原文为准。",
   "career.market.checkUnsupported": "这个链接的来源暂未接入，请在企业官网或招聘平台核对。",
-  "career.result.title": "3. 查看匹配岗位",
+  "career.result.title": "匹配结果",
   "career.result.summary":
     "查找了 {total} 条招聘记录，找到 {relevant} 条相关岗位，先显示 {shown} 条。",
   "career.result.method.semantic": "按方向、技能和经历排序",
@@ -218,7 +218,7 @@ const career = {
   "career.interview.modelNotice":
     "面试会将这份求职画像和岗位内容发送给当前配置的模型；若配置了外部模型，资料会发送到该服务商。",
   "career.material.jump": "继续核对就业材料 ↓",
-  "career.material.title": "4. 核对就业材料",
+  "career.material.title": "就业材料",
   "career.material.intro":
     "上传证书、学历证明或其他材料。系统只查找可见文字与已填资料是否出现相同字样，结论需本人对照原件确认。",
   "career.material.name": "姓名",

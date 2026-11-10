@@ -139,24 +139,34 @@
   }
 }
 
+/* 页头而不是"落地页英雄区"：不铺底色、不做渐变、不用大字号。
+   工具界面里标题的作用是"告诉你现在在哪"，不是营销口号。 */
 .career-hero {
-  padding: clamp(20px, 4vw, 34px);
-  border: 1px solid var(--rf-border-subtle);
-  border-radius: 14px;
-  background:
-    linear-gradient(120deg, rgba(31, 130, 116, 0.12), transparent 70%), var(--rf-surface-alt);
+  padding: 0 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--rf-border-subtle);
+  border-radius: 0;
+  background: none;
 }
 
 .career-hero > span {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: var(--rf-text-description);
+  letter-spacing: 0.04em;
+  color: var(--rf-text-tertiary);
 }
 
 .career-hero h1 {
-  margin: 6px 0 8px;
-  font-size: clamp(24px, 3.3vw, 36px);
-  line-height: 1.25;
+  margin: 4px 0 6px;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.career-hero p {
+  font-size: 12.5px;
+  line-height: 1.6;
 }
 
 .career-hero p,
@@ -170,7 +180,15 @@
 .career-results-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  /* 12px：再大就像把内容切成两块展板，工具界面不需要那么多呼吸声。 */
+  gap: 12px;
+}
+
+/* 卡片只留一条淡边，不加投影，也不叠底色——层次靠"标题 + 分隔线"表达。 */
+.career-start-grid .ant-card,
+.career-results-grid .ant-card {
+  border-color: var(--rf-border-subtle);
+  box-shadow: none;
 }
 
 .career-start-grid {
@@ -182,8 +200,9 @@
   min-width: 0;
 }
 
+/* 拖拽区：保留虚线（它是可放置的语义），但不铺浅灰底，避免"框套框套框"。 */
 .career-drop .ant-upload-drag {
-  background: var(--rf-surface-alt);
+  background: transparent;
 }
 
 .career-drop strong,
@@ -266,25 +285,46 @@
 }
 
 .career-market-heading > strong {
-  font-size: 18px;
+  font-size: 15px;
 }
 
+/* 单列：两列时"链接 + 条数 + 状态"会被挤成三行折行，读起来比一列更长。 */
 .career-source-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: 1fr;
+  gap: 0;
   padding: 0;
   margin: 14px 0 0;
   list-style: none;
 }
 
+/* 来源条目改成"行"而不是"小卡片"：去底色与圆角，用一条分隔线分开，
+   数字右对齐并用等宽数字（tabular-nums），扫一眼就能比大小。 */
 .career-source-list li {
-  border: 1px solid var(--rf-border-subtle);
-  border-radius: 9px;
-  padding: 10px;
+  border: 0;
+  border-bottom: 1px solid var(--rf-border-subtle);
+  border-radius: 0;
+  padding: 8px 0;
   min-width: 0;
-  background: var(--rf-surface-alt);
-  align-items: flex-start;
+  background: none;
+  align-items: baseline;
+  /* 名称在左、条数与状态贴右：一行读完，不用横着找。 */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+}
+
+.career-source-list li .career-source-status {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.career-source-list li:last-child {
+  border-bottom: 0;
+}
+
+.career-source-list small {
+  font-variant-numeric: tabular-nums;
 }
 
 .career-source-list a {
@@ -306,6 +346,28 @@
 .career-source-status .ant-tag,
 .career-result-badges .ant-tag {
   margin-inline-end: 0;
+}
+
+/* 来源状态：圆点 + 文字。彩色胶囊一屏出现十几次就成了"配色噪音"。 */
+.career-source-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--rf-text-tertiary);
+  white-space: nowrap;
+}
+
+.career-source-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rf-border-strong);
+}
+
+.career-source-state[data-current="yes"]::before {
+  background: var(--rf-accent-green);
 }
 
 .career-check-result a {
@@ -495,4 +557,17 @@
   .career-material-fields {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* 「用示例试试 / 用已保存的资料 / 手动填写」三个同等权重的描边按钮，
+   视觉上像"按钮展示区"。降为文字按钮，只让拖拽区承担主视觉。 */
+.career-panel .ant-btn-default {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.career-panel .ant-btn-default:not(:disabled):hover {
+  background: var(--rf-surface-alt);
+  border-color: transparent;
 }

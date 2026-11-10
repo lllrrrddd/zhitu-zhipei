@@ -206,14 +206,15 @@ export default function CareerResumePanel({
       <div className="career-help" aria-live="polite">
         {t(reading ? "career.resume.reading" : "career.resume.local")}
       </div>
-      <div className="career-next-steps">
-        <strong>{t("career.resume.nextTitle")}</strong>
+      {/* 三步说明默认收起：它是"第一次用才看一次"的内容，常驻展示会让卡片读起来像教程。 */}
+      <details className="career-next-steps">
+        <summary>{t("career.resume.nextTitle")}</summary>
         <ol>
           <li>{t("career.resume.nextReview")}</li>
           <li>{t("career.resume.nextTarget")}</li>
           <li>{t("career.resume.nextOfficial")}</li>
         </ol>
-      </div>
+      </details>
       {feedback && (
         <Alert className="career-feedback" type={feedback.type} title={feedback.text} showIcon />
       )}

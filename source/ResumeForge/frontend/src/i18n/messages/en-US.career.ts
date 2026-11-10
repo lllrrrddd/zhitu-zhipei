@@ -4,7 +4,7 @@ const career = {
   "career.title": "Upload a resume to find relevant jobs",
   "career.intro":
     "Search public employer postings and see why each job matches, what to check, and where to read the original.",
-  "career.resume.title": "1. Add a resume",
+  "career.resume.title": "Add a resume",
   "career.resume.upload": "Click or drop a PDF or Word resume",
   "career.resume.uploadHint":
     "PDF up to 15 MB; DOCX up to 10 MB. Large PDFs are read as text only.",
@@ -89,7 +89,7 @@ const career = {
   "career.backup.empty": "The file is empty.",
   "career.profiles.note":
     "Profiles live in this browser only; importing someone else's resume creates a new one and never overwrites your own.",
-  "career.profile.title": "2. Review your details and search",
+  "career.profile.title": "Review your details and search",
   "career.profile.intro":
     "Review extracted fields. If there is no job intent, the role may be inferred from work history.",
   "career.profile.direction": "Roles you want",
@@ -150,7 +150,7 @@ const career = {
     "We did not find the link in the postings covered by this check. Refer to the original.",
   "career.market.checkUnsupported":
     "This source is not connected yet. Check the employer site or job platform.",
-  "career.result.title": "3. Review matching jobs",
+  "career.result.title": "Review matching jobs",
   "career.result.summary":
     "Searched {total} postings, found {relevant} relevant jobs, and showing {shown}.",
   "career.result.method.semantic": "Ranked by roles, skills, and experience",
@@ -245,7 +245,7 @@ const career = {
   "career.interview.modelNotice":
     "The interview sends this profile and job text to the configured model. An external provider receives the data if one is configured.",
   "career.material.jump": "Review supporting documents ↓",
-  "career.material.title": "4. Review supporting documents",
+  "career.material.title": "Review supporting documents",
   "career.material.intro":
     "Upload a certificate or other document. The app finds matching text; you must check the original document yourself.",
   "career.material.name": "Name",
