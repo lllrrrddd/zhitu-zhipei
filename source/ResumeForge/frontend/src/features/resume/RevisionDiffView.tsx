@@ -13,6 +13,8 @@ import { Empty, Tag } from "antd";
 import { t, type MessageKey } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
 import type { DiffKind, DiffLine, RevisionDiff } from "./revisionDiff";
+// 视图自己带样式：面板与宿主只负责排版位置，不再各自记得引一次（删掉旧弹窗时就漏过一回）。
+import "../../styles/revision-diff.css";
 
 const KIND_COLOR: Record<DiffKind, string> = {
   added: "green",
