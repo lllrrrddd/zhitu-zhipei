@@ -40,6 +40,9 @@ const atsCheck = {
   "atsCheck.improvement.copyFailed": "Copy failed — select the text manually",
   "atsCheck.improvement.head": "{index}. [{severity}] {title}",
   "atsCheck.improvement.suggestion": "Suggestion: {suggestion}",
+
+  "atsCheck.keywords.expand": "Show {count} more",
+  "atsCheck.keywords.collapse": "Show less",
 } as const;
 
 export default atsCheck;

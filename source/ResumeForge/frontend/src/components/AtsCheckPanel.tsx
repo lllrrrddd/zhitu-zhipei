@@ -89,6 +89,9 @@ function buildImprovementList(issues: AtsIssue[]): string {
 }
 
 /** 关键词命中：有 hits 时按出现次数降序；没有时退回旧的 matched/missing 两个数组。 */
+/** 未命中词默认只露这么多个：再多就变成词云，读不出重点。 */
+const MISSING_PREVIEW = 12;
+
 function keywordTags(result: {
   keyword_hits?: AtsKeywordHit[];
   matched_keywords: string[];
@@ -226,6 +229,7 @@ export default function AtsCheckPanel({ resumeId, jobId }: Props) {
   }, [data]);
 
   const keywords = useMemo(() => (data ? keywordTags(data) : { matched: [], missing: [] }), [data]);
+  const [showAllMissing, setShowAllMissing] = useState(false);
 
   return (
     <Space orientation="vertical" style={{ width: "100%" }} size="middle">
@@ -292,20 +296,19 @@ export default function AtsCheckPanel({ resumeId, jobId }: Props) {
                 </div>
               ))}
             </Space>
-            {data.coverage_ratio != null && (
-              <Tag color="geekblue">
-                {t("atsCheck.coverage", { percent: Math.round(data.coverage_ratio * 100) })}
-              </Tag>
-            )}
-            {CATEGORY_ORDER.map((item) => {
-              const count = data.summary?.[item.key] ?? 0;
-              if (!count) return null;
-              return (
-                <Tag key={item.key} color={item.color}>
-                  {t(item.labelKey)} {count}
-                </Tag>
-              );
-            })}
+            {/* 覆盖率与各类问题数用一行 meta：三个彩色胶囊并列，会把注意力从分数上拽走。 */}
+            <Typography.Text type="secondary" className="ats-summary-meta">
+              {[
+                data.coverage_ratio != null
+                  ? t("atsCheck.coverage", { percent: Math.round(data.coverage_ratio * 100) })
+                  : "",
+                ...CATEGORY_ORDER.filter((item) => (data.summary?.[item.key] ?? 0) > 0).map(
+                  (item) => `${t(item.labelKey)} ${data.summary?.[item.key] ?? 0}`,
+                ),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Typography.Text>
           </Space>
 
           <Space wrap>
@@ -334,14 +337,30 @@ export default function AtsCheckPanel({ resumeId, jobId }: Props) {
               </Space>
             </div>
           )}
+          {/* 未命中词原来是一整屏彩色胶囊（几十个），像词云；改成一两行文字 + 按需展开。 */}
           {keywords.missing.length > 0 && (
-            <div>
+            <div className="ats-missing">
               <Typography.Text type="secondary">{t("atsCheck.keywords.missing")}</Typography.Text>
-              <Space wrap>
-                {keywords.missing.map((word) => (
-                  <Tag key={word}>{word}</Tag>
-                ))}
-              </Space>
+              <span className="ats-missing-words">
+                {(showAllMissing
+                  ? keywords.missing
+                  : keywords.missing.slice(0, MISSING_PREVIEW)
+                ).join(" / ")}
+              </span>
+              {keywords.missing.length > MISSING_PREVIEW && (
+                <Button
+                  type="link"
+                  size="small"
+                  className="ats-missing-toggle"
+                  onClick={() => setShowAllMissing((value) => !value)}
+                >
+                  {showAllMissing
+                    ? t("atsCheck.keywords.collapse")
+                    : t("atsCheck.keywords.expand", {
+                        count: keywords.missing.length - MISSING_PREVIEW,
+                      })}
+                </Button>
+              )}
             </div>
           )}
 

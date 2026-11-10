@@ -15,7 +15,6 @@ import {
   Card,
   Collapse,
   Empty,
-  Listy,
   Space,
   Switch,
   Tag,
@@ -23,7 +22,6 @@ import {
   Typography,
 } from "antd";
 import LoadingBlock from "./common/LoadingBlock";
-import { ListyItem } from "./common/ListyItem";
 import { useEffect, useMemo, useState } from "react";
 import {
   cancelRiskScan,
@@ -253,7 +251,7 @@ function IntroCard({
   onStart: () => void;
 }) {
   return (
-    <Card size="small">
+    <Card size="small" className="risk-intro-card" variant="borderless">
       <Space orientation="vertical" style={{ width: "100%" }} size="middle">
         {error && (
           <Alert
@@ -271,18 +269,14 @@ function IntroCard({
         <Typography.Paragraph style={{ margin: 0 }}>
           {t("riskPanel.intro.summary")}
         </Typography.Paragraph>
-        <Listy
-          items={CATEGORY_ORDER}
-          rowKey={(item) => item.key}
-          itemRender={(item) => (
-            <ListyItem style={{ paddingBlock: 4 }}>
-              <Space size="small" align="start">
-                <Tag color={item.color}>{t(item.labelKey)}</Tag>
-                <Typography.Text type="secondary">{t(item.descriptionKey)}</Typography.Text>
-              </Space>
-            </ListyItem>
-          )}
-        />
+        <ul className="risk-intro-list">
+          {CATEGORY_ORDER.map((item) => (
+            <li key={item.key}>
+              <strong>{t(item.labelKey)}</strong>
+              <span>{t(item.descriptionKey)}</span>
+            </li>
+          ))}
+        </ul>
         <Space wrap size="small">
           <EnhanceToggle checked={enhance} onChange={onChangeEnhance} />
           <Typography.Text type="secondary">

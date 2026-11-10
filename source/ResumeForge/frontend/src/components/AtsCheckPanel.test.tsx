@@ -98,7 +98,8 @@ describe("AtsCheckPanel", () => {
     renderPanel({ resumeId: 7 });
 
     expect(await screen.findByText("本地规则估计，不代表真实 ATS 解析结果")).toBeInTheDocument();
-    expect(screen.getByText("关键词覆盖率 50%")).toBeInTheDocument();
+    // 覆盖率与各类问题数现在并在一行 meta 里（"关键词覆盖率 50% · 关键词 1"），用正则取其中一段。
+    expect(screen.getByText(/关键词覆盖率 50%/)).toBeInTheDocument();
     // 三个分项各自一条 Progress：格式 88 / 关键词 70 / 位置 64（加上总分的圆环共 4 条）。
     const values = screen
       .getAllByRole("progressbar")

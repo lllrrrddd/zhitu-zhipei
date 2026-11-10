@@ -63,6 +63,9 @@ const atsCheck = {
   "atsCheck.improvement.head": "{index}. 【{severity}】{title}",
   /** 可粘贴清单的建议行（紧跟在标题下面）。 */
   "atsCheck.improvement.suggestion": "建议：{suggestion}",
+
+  "atsCheck.keywords.expand": "展开剩余 {count} 个",
+  "atsCheck.keywords.collapse": "收起",
 } as const;
 
 export default atsCheck;
