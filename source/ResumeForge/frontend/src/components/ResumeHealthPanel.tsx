@@ -216,12 +216,12 @@ export default function ResumeHealthPanel({
   if (score === undefined) {
     return (
       <div className="resume-health">
-        <Alert
-          type="info"
-          showIcon
-          title={t("resumeHealth.intro.title")}
-          description={t("resumeHealth.intro.body")}
-        />
+        {/* 空态不用 Alert：蓝色图标 + 左侧色条的"提示卡"是最像 AI 助手的元素。
+            这里只要一句说明 + 一个主按钮，用户想知道的就这两件事。 */}
+        <div className="resume-health-intro">
+          <strong>{t("resumeHealth.intro.title")}</strong>
+          <p>{t("resumeHealth.intro.body")}</p>
+        </div>
         <Space className="resume-health-actions">
           <Button type="primary" loading={running} onClick={() => void run()}>
             {running ? t("resumeHealth.action.running") : t("resumeHealth.action.run")}

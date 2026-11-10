@@ -138,3 +138,25 @@
 .submit-checklist-manual li {
   line-height: 1.6;
 }
+
+/* 体检空态：标题 + 一句说明，不用提示卡。 */
+.resume-health-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.resume-health-intro strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rf-text);
+}
+
+.resume-health-intro p {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--rf-text-tertiary);
+}

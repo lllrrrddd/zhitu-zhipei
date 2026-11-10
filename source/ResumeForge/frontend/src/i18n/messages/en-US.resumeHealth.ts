@@ -4,7 +4,7 @@
 const resumeHealth = {
   "resumeHealth.intro.title": "Resume health check",
   "resumeHealth.intro.body":
-    "Merges the local ATS check and the risk scan into one list: issues sorted by severity, each marked as handled, and a score change on re-check. Local rules only, no model calls.",
+    "ATS and risk findings merged into one list, ordered by severity; re-running shows the score change. Local rules only, no model calls.",
   "resumeHealth.action.run": "Run health check",
   "resumeHealth.action.rerun": "Run again",
   "resumeHealth.action.running": "Checking…",

@@ -4,7 +4,7 @@
 const resumeHealth = {
   "resumeHealth.intro.title": "简历体检",
   "resumeHealth.intro.body":
-    "把 ATS 本地检测与风险扫描合成一张单子：按严重程度列问题、逐条标记改没改、复检时显示分数变化。体检只用本地规则，不调用模型。",
+    "ATS 与风险扫描合成一张单子，按严重程度排序；改完复检会显示分数变化。只用本地规则，不调用模型。",
   "resumeHealth.action.run": "开始体检",
   "resumeHealth.action.rerun": "重新体检",
   "resumeHealth.action.running": "体检中…",
