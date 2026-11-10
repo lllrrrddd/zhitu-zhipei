@@ -100,3 +100,41 @@
   margin: 6px 0 0;
   padding-left: 18px;
 }
+
+/* 投递自检：自动核对在上、人工项在下，勾选行留足点击高度。 */
+.submit-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submit-checklist-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.submit-checklist-auto,
+.submit-checklist-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.submit-checklist-auto p {
+  margin: 0;
+}
+
+.submit-checklist-manual ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.submit-checklist-manual li {
+  line-height: 1.6;
+}

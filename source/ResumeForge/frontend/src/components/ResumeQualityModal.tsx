@@ -15,6 +15,7 @@ import { Modal, Tabs } from "antd";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import RevisionDiffPanel from "../features/resume/RevisionDiffPanel";
+import SubmitChecklistPanel from "./SubmitChecklistPanel";
 import AtsCheckPanel from "./AtsCheckPanel";
 import ResumeHealthPanel from "./ResumeHealthPanel";
 import ResumeRiskPanel from "./ResumeRiskPanel";
@@ -68,6 +69,11 @@ export default function ResumeQualityModal({
               label: t("componentsMisc.qualityModal.tab.ats"),
               children: <AtsCheckPanel resumeId={resumeId} jobId={jobId} />,
             },
+            {
+              key: "submit",
+              label: t("componentsMisc.qualityModal.tab.submit"),
+              children: <SubmitChecklistPanel resumeId={resumeId} jobId={jobId ?? null} />,
+            },
             // 第一版没有上一代：不渲染这个 Tab，避免点进去只看到一句"没有可比的版本"。
             ...(parentRevisionId == null
               ? []
@@ -76,10 +82,7 @@ export default function ResumeQualityModal({
                     key: "history",
                     label: t("componentsMisc.qualityModal.tab.history"),
                     children: (
-                      <RevisionDiffPanel
-                        resumeId={resumeId}
-                        parentRevisionId={parentRevisionId}
-                      />
+                      <RevisionDiffPanel resumeId={resumeId} parentRevisionId={parentRevisionId} />
                     ),
                   },
                 ]),

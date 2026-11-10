@@ -35,6 +35,7 @@ const componentsMisc = {
 
   "componentsMisc.qualityModal.title": "Checks",
   "componentsMisc.qualityModal.tab.health": "Health",
+  "componentsMisc.qualityModal.tab.submit": "Pre-submission",
   "componentsMisc.qualityModal.tab.history": "Edit history",
   "componentsMisc.qualityModal.tab.risk": "Risk scan",
   "componentsMisc.qualityModal.tab.ats": "ATS check",
@@ -47,7 +48,8 @@ const componentsMisc = {
   "componentsMisc.exportButtons.gate.title": "Low health score — export anyway?",
   "componentsMisc.exportButtons.gate.body":
     "Last check scored {score} (we suggest {threshold}+ before sending). This is advice only — you decide whether the content is ready, and export is not blocked.",
-  "componentsMisc.exportButtons.gate.stale": "The resume changed after that check, so the score may be out of date.",
+  "componentsMisc.exportButtons.gate.stale":
+    "The resume changed after that check, so the score may be out of date.",
   "componentsMisc.exportButtons.gate.continue": "Export anyway",
   "componentsMisc.exportButtons.gate.check": "Check first",
   "componentsMisc.exportButtons.export": "Export",

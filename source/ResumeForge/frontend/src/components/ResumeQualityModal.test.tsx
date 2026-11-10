@@ -12,6 +12,7 @@ vi.mock("./AtsCheckPanel", () => ({ default: () => <div>ATS_STUB</div> }));
 vi.mock("../features/resume/RevisionDiffPanel", () => ({
   default: () => <div>HISTORY_STUB</div>,
 }));
+vi.mock("./SubmitChecklistPanel", () => ({ default: () => <div>SUBMIT_STUB</div> }));
 
 function renderModal(parentRevisionId: number | null) {
   return render(
@@ -32,6 +33,7 @@ it("有上一版时四个 Tab 都在：体检单 / 风险 / ATS / 修改记录",
   expect(screen.getByText(t("componentsMisc.qualityModal.tab.risk"))).toBeInTheDocument();
   expect(screen.getByText(t("componentsMisc.qualityModal.tab.ats"))).toBeInTheDocument();
   expect(screen.getByText(t("componentsMisc.qualityModal.tab.history"))).toBeInTheDocument();
+  expect(screen.getByText(t("componentsMisc.qualityModal.tab.submit"))).toBeInTheDocument();
 });
 
 it("第一版没有上一代：不出现「修改记录」Tab", () => {

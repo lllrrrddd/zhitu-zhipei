@@ -31,6 +31,7 @@ const componentsMisc = {
 
   "componentsMisc.qualityModal.title": "检查",
   "componentsMisc.qualityModal.tab.health": "体检单",
+  "componentsMisc.qualityModal.tab.submit": "投递自检",
   "componentsMisc.qualityModal.tab.history": "修改记录",
   "componentsMisc.qualityModal.tab.risk": "风险扫描",
   "componentsMisc.qualityModal.tab.ats": "ATS 检测",
