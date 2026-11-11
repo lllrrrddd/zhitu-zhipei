@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import hmac
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -18,6 +19,8 @@ from pydantic import BaseModel, Field
 from .context import AUTH_DB_PATH, CurrentUser, current_user
 from .store import (
     authenticate,
+    create_reset_code,
+    reset_password,
     create_invite,
     create_session,
     delete_session,
@@ -69,6 +72,21 @@ def ensure_auth_ready() -> None:
         logger.warning("账号体系首次启动，已生成邀请码：%s", code)
 
 
+class ResetRequest(BaseModel):
+    email: str = Field(max_length=254)
+    code: str = Field(max_length=32)
+    new_password: str = Field(min_length=1, max_length=200)
+
+
+class AdminInviteRequest(BaseModel):
+    count: int = Field(default=1, ge=1, le=20)
+    note: str = Field(default="", max_length=80)
+
+
+class AdminResetRequest(BaseModel):
+    email: str = Field(max_length=254)
+
+
 class RegisterRequest(BaseModel):
     email: str = Field(max_length=254)
     password: str = Field(min_length=1, max_length=200)
@@ -111,6 +129,46 @@ def require_login() -> bool:
     单机本地用法不受影响：`ZY_REQUIRE_LOGIN` 缺省为 0，一切照旧。
     """
     return os.environ.get("ZY_REQUIRE_LOGIN", "0") == "1"
+
+
+def _admin_ok(request: Request) -> bool:
+    """管理员操作：只认环境变量里的 `ZY_ADMIN_KEY`（没配就等于关闭）。"""
+    expected = os.environ.get("ZY_ADMIN_KEY", "").strip()
+    given = request.headers.get("X-Admin-Key", "").strip()
+    return bool(expected) and hmac.compare_digest(expected, given)
+
+
+@router.post("/admin/invites")
+def admin_create_invites(
+    payload: AdminInviteRequest, request: Request
+) -> dict[str, object]:
+    if not _admin_ok(request):
+        raise HTTPException(status_code=403, detail="无权限")
+    codes = [create_invite(AUTH_DB_PATH, note=payload.note) for _ in range(payload.count)]
+    return {"codes": codes}
+
+
+@router.post("/admin/reset-code")
+def admin_create_reset_code(payload: AdminResetRequest, request: Request) -> dict[str, object]:
+    if not _admin_ok(request):
+        raise HTTPException(status_code=403, detail="无权限")
+    code = create_reset_code(AUTH_DB_PATH, payload.email)
+    if code is None:
+        # 不给"这个邮箱没注册"这种可枚举信号：统一说"已生成（如账号存在）"由调用方判断。
+        raise HTTPException(status_code=404, detail="账号不存在")
+    return {"code": code, "ttlHours": 24}
+
+
+@router.post("/reset-password")
+def reset_with_code(payload: ResetRequest) -> dict[str, object]:
+    try:
+        ok = reset_password(AUTH_DB_PATH, payload.email, payload.code, payload.new_password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if not ok:
+        raise HTTPException(status_code=400, detail="重置码无效或已过期")
+    logger.info("账号密码已重置")
+    return {"ok": True}
 
 
 @router.get("/config")

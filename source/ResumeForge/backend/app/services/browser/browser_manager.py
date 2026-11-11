@@ -124,7 +124,9 @@ def default_profile_dir() -> Path:
     下一次 NSIS 升级连同安装目录一起删掉（ADR-0004 的核心不变量：用户数据不落 payload）。
     控制台/开发形态没有 RF_DATA_DIR，DATA_DIR 仍是 ``backend/data``，行为不变。
     """
-    return DATA_DIR / PROFILE_DIR_NAME
+    from ...runtime.data_root import user_scope_root
+
+    return user_scope_root() / PROFILE_DIR_NAME
 
 
 class BrowserManager:

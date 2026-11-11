@@ -105,6 +105,12 @@ const common = {
   "auth.login.requiredEmail": "Email is required",
   "auth.login.requiredPassword": "Password is required",
   "auth.login.failed": "Something went wrong",
+  "auth.login.tabReset": "Forgot password",
+  "auth.login.resetCode": "Reset code",
+  "auth.login.resetCodePlaceholder": "8-digit reset code",
+  "auth.login.newPassword": "New password",
+  "auth.login.submitReset": "Reset password",
+  "auth.login.resetDone": "Password updated. Sign in with the new one.",
 } as const;
 
 export default common;

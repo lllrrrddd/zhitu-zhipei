@@ -1,26 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
-// Full-screen gate: in hosted mode a signed-out visitor sees this instead of the shell.
-// In local single-user mode (/api/auth/config -> requireLogin=false) it renders children.
-
-// SPDX-License-Identifier: Apache-2.0
-/**
- * 登录门：托管模式下，未登录时用它替代整个界面渲染。
- *
- * 为什么做成"整屏门"而不是新加一条 /login 路由：这个应用有 20 多条路由、侧栏与页头
- * 都在 AppShell 里，加独立路由要同步改路由表、菜单高亮、移动端抽屉三处；而"没登录就
- * 进不去"这个语义本来就不该让用户先看到侧栏再被踢走。
- *
- * 本地单机用法不受影响：后端 `/api/auth/config` 返回 requireLogin=false 时，这里直接
- * 渲染 children，等于不存在。
- */
+// Full-screen gate. In hosted mode a signed-out visitor sees this instead of the shell;
+// in local single-user mode (/api/auth/config -> requireLogin=false) it renders children.
+// Three modes: sign in, register with an invite code, reset a forgotten password.
+// All copy lives in the i18n packs (the CJK ratchet forbids new hardcoded UI text).
 
 import { Button, Form, Input, Segmented, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
-import { fetchAuthConfig, fetchMe, login, register, type AuthUser } from "./api";
+import {
+  fetchAuthConfig,
+  fetchMe,
+  login,
+  register,
+  resetPassword,
+  type AuthUser,
+} from "./api";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "reset";
 
 export default function LoginGate({ children }: { children: React.ReactNode }) {
   useLocale();
@@ -30,6 +27,7 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<Mode>("login");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -50,7 +48,18 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
   const submit = async (values: Record<string, string>) => {
     setBusy(true);
     setError("");
+    setNotice("");
     try {
+      if (mode === "reset") {
+        await resetPassword({
+          email: values.email ?? "",
+          code: values.code ?? "",
+          newPassword: values.newPassword ?? "",
+        });
+        setMode("login");
+        setNotice(t("auth.login.resetDone"));
+        return;
+      }
       const result =
         mode === "login"
           ? await login(values.email ?? "", values.password ?? "")
@@ -93,10 +102,12 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
           onChange={(value) => {
             setMode(value as Mode);
             setError("");
+            setNotice("");
           }}
           options={[
             { label: t("auth.login.tabLogin"), value: "login" },
             { label: t("auth.login.tabRegister"), value: "register" },
+            { label: t("auth.login.tabReset"), value: "reset" },
           ]}
         />
 
@@ -104,17 +115,39 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
           {mode === "register" && (
             <>
               <Form.Item name="displayName" label={t("auth.login.name")}>
-                <Input placeholder={t("auth.login.namePlaceholder")} autoComplete="nickname" />
+                <Input
+                  placeholder={t("auth.login.namePlaceholder")}
+                  autoComplete="nickname"
+                />
               </Form.Item>
               <Form.Item
                 name="invite"
                 label={t("auth.login.invite")}
                 rules={[{ required: true, message: t("auth.login.requiredInvite") }]}
               >
-                <Input placeholder={t("auth.login.invitePlaceholder")} autoComplete="off" />
+                <Input
+                  placeholder={t("auth.login.invitePlaceholder")}
+                  autoComplete="off"
+                  inputMode="numeric"
+                />
               </Form.Item>
             </>
           )}
+
+          {mode === "reset" && (
+            <Form.Item
+              name="code"
+              label={t("auth.login.resetCode")}
+              rules={[{ required: true, message: t("auth.login.requiredInvite") }]}
+            >
+              <Input
+                placeholder={t("auth.login.resetCodePlaceholder")}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+              />
+            </Form.Item>
+          )}
+
           <Form.Item
             name="email"
             label={t("auth.login.email")}
@@ -122,23 +155,42 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
           >
             <Input placeholder="you@example.com" autoComplete="email" />
           </Form.Item>
-          <Form.Item
-            name="password"
-            label={t("auth.login.password")}
-            rules={[{ required: true, message: t("auth.login.requiredPassword") }]}
-          >
-            <Input.Password
-              placeholder={
-                mode === "register" ? t("auth.login.passwordHint") : t("auth.login.password")
-              }
-              autoComplete={mode === "register" ? "new-password" : "current-password"}
-            />
-          </Form.Item>
+
+          {mode === "reset" ? (
+            <Form.Item
+              name="newPassword"
+              label={t("auth.login.newPassword")}
+              rules={[{ required: true, message: t("auth.login.requiredPassword") }]}
+            >
+              <Input.Password
+                placeholder={t("auth.login.passwordHint")}
+                autoComplete="new-password"
+              />
+            </Form.Item>
+          ) : (
+            <Form.Item
+              name="password"
+              label={t("auth.login.password")}
+              rules={[{ required: true, message: t("auth.login.requiredPassword") }]}
+            >
+              <Input.Password
+                placeholder={
+                  mode === "register" ? t("auth.login.passwordHint") : t("auth.login.password")
+                }
+                autoComplete={mode === "register" ? "new-password" : "current-password"}
+              />
+            </Form.Item>
+          )}
 
           {error && <Typography.Text type="danger">{error}</Typography.Text>}
+          {notice && <Typography.Text type="success">{notice}</Typography.Text>}
 
           <Button type="primary" htmlType="submit" block loading={busy} className="auth-submit">
-            {mode === "login" ? t("auth.login.submitLogin") : t("auth.login.submitRegister")}
+            {mode === "login"
+              ? t("auth.login.submitLogin")
+              : mode === "register"
+                ? t("auth.login.submitRegister")
+                : t("auth.login.submitReset")}
           </Button>
         </Form>
 

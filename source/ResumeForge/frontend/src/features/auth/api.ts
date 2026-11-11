@@ -56,6 +56,17 @@ export function register(input: {
   });
 }
 
+export function resetPassword(input: {
+  email: string;
+  code: string;
+  newPassword: string;
+}): Promise<{ ok: boolean }> {
+  return call("/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ email: input.email, code: input.code, new_password: input.newPassword }),
+  });
+}
+
 export function logout(): Promise<{ ok: boolean }> {
   return call("/logout", { method: "POST" });
 }

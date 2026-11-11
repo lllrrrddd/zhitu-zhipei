@@ -103,6 +103,12 @@ const common = {
   "auth.login.requiredEmail": "请填写邮箱",
   "auth.login.requiredPassword": "请填写密码",
   "auth.login.failed": "操作失败",
+  "auth.login.tabReset": "忘记密码",
+  "auth.login.resetCode": "重置码",
+  "auth.login.resetCodePlaceholder": "8 位数字重置码",
+  "auth.login.newPassword": "新密码",
+  "auth.login.submitReset": "重设密码",
+  "auth.login.resetDone": "密码已重设，请用新密码登录。",
 } as const;
 
 export default common;

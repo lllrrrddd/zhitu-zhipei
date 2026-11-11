@@ -55,7 +55,9 @@ def user_files_dir(bind=None) -> Path:
     database = getattr(url, "database", None)
     if database and database != ":memory:" and Path(database).is_absolute():
         return Path(database).resolve().parent / USER_FILES_DIRNAME
-    return DATA_DIR / USER_FILES_DIRNAME
+    from ..runtime.data_root import user_scope_root
+
+    return user_scope_root() / USER_FILES_DIRNAME
 
 
 def _safe_original_name(name: str) -> str:

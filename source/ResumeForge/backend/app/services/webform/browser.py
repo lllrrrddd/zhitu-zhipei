@@ -37,7 +37,9 @@ def default_profile_dir():
 
     与投递浏览器同理：不能写进安装目录，否则升级安装会清掉登录态（ADR-0004）。
     """
-    return DATA_DIR / WEBFORM_PROFILE_DIR_NAME
+    from ...runtime.data_root import user_scope_root
+
+    return user_scope_root() / WEBFORM_PROFILE_DIR_NAME
 
 
 def _cache_key(config: Any) -> tuple[str, str]:

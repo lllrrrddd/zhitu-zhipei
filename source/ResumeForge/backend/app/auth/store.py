@@ -28,7 +28,7 @@ _SCRYPT_R = 8
 _SCRYPT_P = 1
 _DKLEN = 32
 
-_INVITE_ALPHABET = string.ascii_uppercase + string.digits
+_INVITE_ALPHABET = string.digits  # 纯数字：念得清、抄得对，和重置码同一套格式
 
 
 @dataclass(frozen=True)
@@ -73,6 +73,13 @@ def init_auth_db(db_path: Path) -> None:
                 expires_at INTEGER NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+            CREATE TABLE IF NOT EXISTS reset_codes (
+                code       TEXT PRIMARY KEY,
+                user_id    INTEGER NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at INTEGER NOT NULL,
+                used_at    TEXT
+            );
             """
         )
 
@@ -224,3 +231,70 @@ def session_user_id(db_path: Path, token: str) -> int | None:
 def delete_session(db_path: Path, token: str) -> None:
     with _connect(db_path) as conn:
         conn.execute("DELETE FROM sessions WHERE token_hash = ?", (_token_hash(token),))
+
+
+# ── 密码重置：一次性数字码 ────────────────────────────────────────────────
+#
+# 没有邮件服务（发布环境只有单端口，发不了信），所以做成"管理员发一枚 8 位数字码，
+# 用户凭码自助改密"。码只存哈希、24 小时过期、用过一次即作废——它等价于一次性的
+# 临时凭据，不能当长期密码用。
+
+
+def _code_hash(code: str) -> str:
+    return hashlib.sha256(f"reset:{code}".encode("utf-8")).hexdigest()
+
+
+def create_reset_code(db_path: Path, email: str, ttl_seconds: int = 86400 * 1) -> str | None:
+    """给指定邮箱生成一枚重置码；邮箱不存在返回 None（不泄露"这个邮箱是否注册过"由路由决定）。"""
+    with _connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE email = ?", (email.strip().lower(),)
+        ).fetchone()
+        if row is None:
+            return None
+        code = "".join(secrets.choice(string.digits) for _ in range(8))
+        conn.execute(
+            "INSERT INTO reset_codes (code, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+            (_code_hash(code), int(row["id"]), _now_iso(), int(time.time()) + ttl_seconds),
+        )
+    return code
+
+
+def reset_password(db_path: Path, email: str, code: str, new_password: str) -> bool:
+    """凭重置码改密。成功返回 True，并作废该用户全部会话（旧 cookie 立即失效）。"""
+    if len(new_password) < 8:
+        raise ValueError("密码至少 8 位")
+    cleaned = code.strip()
+    with _connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE email = ?", (email.strip().lower(),)
+        ).fetchone()
+        if row is None:
+            return False
+        user_id = int(row["id"])
+        record = conn.execute(
+            "SELECT * FROM reset_codes WHERE code = ?", (_code_hash(cleaned),)
+        ).fetchone()
+        if record is None or record["user_id"] != user_id:
+            return False
+        if record["used_at"] is not None or record["expires_at"] < int(time.time()):
+            return False
+        conn.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hash_password(new_password), user_id),
+        )
+        conn.execute(
+            "UPDATE reset_codes SET used_at = ? WHERE code = ?", (_now_iso(), _code_hash(cleaned))
+        )
+        conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+    return True
+
+
+def purge_invalid_reset_codes(db_path: Path) -> int:
+    """清掉过期/已用的重置码（启动时跑一次即可）。"""
+    with _connect(db_path) as conn:
+        cursor = conn.execute(
+            "DELETE FROM reset_codes WHERE used_at IS NOT NULL OR expires_at < ?",
+            (int(time.time()),),
+        )
+        return cursor.rowcount

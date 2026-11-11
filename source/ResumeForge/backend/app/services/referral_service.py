@@ -77,7 +77,9 @@ def referral_images_dir(bind=None) -> Path:
     database = getattr(url, "database", None)
     if database and database != ":memory:" and Path(database).is_absolute():
         return Path(database).resolve().parent / REFERRAL_IMAGES_DIRNAME
-    return DATA_DIR / REFERRAL_IMAGES_DIRNAME
+    from ..runtime.data_root import user_scope_root
+
+    return user_scope_root() / REFERRAL_IMAGES_DIRNAME
 
 
 # 有效内推：还没走到终态（closed/invalid）的才计入转化率分母。

@@ -34,7 +34,9 @@ def captures_dir() -> Path:
     也**不属于任何 dataset 目录**——它是排查产物，不该跟着数据集切换，更不该和投递浏览器的
     登录态（``backend/data/browser-profile/``）混在一起。
     """
-    return DATA_DIR / "captures"
+    from .runtime.data_root import user_scope_root
+
+    return user_scope_root() / "captures"
 
 
 # 投递专用浏览器的 CDP 调试端口默认值。这是**唯一**的常量来源：

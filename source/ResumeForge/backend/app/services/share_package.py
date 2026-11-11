@@ -58,7 +58,11 @@ logger = logging.getLogger(__name__)
 
 # 分享包落在数据目录下（与 captures 同级），天然不进仓库、不进备份。文件型 SQLite
 # 时进一步落到数据库同目录：测试库（临时目录）自动隔离，不会写进仓库的 backend/data。
-SHARE_PACKAGES_DIR = DATA_DIR / "share_packages"
+def share_packages_dir() -> Path:
+    """导出/分享包目录：跟随当前用户（未登录用全局根）。"""
+    from ..runtime.data_root import user_scope_root
+
+    return user_scope_root() / "share_packages"
 
 MAX_SHARE_PACKAGE_LIST = 500
 
@@ -105,7 +109,7 @@ def share_root(bind) -> Path:
         resolved = Path(database).resolve()
         root = resolved.parent / "share_packages"
         return root if _is_main_database(resolved) else root / resolved.stem
-    return SHARE_PACKAGES_DIR
+    return share_packages_dir()
 
 
 def package_directory(bind, share_id: int) -> Path:
@@ -470,7 +474,6 @@ def import_comments(
 
 __all__ = [
     "MAX_SHARE_PACKAGE_LIST",
-    "SHARE_PACKAGES_DIR",
     "SharePackageError",
     "create_share_package",
     "create_share_token",
