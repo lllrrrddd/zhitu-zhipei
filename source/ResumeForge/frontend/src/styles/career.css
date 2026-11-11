@@ -81,6 +81,35 @@
 
 /* 标题 19px 品牌蓝链接是"门户网站"的做法：一条列表里十几个大号彩字，噪音压过内容。
    改成正文色 + 加粗，靠 hover 变蓝并加下划线表达可点。 */
+.career-browse-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.career-browse-avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--rf-vivid-teal);
+}
+
+.career-browse-avatar[data-tone="1"] {
+  background: var(--rf-vivid-coral);
+}
+
+.career-browse-avatar[data-tone="2"] {
+  background: var(--rf-vivid-amber);
+}
+
 .career-browse-card h2 {
   margin: 0;
   font-size: 15px;
@@ -170,34 +199,64 @@
   }
 }
 
-/* 页头而不是"落地页英雄区"：不铺底色、不做渐变、不用大字号。
-   工具界面里标题的作用是"告诉你现在在哪"，不是营销口号。 */
+/* 页头：一张带渐变温度的浅色卡（蓝→青→米），圆角 16、极淡描边。
+   标题 26px 给足存在感，下面一句副文案说清"这是什么"；再往下才是可操作的东西。 */
 .career-hero {
-  padding: 0 0 14px;
-  border: 0;
-  border-bottom: 1px solid var(--rf-border-subtle);
-  border-radius: 0;
-  background: none;
+  position: relative;
+  overflow: hidden;
+  padding: 22px 24px;
+  border: 1px solid rgb(22 54 92 / 8%);
+  border-radius: 16px;
+  background: var(--rf-wash-hero);
+}
+
+/* 右上角一团极淡的珊瑚色光斑：给纯色面板一点纵深，不做成"闪光的渐变按钮"。 */
+.career-hero::after {
+  content: "";
+  position: absolute;
+  top: -70px;
+  right: -50px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(226 85 43 / 14%), transparent 68%);
+  pointer-events: none;
 }
 
 .career-hero > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 78%);
   font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--rf-text-tertiary);
+  letter-spacing: 0.02em;
+  color: var(--rf-brand);
+}
+
+.career-hero > span::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rf-vivid-coral);
 }
 
 .career-hero h1 {
-  margin: 4px 0 6px;
-  font-size: 20px;
-  line-height: 1.4;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  margin: 12px 0 6px;
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--rf-brand);
 }
 
 .career-hero p {
-  font-size: 12.5px;
-  line-height: 1.6;
+  max-width: 62ch;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .career-hero p,
@@ -231,9 +290,38 @@
   min-width: 0;
 }
 
-/* 拖拽区：保留虚线（它是可放置的语义），但不铺浅灰底，避免"框套框套框"。 */
+/* 拖拽区：这里是页面唯一"邀请你动手"的地方，给它浅青渐变 + 大圆角 + 彩色图标；
+   悬停时底色加深一点、描边变成青绿。虚线保留——它是"可以放进来"的语义。 */
 .career-drop .ant-upload-drag {
-  background: transparent;
+  border: 1.5px dashed rgb(14 147 132 / 35%);
+  border-radius: 12px;
+  background: linear-gradient(160deg, var(--rf-vivid-teal-soft) 0%, #f7fbfa 100%);
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.career-drop .ant-upload-drag:hover {
+  border-color: var(--rf-vivid-teal);
+  background: linear-gradient(160deg, #d7f0ec 0%, #f2faf8 100%);
+}
+
+/* 上传图标做成品牌色的圆形徽标，而不是一枚灰色线稿。 */
+.career-drop .ant-upload-drag-icon .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rf-vivid-teal) 0%, #12a89a 100%);
+  box-shadow: 0 6px 16px rgb(14 147 132 / 24%);
+}
+
+.career-drop .ant-upload-drag-icon {
+  margin-bottom: 10px;
 }
 
 .career-drop strong,
@@ -360,6 +448,35 @@
 
 .career-source-list a {
   overflow-wrap: anywhere;
+}
+
+.career-source-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.career-source-avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--rf-vivid-teal);
+}
+
+.career-source-avatar[data-tone="1"] {
+  background: var(--rf-vivid-coral);
+}
+
+.career-source-avatar[data-tone="2"] {
+  background: var(--rf-vivid-amber);
 }
 
 .career-source-list small,

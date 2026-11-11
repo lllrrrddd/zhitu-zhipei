@@ -114,4 +114,6 @@
   min-height: calc(100vh - var(--rf-header-height, 64px) - var(--rf-announcement-h, 0px));
   padding: var(--rf-content-pad);
   overflow-x: hidden;
+  /* 内容区退成极浅的灰蓝：白卡片才有"浮在上面"的层次，否则白上白只靠 1px 线分界。 */
+  background: var(--rf-surface-alt);
 }

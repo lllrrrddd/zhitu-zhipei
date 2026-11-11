@@ -26,10 +26,19 @@
   font-size: 17px;
 }
 
-/* 选中态：左侧 2px 竖条 + 加粗文字，像编辑器/IDE 的导航，而不是一块彩色按钮。 */
+/* 选中态：浅青底胶囊 + 品牌色图标。比"整块深蓝"轻，比"一根竖条"更有生气。 */
 .app-nav-menu .ant-menu-item-selected {
   font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--rf-brand);
+  color: var(--rf-brand);
+  background: var(--rf-vivid-teal-soft);
+}
+
+.app-nav-menu .ant-menu-item-selected .anticon {
+  color: var(--rf-vivid-teal);
+}
+
+.app-nav-menu .ant-menu-item:hover {
+  background: var(--rf-surface-alt);
 }
 
 .app-nav-menu .ant-menu-item-selected .anticon {

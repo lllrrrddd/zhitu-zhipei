@@ -36,3 +36,53 @@
   background: var(--rf-surface-alt);
   border-color: transparent;
 }
+
+/* 主按钮：深蓝→亮蓝的轻渐变，悬停提亮。比纯色更有质感，也不至于像"营销按钮"。 */
+.ant-btn-primary:not(:disabled) {
+  background-image: var(--rf-fill-primary);
+  border-color: transparent;
+}
+
+.ant-btn-primary:not(:disabled):hover {
+  background-image: linear-gradient(135deg, #1c4677 0%, #2f6aa3 100%);
+}
+
+/* 列表卡悬停：上浮 2px + 淡影。只在有指针的设备上做，触屏不跟着"跳"。 */
+@media (hover: hover) and (pointer: fine) {
+  .career-browse-card,
+  .career-start-grid .ant-card,
+  .career-results-grid .ant-card {
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      border-color 0.16s ease;
+  }
+
+  .career-browse-card:hover,
+  .career-start-grid .ant-card:hover,
+  .career-results-grid .ant-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(14 147 132 / 35%);
+    box-shadow: 0 8px 20px rgb(22 54 92 / 8%);
+  }
+}
+
+/* 卡片标题：左侧 3px 色条 + 14px/600。纯文字标题在浅底上会"飘"，色条给一个锚点。 */
+.ant-card-head-title {
+  position: relative;
+  padding-left: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ant-card-head-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--rf-vivid-teal);
+}

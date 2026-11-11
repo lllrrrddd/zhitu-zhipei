@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { checkCareerPosting } from "../../api/career";
 import { t } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
+import { toneOf } from "../common/tone";
 import { formatDateTime } from "../../utils/format";
 import type { MarketSource, MarketSummary, PostingCheck } from "./types";
 
@@ -19,7 +20,12 @@ function sourceStatus(source: MarketSource) {
 function sourceItem(source: MarketSource) {
   return (
     <li key={source.id}>
-      <div>
+      <div className="career-source-main">
+        {/* 首字母色块：一行里十来个纯文字链接很难扫，给每行一个颜色锚点。
+            色调只按名字哈希取三档，不随机——同一个来源每次都是同一个颜色。 */}
+        <span className="career-source-avatar" data-tone={toneOf(source.name)} aria-hidden="true">
+          {source.name.slice(0, 1)}
+        </span>
         <a href={source.url} target="_blank" rel="noopener noreferrer">
           {source.name} ↗
         </a>

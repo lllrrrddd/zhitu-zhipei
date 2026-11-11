@@ -11,6 +11,8 @@ const appConfig = {
   // ── 品牌 ──────────────────────────────────────────────────
   /** 应用名的唯一真相（页头品牌区、文档标题、星标提示、源码入口的无障碍名都取它）。 */
   "appConfig.brand.name": "职途智配",
+  // 旧名（竖线分隔）：改名后历史文案里的旧称呼会被自动替换成新名（见 src/brand.ts）。
+  "appConfig.brand.legacyNames": "职途智配|ZhiTuZhiPei|ResumeForge",
 
   // ── 大模型预设（选择后自动填充 Base URL 与模型名）────────────
   "appConfig.preset.deepseek": "DeepSeek（深度求索）",

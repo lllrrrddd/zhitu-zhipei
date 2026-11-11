@@ -16,6 +16,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { browseCareerMarket, refreshCareerMarket } from "../api/career";
 import type { MarketBrowse, MarketBrowseItem } from "../features/career/types";
+import { toneOf } from "../features/common/tone";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 import { formatDateTime } from "../utils/format";
@@ -147,11 +148,21 @@ export default function MarketPage() {
                 </span>
                 <span>{item.source_name}</span>
               </div>
-              <h2>
-                <a href={item.job.url} target="_blank" rel="noopener noreferrer">
-                  {item.job.title} <ExportOutlined />
-                </a>
-              </h2>
+              {/* 公司首字色块：列表里最缺的是"这家是谁"的视觉锚点。 */}
+              <div className="career-browse-title-row">
+                <span
+                  className="career-browse-avatar"
+                  data-tone={toneOf(item.job.company || item.job.title)}
+                  aria-hidden="true"
+                >
+                  {(item.job.company || item.job.title).slice(0, 1)}
+                </span>
+                <h2>
+                  <a href={item.job.url} target="_blank" rel="noopener noreferrer">
+                    {item.job.title} <ExportOutlined />
+                  </a>
+                </h2>
+              </div>
               <div className="career-browse-meta">
                 <strong>{item.job.company}</strong>
                 <span>{item.job.cities.join(", ") || t("career.result.cityUnknown")}</span>

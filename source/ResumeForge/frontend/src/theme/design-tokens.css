@@ -46,6 +46,18 @@
   --rf-accent-amber: #f0b429;
   --rf-accent-blue: #7ba7d0;
   --rf-accent-pink: #f08bb4;
+  /* 活力强调色（V2 视觉）：主色仍是深蓝，这三档只用于"点一下会变"的地方——
+     主按钮渐变、图标底、卡片悬停描边、数字高亮。刻意只留三档，避免配色变成噪声。 */
+  --rf-vivid-coral: #e2552b;
+  --rf-vivid-coral-soft: #fdeee7;
+  --rf-vivid-teal: #0e9384;
+  --rf-vivid-teal-soft: #e4f5f2;
+  --rf-vivid-amber: #c9761a;
+  --rf-vivid-amber-soft: #fdf1e2;
+  /* 页头渐变：三段极浅的蓝-青-米，压在白底上只留下一点温度，不抢内容。 */
+  --rf-wash-hero: linear-gradient(135deg, #eef4fb 0%, #e8f6f2 58%, #fdf2e8 100%);
+  /* 主按钮渐变：深蓝到偏亮的蓝，悬停时提亮而不是加投影。 */
+  --rf-fill-primary: linear-gradient(135deg, #16365c 0%, #245a8d 100%);
   /* 求职进度的阶段色（T9）：**随主题变化**，所以只存在于 CSS——`tokens.ts` 不带它们。
      深色对应值见 dark-tokens.css（同名同序）。这六档是"图形/色块"用色，
      对比度门槛 3:1（不是正文的 4.5），实测值见 theme/contrast.test.ts。 */
