@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from urllib.parse import urlparse
 
 from starlette.requests import Request
@@ -23,14 +24,28 @@ _MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # 恶意网页发来的 `Origin: https://evil.example` host 非回环，被拒。
 _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
+# 局域网部署（`http://192.168.x.x:3000`）需要额外放行本机 LAN 地址，否则**所有写请求**
+# 都会被这道墙挡成 403——包括登录和注册，表现是"页面能看、一点就失败"。
+# 用环境变量显式声明，而不是"私网 IP 一律放行"：放行面越小越好，且必须由部署的人
+# 自己写下"这个地址是我的"。
+_TRUSTED_HOSTS_ENV = "ZY_TRUSTED_ORIGIN_HOSTS"
+
+
+def _extra_trusted_hosts() -> set[str]:
+    raw = os.environ.get(_TRUSTED_HOSTS_ENV, "")
+    return {item.strip().lower() for item in raw.split(",") if item.strip()}
+
 
 def _origin_is_loopback(origin: str) -> bool:
-    """Return whether an HTTP Origin names one of the exact loopback hosts."""
+    """Return whether an HTTP Origin names a loopback host or a declared LAN host."""
     try:
         hostname = urlparse(origin).hostname
     except ValueError:
         return False
-    return bool(hostname) and hostname.lower() in _LOOPBACK_HOSTS
+    if not hostname:
+        return False
+    host = hostname.lower()
+    return host in _LOOPBACK_HOSTS or host in _extra_trusted_hosts()
 
 
 def is_non_cross_site_request(request: Request) -> bool:
