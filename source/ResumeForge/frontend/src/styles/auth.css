@@ -1,50 +1,126 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-/* 登录门：整屏渐变底 + 一张窄卡片。 */
+/* 登录门：左侧品牌面板 + 右侧表单卡。窄屏折成单列，面板退成顶部一条品牌条。 */
 
+/* 移动优先：默认竖排（品牌条在上、表单在下）。宽屏才在下面切成左右两栏——
+   反过来写（默认横排、窄屏再改竖排）会在窄屏漏掉 flex 方向，卡片被挤出屏幕。 */
 .auth-gate {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   min-height: 100vh;
-  padding: 24px;
-  background: var(--rf-wash-hero);
+  /* 底：三层极浅的蓝-青-米，比纯白有温度；再叠一层网格点，避免大面积纯色显空。 */
+  background: var(--rf-auth-dots), var(--rf-wash-hero);
 }
 
 .auth-gate-loading {
+  align-items: center;
   font-size: 13px;
   color: var(--rf-text-tertiary);
 }
+
+/* ── 左侧品牌面板：渐变块 + 星形水印 + 三条能力 ─────────────────── */
+
+.auth-panel {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  padding: 18px 20px;
+  color: #fff;
+  background: var(--rf-auth-panel);
+}
+
+/* 巨大的星形水印：右下角出血，给深色块一点"产品感"，不抢左侧文字。 */
+.auth-panel::after {
+  content: "";
+  position: absolute;
+  right: -90px;
+  bottom: -110px;
+  width: 360px;
+  height: 360px;
+  background: url("/zhiyin-mark.svg") no-repeat center / contain;
+  opacity: 0.10;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+.auth-panel-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  height: 100%;
+}
+
+.auth-panel-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.auth-panel h1 {
+  margin: 8px 0 0;
+  font-size: 30px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.auth-panel ul {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-panel li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--rf-auth-text-dim);
+}
+
+/* 每条前面一个珊瑚小点，代替默认圆点——和主按钮同色。 */
+.auth-panel li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rf-vivid-coral);
+}
+
+.auth-panel-footnote {
+  margin: auto 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--rf-auth-rule);
+  font-size: 11.5px;
+  color: var(--rf-auth-text-faint);
+}
+
+/* ── 右侧表单卡 ───────────────────────────────────────────────── */
 
 .auth-card {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  align-self: center;
   width: min(100%, 380px);
+  margin: 32px 24px;
   padding: 26px 24px 22px;
   border: 1px solid var(--rf-border-subtle);
   border-radius: 16px;
   background: var(--rf-surface);
-  box-shadow: 0 18px 44px rgb(22 54 92 / 10%);
-}
-
-.auth-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.auth-brand strong {
-  display: block;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--rf-brand);
-}
-
-.auth-brand span {
-  display: block;
-  font-size: 12px;
-  color: var(--rf-text-tertiary);
+  box-shadow: var(--rf-shadow-auth);
 }
 
 .auth-form .ant-form-item {
@@ -66,4 +142,53 @@
   font-size: 11.5px;
   line-height: 1.6;
   color: var(--rf-text-tertiary);
+}
+
+/* 宽屏：左右两栏。面板定宽 44%（有上限），卡片在剩余空间里居中。 */
+@media (min-width: 1092px) {
+  .auth-gate {
+    flex-direction: row;
+  }
+
+  .auth-panel {
+    flex: 0 0 clamp(380px, 44%, 560px);
+    padding: 48px 44px;
+  }
+
+  /* 右侧剩余空间里水平居中：auto 内外边距在 flex 行里就是"均分剩余空间"。 */
+  .auth-card {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* 右侧剩余空间里水平居中：auto 内外边距在 flex 行里就是"均分剩余空间"。 */
+  .auth-card {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* 窄屏：面板退成顶部一条通栏品牌条，卡片占满宽度。 */
+@media (max-width: 1092px) {
+  .auth-panel,
+  .auth-panel-inner {
+    width: 100%;
+  }
+
+  .auth-panel h1,
+  .auth-panel ul,
+  .auth-panel-footnote,
+  .auth-panel::after {
+    display: none;
+  }
+
+  .auth-panel-brand {
+    font-size: 17px;
+  }
+
+  .auth-card {
+    align-self: center;
+    width: calc(100% - 32px);
+    margin: 18px 16px 32px;
+  }
 }

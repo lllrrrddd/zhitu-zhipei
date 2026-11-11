@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import re
 import secrets
 import sqlite3
 import string
@@ -37,6 +38,12 @@ class User:
     email: str
     display_name: str
     created_at: str
+    phone: str = ""
+
+    @property
+    def account(self) -> str:
+        """登录名：有邮箱用邮箱，否则用手机号（界面展示与日志都用这个）。"""
+        return self.email or self.phone
 
 
 def _connect(db_path: Path) -> sqlite3.Connection:
@@ -54,7 +61,8 @@ def init_auth_db(db_path: Path) -> None:
             """
             CREATE TABLE IF NOT EXISTS users (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                email         TEXT NOT NULL UNIQUE,
+                email         TEXT UNIQUE,
+                phone         TEXT UNIQUE,
                 password_hash TEXT NOT NULL,
                 display_name  TEXT NOT NULL DEFAULT '',
                 created_at    TEXT NOT NULL
@@ -82,6 +90,20 @@ def init_auth_db(db_path: Path) -> None:
             );
             """
         )
+        _migrate_users_table(conn)
+
+
+def _migrate_users_table(conn: sqlite3.Connection) -> None:
+    """老库兼容：补 `phone` 列。
+
+    SQLite 不支持"把 NOT NULL 改成可空"，但**保留 email NOT NULL 也没关系**——
+    手机号注册的用户把 email 写成空字符串即可（唯一索引允许多个空串），
+    查询时按"空串不算邮箱"处理。这样不必重建表，也就不用搬数据。
+    """
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)")}
+    if "phone" not in columns:
+        conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone)")
 
 
 def hash_password(password: str) -> str:
@@ -124,17 +146,45 @@ def create_invite(db_path: Path, note: str = "") -> str:
     return code
 
 
+_PHONE_RE = re.compile(r"^1[3-9]\d{9}$")
+
+
+def parse_account(raw: str) -> tuple[str, str]:
+    """把用户填的"邮箱或手机号"归一成 (kind, value)。
+
+    kind 只可能是 "email" / "phone"，其它一律 ValueError——**别猜**：
+    "1234" 既不像手机也不像邮箱，硬当成手机号会让用户拿一个打不通的账号注册。
+    """
+    cleaned = (raw or "").strip()
+    if _PHONE_RE.match(cleaned):
+        return "phone", cleaned
+    if "@" in cleaned and "." in cleaned.split("@")[-1] and len(cleaned) <= 254:
+        return "email", cleaned.lower()
+    raise ValueError("请输入有效的邮箱或 11 位手机号")
+
+
+def _row_to_user(row: sqlite3.Row) -> User:
+    keys = row.keys()
+    return User(
+        id=row["id"],
+        email=row["email"] or "",
+        display_name=row["display_name"],
+        created_at=row["created_at"],
+        phone=(row["phone"] or "") if "phone" in keys else "",
+    )
+
+
 def register_user(
-    db_path: Path, email: str, password: str, display_name: str, invite_code: str
+    db_path: Path, account: str, password: str, display_name: str, invite_code: str
 ) -> User:
     """用邀请码注册。邀请码一次性：成功注册即标记 used（失败的尝试不消耗）。
 
-    抛出 ``ValueError`` 表示用户侧错误（邀请码无效 / 邮箱已存在 / 密码太短），
-    路由层把它翻成 400 并原文回显，方便界面直接展示。
+    ``account`` 是用户填的"邮箱或手机号"，注册时按类型分别落到 email / phone 列。
+    手机号注册的用户 email 存空串（老表 email 是 NOT NULL，空串可重复）。
     """
-    email = email.strip().lower()
-    if "@" not in email or len(email) > 254:
-        raise ValueError("邮箱格式不正确")
+    kind, value = parse_account(account)
+    email = value if kind == "email" else ""
+    phone = value if kind == "phone" else None
     if len(password) < 8:
         raise ValueError("密码至少 8 位")
     code = invite_code.strip().upper()
@@ -145,12 +195,17 @@ def register_user(
             raise ValueError("邀请码无效")
         if invite["used_by"] is not None:
             raise ValueError("邀请码已被使用")
-        if conn.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone():
-            raise ValueError("这个邮箱已经注册过了")
+        if kind == "email":
+            taken = conn.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone()
+        else:
+            taken = conn.execute("SELECT 1 FROM users WHERE phone = ?", (phone,)).fetchone()
+        if taken:
+            raise ValueError("这个账号已经注册过了")
 
         cursor = conn.execute(
-            "INSERT INTO users (email, password_hash, display_name, created_at) VALUES (?, ?, ?, ?)",
-            (email, hash_password(password), display_name.strip(), _now_iso()),
+            "INSERT INTO users (email, phone, password_hash, display_name, created_at)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (email, phone, hash_password(password), display_name.strip(), _now_iso()),
         )
         user_id = int(cursor.lastrowid)
         conn.execute(
@@ -159,27 +214,19 @@ def register_user(
         )
         row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
-    return User(
-        id=row["id"],
-        email=row["email"],
-        display_name=row["display_name"],
-        created_at=row["created_at"],
-    )
+    return _row_to_user(row)
 
 
-def authenticate(db_path: Path, email: str, password: str) -> User | None:
+def authenticate(db_path: Path, account: str, password: str) -> User | None:
+    kind, value = parse_account(account)
+    column = "email" if kind == "email" else "phone"
+    # 参数化列名不可行，列名只能来自这个白名单（kind 由 parse_account 保证）
+    assert column in {"email", "phone"}
     with _connect(db_path) as conn:
-        row = conn.execute(
-            "SELECT * FROM users WHERE email = ?", (email.strip().lower(),)
-        ).fetchone()
+        row = conn.execute(f"SELECT * FROM users WHERE {column} = ?", (value,)).fetchone()
     if row is None or not verify_password(password, row["password_hash"]):
         return None
-    return User(
-        id=row["id"],
-        email=row["email"],
-        display_name=row["display_name"],
-        created_at=row["created_at"],
-    )
+    return _row_to_user(row)
 
 
 def get_user(db_path: Path, user_id: int) -> User | None:
@@ -187,12 +234,7 @@ def get_user(db_path: Path, user_id: int) -> User | None:
         row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     if row is None:
         return None
-    return User(
-        id=row["id"],
-        email=row["email"],
-        display_name=row["display_name"],
-        created_at=row["created_at"],
-    )
+    return _row_to_user(row)
 
 
 # ── 会话：只存 token 的哈希，库被读走也拿不到可用的 cookie ──────────────────
@@ -244,12 +286,12 @@ def _code_hash(code: str) -> str:
     return hashlib.sha256(f"reset:{code}".encode("utf-8")).hexdigest()
 
 
-def create_reset_code(db_path: Path, email: str, ttl_seconds: int = 86400 * 1) -> str | None:
-    """给指定邮箱生成一枚重置码；邮箱不存在返回 None（不泄露"这个邮箱是否注册过"由路由决定）。"""
+def create_reset_code(db_path: Path, account: str, ttl_seconds: int = 86400 * 1) -> str | None:
+    """给指定账号（邮箱或手机号）生成一枚重置码；账号不存在返回 None。"""
+    kind, value = parse_account(account)
+    column = "email" if kind == "email" else "phone"
     with _connect(db_path) as conn:
-        row = conn.execute(
-            "SELECT id FROM users WHERE email = ?", (email.strip().lower(),)
-        ).fetchone()
+        row = conn.execute(f"SELECT id FROM users WHERE {column} = ?", (value,)).fetchone()
         if row is None:
             return None
         code = "".join(secrets.choice(string.digits) for _ in range(8))
@@ -260,15 +302,15 @@ def create_reset_code(db_path: Path, email: str, ttl_seconds: int = 86400 * 1) -
     return code
 
 
-def reset_password(db_path: Path, email: str, code: str, new_password: str) -> bool:
+def reset_password(db_path: Path, account: str, code: str, new_password: str) -> bool:
     """凭重置码改密。成功返回 True，并作废该用户全部会话（旧 cookie 立即失效）。"""
     if len(new_password) < 8:
         raise ValueError("密码至少 8 位")
     cleaned = code.strip()
+    kind, value = parse_account(account)
+    column = "email" if kind == "email" else "phone"
     with _connect(db_path) as conn:
-        row = conn.execute(
-            "SELECT id FROM users WHERE email = ?", (email.strip().lower(),)
-        ).fetchone()
+        row = conn.execute(f"SELECT id FROM users WHERE {column} = ?", (value,)).fetchone()
         if row is None:
             return False
         user_id = int(row["id"])

@@ -52,7 +52,7 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
     try {
       if (mode === "reset") {
         await resetPassword({
-          email: values.email ?? "",
+          account: values.account ?? "",
           code: values.code ?? "",
           newPassword: values.newPassword ?? "",
         });
@@ -62,9 +62,9 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
       }
       const result =
         mode === "login"
-          ? await login(values.email ?? "", values.password ?? "")
+          ? await login(values.account ?? "", values.password ?? "")
           : await register({
-              email: values.email ?? "",
+              account: values.account ?? "",
               password: values.password ?? "",
               displayName: values.displayName ?? "",
               invite: values.invite ?? "",
@@ -87,15 +87,23 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="auth-gate">
-      <div className="auth-card">
-        <div className="auth-brand">
-          <img src="/zhiyin-mark.svg" alt="" width={36} height={36} />
-          <div>
+      <aside className="auth-panel">
+        <div className="auth-panel-inner">
+          <div className="auth-panel-brand">
+            <img src="/zhiyin-mark.svg" alt="" width={40} height={40} />
             <strong>{t("appConfig.brand.name")}</strong>
-            <span>{t("auth.login.brandTag")}</span>
           </div>
+          <h1>{t("auth.brand.title")}</h1>
+          <ul>
+            <li>{t("auth.brand.point1")}</li>
+            <li>{t("auth.brand.point2")}</li>
+            <li>{t("auth.brand.point3")}</li>
+          </ul>
+          <p className="auth-panel-footnote">{t("auth.brand.footnote")}</p>
         </div>
+      </aside>
 
+      <div className="auth-card">
         <Segmented
           block
           value={mode}
@@ -149,11 +157,11 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
           )}
 
           <Form.Item
-            name="email"
+            name="account"
             label={t("auth.login.email")}
             rules={[{ required: true, message: t("auth.login.requiredEmail") }]}
           >
-            <Input placeholder="you@example.com" autoComplete="email" />
+            <Input placeholder={t("auth.login.accountPlaceholder")} autoComplete="username" />
           </Form.Item>
 
           {mode === "reset" ? (

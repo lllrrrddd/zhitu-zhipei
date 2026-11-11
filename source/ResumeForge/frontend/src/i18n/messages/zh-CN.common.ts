@@ -91,7 +91,7 @@ const common = {
   "auth.login.namePlaceholder": "怎么称呼你",
   "auth.login.invite": "邀请码",
   "auth.login.invitePlaceholder": "8 位邀请码",
-  "auth.login.email": "邮箱",
+  "auth.login.email": "邮箱或手机号",
   "auth.login.password": "密码",
   "auth.login.passwordHint": "至少 8 位",
   "auth.login.submitLogin": "登录",
@@ -100,7 +100,7 @@ const common = {
   "auth.login.brandTag": "简历到 offer",
   "auth.login.hint": "内部版本，需要邀请码。每个人登录后用的是自己独立的简历与岗位数据，互不可见。",
   "auth.login.requiredInvite": "请填写邀请码",
-  "auth.login.requiredEmail": "请填写邮箱",
+  "auth.login.requiredEmail": "请填写邮箱或手机号",
   "auth.login.requiredPassword": "请填写密码",
   "auth.login.failed": "操作失败",
   "auth.login.tabReset": "忘记密码",
@@ -109,6 +109,12 @@ const common = {
   "auth.login.newPassword": "新密码",
   "auth.login.submitReset": "重设密码",
   "auth.login.resetDone": "密码已重设，请用新密码登录。",
+  "auth.login.accountPlaceholder": "you@example.com 或 13800000000",
+  "auth.brand.title": "把简历变成面试机会",
+  "auth.brand.point1": "简历诊断：结构、措辞、量化是否经得起追问",
+  "auth.brand.point2": "岗位匹配：按你的经历找对口岗位，而不是海投",
+  "auth.brand.point3": "投递跟进：一次投递一条记录，进度不再靠记忆",
+  "auth.brand.footnote": "每个账号的数据各自独立，互不可见",
 } as const;
 
 export default common;

@@ -6,7 +6,8 @@
 
 export interface AuthUser {
   id: number;
-  email: string;
+  /** 登录名：邮箱或手机号（后端二选一存）。 */
+  account: string;
   displayName: string;
 }
 
@@ -35,12 +36,12 @@ export function fetchMe(): Promise<{ user: AuthUser | null }> {
   return call("/me");
 }
 
-export function login(email: string, password: string): Promise<{ user: AuthUser }> {
-  return call("/login", { method: "POST", body: JSON.stringify({ email, password }) });
+export function login(account: string, password: string): Promise<{ user: AuthUser }> {
+  return call("/login", { method: "POST", body: JSON.stringify({ account, password }) });
 }
 
 export function register(input: {
-  email: string;
+  account: string;
   password: string;
   displayName: string;
   invite: string;
@@ -48,7 +49,7 @@ export function register(input: {
   return call("/register", {
     method: "POST",
     body: JSON.stringify({
-      email: input.email,
+      account: input.account,
       password: input.password,
       display_name: input.displayName,
       invite: input.invite,
@@ -57,13 +58,17 @@ export function register(input: {
 }
 
 export function resetPassword(input: {
-  email: string;
+  account: string;
   code: string;
   newPassword: string;
 }): Promise<{ ok: boolean }> {
   return call("/reset-password", {
     method: "POST",
-    body: JSON.stringify({ email: input.email, code: input.code, new_password: input.newPassword }),
+    body: JSON.stringify({
+      account: input.account,
+      code: input.code,
+      new_password: input.newPassword,
+    }),
   });
 }
 

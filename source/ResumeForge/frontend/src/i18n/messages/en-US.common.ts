@@ -93,7 +93,7 @@ const common = {
   "auth.login.namePlaceholder": "What should we call you",
   "auth.login.invite": "Invite code",
   "auth.login.invitePlaceholder": "8-character code",
-  "auth.login.email": "Email",
+  "auth.login.email": "Email or phone",
   "auth.login.password": "Password",
   "auth.login.passwordHint": "At least 8 characters",
   "auth.login.submitLogin": "Sign in",
@@ -102,7 +102,7 @@ const common = {
   "auth.login.brandTag": "Resume to offer",
   "auth.login.hint": "Invite-only build. Each account has its own resumes and jobs; nobody sees anyone else's.",
   "auth.login.requiredInvite": "Invite code is required",
-  "auth.login.requiredEmail": "Email is required",
+  "auth.login.requiredEmail": "Enter your email or phone",
   "auth.login.requiredPassword": "Password is required",
   "auth.login.failed": "Something went wrong",
   "auth.login.tabReset": "Forgot password",
@@ -111,6 +111,12 @@ const common = {
   "auth.login.newPassword": "New password",
   "auth.login.submitReset": "Reset password",
   "auth.login.resetDone": "Password updated. Sign in with the new one.",
+  "auth.login.accountPlaceholder": "you@example.com or 13800000000",
+  "auth.brand.title": "Turn a resume into interviews",
+  "auth.brand.point1": "Resume review: structure, wording, numbers that survive follow-ups",
+  "auth.brand.point2": "Job matching: roles that fit your experience, not spray-and-pray",
+  "auth.brand.point3": "Application tracking: one record per application",
+  "auth.brand.footnote": "Every account keeps its own data; nobody sees anyone else's",
 } as const;
 
 export default common;

@@ -45,7 +45,7 @@ export default function UserBadge() {
       trigger={["click"]}
       menu={{
         items: [
-          { key: "email", label: user.email, disabled: true },
+          { key: "account", label: user.account, disabled: true },
           { type: "divider" },
           { key: "logout", icon: <LogoutOutlined />, label: t("auth.logout") },
         ],
@@ -56,9 +56,9 @@ export default function UserBadge() {
         },
       }}
     >
-      <Tooltip title={user.email}>
+      <Tooltip title={user.account}>
         <Button type="text" className="app-user-badge">
-          {user.displayName || user.email.split("@")[0]}
+          {user.displayName || user.account}
         </Button>
       </Tooltip>
     </Dropdown>

@@ -70,6 +70,14 @@
   --rf-avatar-shadow: 0 6px 16px rgb(14 147 132 / 24%);
   --rf-on-image: rgb(255 255 255 / 78%);
   /* 上传拖拽区的底：浅色是浅青渐变，深色必须换成深底（否则深色页里出现一块白板）。 */
+  --rf-auth-dots: radial-gradient(circle at 1px 1px, rgb(22 54 92 / 6%) 1px, transparent 0) 0 0
+    / 22px 22px;
+  --rf-auth-panel: radial-gradient(circle at 78% 8%, rgb(240 128 90 / 26%), transparent 42%),
+    linear-gradient(150deg, #16365c 0%, #0f4f4a 62%, #0e9384 100%);
+  --rf-auth-text-dim: rgb(255 255 255 / 82%);
+  --rf-auth-text-faint: rgb(255 255 255 / 62%);
+  --rf-auth-rule: rgb(255 255 255 / 16%);
+  --rf-shadow-auth: 0 18px 44px rgb(22 54 92 / 10%);
   --rf-drop-bg: linear-gradient(160deg, #e4f5f2 0%, #f7fbfa 100%);
   --rf-drop-bg-hover: linear-gradient(160deg, #d7f0ec 0%, #f2faf8 100%);
   /* 求职进度的阶段色（T9）：**随主题变化**，所以只存在于 CSS——`tokens.ts` 不带它们。

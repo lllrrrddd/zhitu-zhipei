@@ -73,7 +73,7 @@ def ensure_auth_ready() -> None:
 
 
 class ResetRequest(BaseModel):
-    email: str = Field(max_length=254)
+    account: str = Field(max_length=254)
     code: str = Field(max_length=32)
     new_password: str = Field(min_length=1, max_length=200)
 
@@ -84,18 +84,18 @@ class AdminInviteRequest(BaseModel):
 
 
 class AdminResetRequest(BaseModel):
-    email: str = Field(max_length=254)
+    account: str = Field(max_length=254)
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(max_length=254)
+    account: str = Field(max_length=254)
     password: str = Field(min_length=1, max_length=200)
     display_name: str = Field(default="", max_length=60)
     invite: str = Field(max_length=32)
 
 
 class LoginRequest(BaseModel):
-    email: str = Field(max_length=254)
+    account: str = Field(max_length=254)
     password: str = Field(min_length=1, max_length=200)
 
 
@@ -117,7 +117,7 @@ def _user_payload(user: CurrentUser | None) -> dict[str, object]:
     return {
         "user": {
             "id": user.id,
-            "email": user.email,
+            "account": user.email or user.phone,
             "displayName": user.display_name,
         }
     }
@@ -152,7 +152,10 @@ def admin_create_invites(
 def admin_create_reset_code(payload: AdminResetRequest, request: Request) -> dict[str, object]:
     if not _admin_ok(request):
         raise HTTPException(status_code=403, detail="无权限")
-    code = create_reset_code(AUTH_DB_PATH, payload.email)
+    try:
+        code = create_reset_code(AUTH_DB_PATH, payload.account)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     if code is None:
         # 不给"这个邮箱没注册"这种可枚举信号：统一说"已生成（如账号存在）"由调用方判断。
         raise HTTPException(status_code=404, detail="账号不存在")
@@ -162,7 +165,7 @@ def admin_create_reset_code(payload: AdminResetRequest, request: Request) -> dic
 @router.post("/reset-password")
 def reset_with_code(payload: ResetRequest) -> dict[str, object]:
     try:
-        ok = reset_password(AUTH_DB_PATH, payload.email, payload.code, payload.new_password)
+        ok = reset_password(AUTH_DB_PATH, payload.account, payload.code, payload.new_password)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not ok:
@@ -185,7 +188,7 @@ def me(request: Request) -> dict[str, object]:
 def register(payload: RegisterRequest, response: Response) -> dict[str, object]:
     try:
         user = register_user(
-            AUTH_DB_PATH, payload.email, payload.password, payload.display_name, payload.invite
+            AUTH_DB_PATH, payload.account, payload.password, payload.display_name, payload.invite
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -193,17 +196,21 @@ def register(payload: RegisterRequest, response: Response) -> dict[str, object]:
     token = create_session(AUTH_DB_PATH, user.id, int(SESSION_TTL.total_seconds()))
     _set_session_cookie(response, token)
     logger.info("新用户注册成功 id=%s", user.id)
-    return {"user": {"id": user.id, "email": user.email, "displayName": user.display_name}}
+    return {"user": {"id": user.id, "account": user.email or user.phone, "displayName": user.display_name}}
 
 
 @router.post("/login")
 def login(payload: LoginRequest, response: Response) -> dict[str, object]:
-    user = authenticate(AUTH_DB_PATH, payload.email, payload.password)
+    try:
+        user = authenticate(AUTH_DB_PATH, payload.account, payload.password)
+    except ValueError as exc:
+        # 账号格式不对是"用户填错了"，不是服务端故障：400 而不是 500。
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     if user is None:
-        raise HTTPException(status_code=401, detail="邮箱或密码不正确")
+        raise HTTPException(status_code=401, detail="账号或密码不正确")
     token = create_session(AUTH_DB_PATH, user.id, int(SESSION_TTL.total_seconds()))
     _set_session_cookie(response, token)
-    return {"user": {"id": user.id, "email": user.email, "displayName": user.display_name}}
+    return {"user": {"id": user.id, "account": user.email or user.phone, "displayName": user.display_name}}
 
 
 @router.post("/logout")
@@ -226,4 +233,4 @@ def resolve_request_user(request: Request) -> CurrentUser | None:
     record = get_user(AUTH_DB_PATH, user_id)
     if record is None:
         return None
-    return CurrentUser(id=record.id, email=record.email, display_name=record.display_name)
+    return CurrentUser(id=record.id, email=record.account, display_name=record.display_name)
