@@ -1,20 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="职引">
   <defs>
-    <linearGradient id="zy-mark-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#12A89A" />
-      <stop offset="1" stop-color="#0B6F66" />
+    <!-- 珊瑚→琥珀的斜向渐变：暖色只出现在这枚星和主按钮上，两者同源。 -->
+    <linearGradient id="zy-star-fill" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#F58F4C" />
+      <stop offset="0.5" stop-color="#E2552B" />
+      <stop offset="1" stop-color="#BE6A15" />
     </linearGradient>
   </defs>
-  <!-- 底：青绿渐变圆角方块 -->
-  <rect x="3" y="3" width="58" height="58" rx="17" fill="url(#zy-mark-bg)" />
-  <!-- 路径：从左下走到右上，表示"从简历到 offer"这一段路 -->
+  <!-- 四角罗盘星：长轴朝上下、短轴朝左右，读作"指向"，而不是通用的五角星。 -->
   <path
-    d="M20 45c0-9 6-13 12-15s9-5 9-10"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-width="5"
-    stroke-linecap="round"
+    d="M32 4c1.8 15.4 12.6 26.2 28 28-15.4 1.8-26.2 12.6-28 28-1.8-15.4-12.6-26.2-28-28 15.4-1.8 26.2-12.6 28-28Z"
+    fill="url(#zy-star-fill)"
   />
-  <!-- 终点：珊瑚色圆点，视线落点也是"目标岗位" -->
-  <circle cx="43" cy="18" r="5.5" fill="#F07A4A" />
+  <!-- 内层高光：一点通透感，缩到 24px 也不至于糊成一团。 -->
+  <path
+    d="M32 14c1 9 7.6 15.6 16.6 16.6C39.6 31.6 33 38.2 32 47.2c-1-9-7.6-15.6-16.6-16.6C24.4 29.6 31 23 32 14Z"
+    fill="#FFFFFF"
+    opacity="0.22"
+  />
 </svg>
