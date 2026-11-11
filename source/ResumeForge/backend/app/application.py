@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
@@ -399,6 +400,11 @@ def _frontend_dist_dir() -> Path:
         frozen_dist = Path(sys.executable).resolve().parent / "frontend" / "dist"
         if frozen_dist.is_dir():
             return frozen_dist
+    # 部署形态（容器/单端口发布）里前端产物不一定在 `../frontend/dist`，
+    # 用环境变量指过去，避免为了发布去挪构建目录。
+    override = os.environ.get("RF_FRONTEND_DIST", "").strip()
+    if override:
+        return Path(override).resolve()
     return BACKEND_DIR.parent / "frontend" / "dist"
 
 

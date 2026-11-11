@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="职引">
+  <defs>
+    <!-- 珊瑚→琥珀的斜向渐变：暖色只出现在这枚星和主按钮上，两者同源。 -->
+    <linearGradient id="zy-star-fill" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#F58F4C" />
+      <stop offset="0.5" stop-color="#E2552B" />
+      <stop offset="1" stop-color="#BE6A15" />
+    </linearGradient>
+  </defs>
+  <!-- 四角罗盘星：长轴朝上下、短轴朝左右，读作"指向"，而不是通用的五角星。 -->
+  <path
+    d="M32 4c1.8 15.4 12.6 26.2 28 28-15.4 1.8-26.2 12.6-28 28-1.8-15.4-12.6-26.2-28-28 15.4-1.8 26.2-12.6 28-28Z"
+    fill="url(#zy-star-fill)"
+  />
+  <!-- 内层高光：一点通透感，缩到 24px 也不至于糊成一团。 -->
+  <path
+    d="M32 14c1 9 7.6 15.6 16.6 16.6C39.6 31.6 33 38.2 32 47.2c-1-9-7.6-15.6-16.6-16.6C24.4 29.6 31 23 32 14Z"
+    fill="#FFFFFF"
+    opacity="0.22"
+  />
+</svg>
