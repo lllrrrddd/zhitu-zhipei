@@ -1,0 +1,69 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* 登录门：整屏渐变底 + 一张窄卡片。 */
+
+.auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--rf-wash-hero);
+}
+
+.auth-gate-loading {
+  font-size: 13px;
+  color: var(--rf-text-tertiary);
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(100%, 380px);
+  padding: 26px 24px 22px;
+  border: 1px solid var(--rf-border-subtle);
+  border-radius: 16px;
+  background: var(--rf-surface);
+  box-shadow: 0 18px 44px rgb(22 54 92 / 10%);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-brand strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--rf-brand);
+}
+
+.auth-brand span {
+  display: block;
+  font-size: 12px;
+  color: var(--rf-text-tertiary);
+}
+
+.auth-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.auth-form .ant-form-item-label > label {
+  font-size: 12.5px;
+  color: var(--rf-text-secondary);
+}
+
+.auth-submit {
+  margin-top: 4px;
+  height: 40px;
+}
+
+.auth-hint {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--rf-text-tertiary);
+}

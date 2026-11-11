@@ -1837,7 +1837,7 @@
     }
   },
   "productCopy": {
-    "total": 123,
+    "total": 126,
     "files": {
       "api/aiTasks.ts": {
         "count": 0,
@@ -3962,9 +3962,10 @@
         }
       },
       "components/shell/AppShell.tsx": {
-        "count": 1,
+        "count": 2,
         "fingerprints": {
-          "89aafc4637f75e179556f1b81ab45d1a9740ad92a61080cbc0171921f57d53b3": 1
+          "89aafc4637f75e179556f1b81ab45d1a9740ad92a61080cbc0171921f57d53b3": 1,
+          "00629d8f0a3ab261e19474d8e7c559b3aa474e50b40bced97d3827680ff94a16": 1
         }
       },
       "components/shell/RootLayout.tsx": {
@@ -6679,6 +6680,22 @@
         "fingerprints": {}
       },
       "vite-env.d.ts": {
+        "count": 0,
+        "fingerprints": {}
+      },
+      "features/auth/api.ts": {
+        "count": 1,
+        "fingerprints": {
+          "bfb0f6c7054403a4b819dfd89a8da2b8ecec1a6002f3156046cf2dfff9c5a348": 1
+        }
+      },
+      "features/auth/LoginGate.tsx": {
+        "count": 1,
+        "fingerprints": {
+          "e4de6e4c3f9cfbb77701e9c02ec1ef49549c0d06c98a44c1536b66195b2762ca": 1
+        }
+      },
+      "components/UserBadge.tsx": {
         "count": 0,
         "fingerprints": {}
       }

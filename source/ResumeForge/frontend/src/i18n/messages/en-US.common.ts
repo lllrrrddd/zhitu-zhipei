@@ -86,6 +86,25 @@ const common = {
   "common.note.trashRecovery": "It will move to Trash, where you can restore it later.",
   /** Consequence sentence of a hard-delete confirmation (paired with the key above). */
   "common.note.hardDelete": "It will be deleted permanently and cannot be recovered.",
+  "auth.logout": "Sign out",
+  "auth.login.tabLogin": "Sign in",
+  "auth.login.tabRegister": "Register with invite",
+  "auth.login.name": "Name",
+  "auth.login.namePlaceholder": "What should we call you",
+  "auth.login.invite": "Invite code",
+  "auth.login.invitePlaceholder": "8-character code",
+  "auth.login.email": "Email",
+  "auth.login.password": "Password",
+  "auth.login.passwordHint": "At least 8 characters",
+  "auth.login.submitLogin": "Sign in",
+  "auth.login.submitRegister": "Register and continue",
+  "auth.login.checking": "Checking your session…",
+  "auth.login.brandTag": "Resume to offer",
+  "auth.login.hint": "Invite-only build. Each account has its own resumes and jobs; nobody sees anyone else's.",
+  "auth.login.requiredInvite": "Invite code is required",
+  "auth.login.requiredEmail": "Email is required",
+  "auth.login.requiredPassword": "Password is required",
+  "auth.login.failed": "Something went wrong",
 } as const;
 
 export default common;

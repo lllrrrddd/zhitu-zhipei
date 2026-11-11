@@ -181,5 +181,9 @@ ROUTERS = (
 
 def install_routers(app: FastAPI) -> None:
     """按固定顺序注册全部子路由（顺序有意义，见 ROUTERS 内的行内注释）。"""
+    # 账号接口放最前：路径前缀 /api/auth 独立，先注册可避免被任何通用前缀抢走。
+    from .auth import router as auth_router
+
+    app.include_router(auth_router)
     for router in ROUTERS:
         app.include_router(router)

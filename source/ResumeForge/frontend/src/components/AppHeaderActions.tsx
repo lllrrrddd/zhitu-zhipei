@@ -16,6 +16,7 @@ import MySpaceMenu from "./navigation/MySpaceMenu";
 import ScenarioSelector from "../features/career-scenarios/ScenarioSelector";
 import ThemeSwitch from "./ThemeSwitch";
 import { GITHUB_REPO } from "../config";
+import UserBadge from "./UserBadge";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";
 
@@ -61,6 +62,7 @@ export default function AppHeaderActions({ hiddenKeys, onStarClick, simple = fal
           />
         </Tooltip>
       )}
+      <UserBadge />
       <ExitAppButton />
     </div>
   );

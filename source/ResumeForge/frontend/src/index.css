@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 @import "./theme/design-tokens.css";
 @import "./styles/base.css";
+@import "./styles/auth.css";
 @import "./styles/resume.css";
 @import "./styles/assistant-layout.css";
 @import "./styles/assistant-content.css";

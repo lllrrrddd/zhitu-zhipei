@@ -10,6 +10,7 @@ import AppHeaderActions from "../../components/AppHeaderActions";
 import AnnouncementBar from "../../components/common/AnnouncementBar";
 import BackgroundTaskBar from "../../components/BackgroundTaskBar";
 import StarPromptModal from "../../components/StarPromptModal";
+import LoginGate from "../../features/auth/LoginGate";
 import PageSkeleton from "../../components/common/PageSkeleton";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -241,6 +242,8 @@ export default function AppShell() {
 
   return (
     <TouTouProvider>
+      {/* Auth gate: hosted mode shows a sign-in card instead of the shell; local mode passes through. */}
+      <LoginGate>
       <>
         <RouteAccessibility />
         {/* 批次完成全局通知：挂在布局层，投递/采集跑完时无论用户在哪个页面都能收到。 */}
@@ -433,6 +436,7 @@ export default function AppShell() {
         )}
         <StarPromptModal open={starModalOpen} onClose={() => setStarModalOpen(false)} />
       </>
+      </LoginGate>
     </TouTouProvider>
   );
 }

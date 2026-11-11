@@ -103,7 +103,34 @@ except DatasetError:
 
 engine = build_engine(_initial_url)
 
-SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+_global_sessionmaker = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+class _SessionFactoryProxy:
+    """``SessionLocal`` 的替身：优先用"当前请求的用户库工厂"，否则回落全局。
+
+    为什么要代理而不是改 57 处调用点：那些调用散在服务层与后台任务里，逐个改成
+    `current_factory()` 既啰嗦又容易漏；代理让「`SessionLocal()`」这个既有写法
+    自动跟随请求上下文，登录用户拿到自己的库，未登录仍是主库。
+
+    `configure()` 必须转发给真正的 sessionmaker——`rebind()` / `adopt_engine()`
+    靠它原地改绑，代理若自己吞掉，数据集切换就失效了。
+    """
+
+    def __call__(self, *args, **kwargs):
+        from .auth.context import current_factory
+
+        factory = current_factory() or _global_sessionmaker
+        return factory(*args, **kwargs)
+
+    def configure(self, **kwargs):
+        _global_sessionmaker.configure(**kwargs)
+
+    def __getattr__(self, name):
+        return getattr(_global_sessionmaker, name)
+
+
+SessionLocal = _SessionFactoryProxy()
 
 
 def rebind(database_path: Path) -> Engine:
@@ -174,7 +201,10 @@ def ensure_sqlite_columns(
 
 
 def get_db():
-    """FastAPI 依赖：每个请求一个独立会话，请求结束自动关闭。"""
+    """FastAPI 依赖：每个请求一个独立会话，请求结束自动关闭。
+
+    会话来自 `SessionLocal` 代理——登录用户连自己的库文件，未登录连主库。
+    """
     db = SessionLocal()
     try:
         yield db

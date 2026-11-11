@@ -84,6 +84,25 @@ const common = {
   "common.note.trashRecovery": "会移入回收站，之后可以在「回收站」里恢复。",
   /** 硬删除二次确认的后果段（与上一条成对）：不进回收站，也没有恢复入口。 */
   "common.note.hardDelete": "会直接删除，不进「回收站」，也无法恢复。",
+  "auth.logout": "退出登录",
+  "auth.login.tabLogin": "登录",
+  "auth.login.tabRegister": "用邀请码注册",
+  "auth.login.name": "称呼",
+  "auth.login.namePlaceholder": "怎么称呼你",
+  "auth.login.invite": "邀请码",
+  "auth.login.invitePlaceholder": "8 位邀请码",
+  "auth.login.email": "邮箱",
+  "auth.login.password": "密码",
+  "auth.login.passwordHint": "至少 8 位",
+  "auth.login.submitLogin": "登录",
+  "auth.login.submitRegister": "注册并进入",
+  "auth.login.checking": "正在确认登录状态…",
+  "auth.login.brandTag": "简历到 offer",
+  "auth.login.hint": "内部版本，需要邀请码。每个人登录后用的是自己独立的简历与岗位数据，互不可见。",
+  "auth.login.requiredInvite": "请填写邀请码",
+  "auth.login.requiredEmail": "请填写邮箱",
+  "auth.login.requiredPassword": "请填写密码",
+  "auth.login.failed": "操作失败",
 } as const;
 
 export default common;

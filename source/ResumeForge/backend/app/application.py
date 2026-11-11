@@ -187,6 +187,13 @@ async def lifespan(_app: FastAPI):
         ensure_sqlite_columns(bind, SQLITE_REQUIRED_COLUMNS)
     run_database_migrations(bind)
     # WAL 截断与统计刷新都可能因并发读者失败：维护是保险不是门槛，绝不阻断启动。
+    # 账号层：建 auth.db、确保演示邀请码存在。失败不阻断启动（本地单机用法不需要登录）。
+    try:
+        from .auth import ensure_auth_ready
+
+        ensure_auth_ready()
+    except Exception:  # noqa: BLE001
+        startup_logger.warning("账号体系初始化失败（按单机模式继续）", exc_info=True)
     startup_logger.info("启动自检：SQLite 例行维护")
     try:
         run_sqlite_maintenance(bind)
@@ -411,6 +418,44 @@ def _frontend_dist_dir() -> Path:
 def create_app() -> FastAPI:
     """创建并装配应用；保留工厂便于离线测试和未来多实例部署。"""
     app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
+    # 账号层：每个请求先解析 cookie，把「当前用户 + 他的库工厂」放进上下文；
+    # 请求结束必须清空，否则同一线程复用时会串到下一个用户的库。
+    @app.middleware("http")
+    async def _bind_user_context(request: Request, call_next):
+        from .auth import resolve_request_user, set_current_user
+
+        try:
+            set_current_user(resolve_request_user(request))
+        except Exception:  # noqa: BLE001 - 身份解析失败按未登录处理，不阻断请求
+            set_current_user(None)
+        # 托管模式：未登录只能读。判据放在这里而不是每条路由上——
+        # 431 条路由逐个加依赖一定会漏，而"漏掉一条写接口"就是陌生人能改演示数据。
+        try:
+            from .auth.routes import require_login
+
+            if (
+                require_login()
+                and request.method in {"POST", "PUT", "PATCH", "DELETE"}
+                and request.url.path.startswith("/api/")
+                and not request.url.path.startswith("/api/auth/")
+                and request.url.path != "/api/health"
+            ):
+                from .auth.context import current_user
+
+                if current_user() is None:
+                    from fastapi.responses import JSONResponse
+
+                    return JSONResponse(
+                        status_code=401,
+                        content={"detail": "请先登录后再操作"},
+                    )
+        except Exception:  # noqa: BLE001 - 写保护判断失败时不要误伤请求
+            pass
+        try:
+            return await call_next(request)
+        finally:
+            set_current_user(None)
+
     app.add_middleware(DatasetRequestMiddleware)
     app.add_middleware(
         RequestContextMiddleware,

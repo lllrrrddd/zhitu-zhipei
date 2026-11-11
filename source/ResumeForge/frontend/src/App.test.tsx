@@ -119,6 +119,8 @@ describe("application navigation", () => {
     // 页头品牌区展示的必须是同一个值：以 v 开头；说明由 Tooltip 承担（不再是原生
     // title —— 原生 title 只对鼠标可见，功能提示必须让键盘/读屏也能拿到），
     // 所以这里改成悬停后断言气泡文案，比原来检查 title 属性更贴近真实行为。
+    // 登录门先异步确认"要不要登录"，外壳稍后才挂载。
+    await waitFor(() => expect(container.querySelector(".app-main")).not.toBeNull());
     const version = container.querySelector(".app-brand-version");
     expect(version).not.toBeNull();
     expect(version!.textContent).toMatch(/^v/);
@@ -178,6 +180,7 @@ describe("application navigation", () => {
     // 入口的位置契约没变——`GITHUB_REPO` 一填回来，按钮就回到页头右上角、与「关闭应用」并排；
     // 这里钉住的是"留空时不该出现"，而不是把按钮本身删掉。
     expect(GITHUB_REPO).toBe("");
+    await waitFor(() => expect(container.querySelector(".app-header-actions")).not.toBeNull());
     const headerActions = container.querySelector(".app-header-actions");
     expect(headerActions).not.toBeNull();
     expect(headerActions?.querySelector(".app-repo-button")).toBeNull();
@@ -211,6 +214,7 @@ describe("application navigation", () => {
       </MemoryRouter>,
     );
 
+    await waitFor(() => expect(document.querySelector(".app-main")).not.toBeNull());
     const scroller = document.querySelector<HTMLElement>(".app-main");
     expect(scroller).not.toBeNull();
     scroller!.scrollTo = scrollTo;
