@@ -16,14 +16,18 @@ import type { MessageKey } from "./i18n";
  */
 export const APP_NAME_KEY: MessageKey = "appConfig.brand.name";
 /** 英文品牌名（常量口径，不是界面文案；界面上取 `APP_NAME_KEY` 的值）。 */
-export const APP_NAME_EN = "ResumeForge";
+export const APP_NAME_EN = "Zhiyin";
 
 /** 应用版本号（页头品牌区展示，如 "0.17.0"）。 */
 export const APP_VERSION: string = pkg.version;
 
-/** 公开仓库地址可被部署环境覆盖；默认值用于开源发行版的导航入口。 */
-export const GITHUB_REPO =
-  import.meta.env.VITE_GITHUB_REPO?.trim() || "https://github.com/lllrrrddd/zhitu-zhipei";
+/**
+ * 公开仓库地址：**本版留空 = 页头不显示开源入口**（用户要求"GitHub 不显示它"）。
+ *
+ * 留空而不是删掉按钮：`AppHeaderActions` 用 `GITHUB_REPO &&` 判断是否渲染，
+ * 部署方仍可用 `VITE_GITHUB_REPO` 环境变量把它打开，代码不必二次改动。
+ */
+export const GITHUB_REPO = import.meta.env.VITE_GITHUB_REPO?.trim() || "";
 
 /**
  * JD/招聘原文类文本输入的统一硬上限（字符数）。

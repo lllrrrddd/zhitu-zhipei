@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="职引">
+  <defs>
+    <linearGradient id="zy-mark-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12A89A" />
+      <stop offset="1" stop-color="#0B6F66" />
+    </linearGradient>
+  </defs>
+  <!-- 底：青绿渐变圆角方块 -->
+  <rect x="3" y="3" width="58" height="58" rx="17" fill="url(#zy-mark-bg)" />
+  <!-- 路径：从左下走到右上，表示"从简历到 offer"这一段路 -->
+  <path
+    d="M20 45c0-9 6-13 12-15s9-5 9-10"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="5"
+    stroke-linecap="round"
+  />
+  <!-- 终点：珊瑚色圆点，视线落点也是"目标岗位" -->
+  <circle cx="43" cy="18" r="5.5" fill="#F07A4A" />
+</svg>

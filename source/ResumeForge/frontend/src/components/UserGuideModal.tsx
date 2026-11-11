@@ -11,7 +11,7 @@ import { App as AntdApp, Button, Divider, Modal, Space, Steps, Typography } from
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 // 从 src/assets 导入本项目标识，让 Vite 按部署 base 重写路径。
-import brandIcon from "../assets/zt-zhipei-mark.svg";
+import brandIcon from "../assets/zhiyin-mark.svg";
 import { loadSampleDataset } from "../api/settings";
 import { t } from "../i18n";
 import { useLocale } from "../i18n/i18nContext";

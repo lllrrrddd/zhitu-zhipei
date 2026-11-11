@@ -65,7 +65,7 @@ import {
 import { UserGuideModal } from "../../pages/modals";
 import { setUserGuideVisible } from "../../utils/userGuide";
 // 侧栏使用本项目标识；从 src/assets 导入以便 Vite 按部署 base 重写路径。
-import brandIcon from "../../assets/zt-zhipei-mark.svg";
+import brandIcon from "../../assets/zhiyin-mark.svg";
 // 投投宣传图（透明底抠图）：GitHub Star 提示弹窗用。
 
 /** 首屏预热：起始延迟、每批 chunk 数与空闲调度参数。 */

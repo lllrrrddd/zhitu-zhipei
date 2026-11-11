@@ -53,7 +53,7 @@ describe("guide entry", () => {
     await screen.findByText(STUB_CAREER);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
-    expect(await screen.findByRole("dialog", { name: "欢迎使用职途智配" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "欢迎使用职引" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "稍后查看" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     firstRender.unmount();
@@ -68,7 +68,7 @@ describe("guide entry", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "使用指南" }));
-    expect(await screen.findByRole("dialog", { name: "欢迎使用职途智配" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "欢迎使用职引" })).toBeInTheDocument();
   });
 });
 
@@ -166,7 +166,7 @@ describe("application navigation", () => {
     expect(space.compareDocumentPosition(avatar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("keeps the open-source link in the header actions, not in the sidebar footer", async () => {
+  it("本版不展示开源入口：页头与页脚都没有 GitHub 按钮", async () => {
     window.localStorage.setItem("resumeforge.user-guide.seen", "1");
     const { container } = render(
       <MemoryRouter>
@@ -174,25 +174,16 @@ describe("application navigation", () => {
       </MemoryRouter>,
     );
 
-    // 入口走过三个位置：页头右上角的一行文字（太抢注意力）→ 侧栏左下角图标（要找到底部）
-    // → 页头右上角图标（与「退出」并排，符合"关于本项目"这类入口的习惯）。
-    // 这条断言钉住的是**位置**，不是"存在"——只断言存在的话，挪到哪里都能过。
+    // 产品决定（2026-11-11）：这个版本对外不露出开源仓库入口。
+    // 入口的位置契约没变——`GITHUB_REPO` 一填回来，按钮就回到页头右上角、与「关闭应用」并排；
+    // 这里钉住的是"留空时不该出现"，而不是把按钮本身删掉。
+    expect(GITHUB_REPO).toBe("");
     const headerActions = container.querySelector(".app-header-actions");
     expect(headerActions).not.toBeNull();
-    const repoLink = headerActions?.querySelector(".app-repo-button");
-    expect(repoLink).not.toBeNull();
-    expect(repoLink).toHaveAttribute("href", GITHUB_REPO);
-    expect(repoLink).toHaveAttribute("aria-label", `在 GitHub 上查看 ${t(APP_NAME_KEY)} 源码`);
-    // 页头里必须和「关闭应用」并排，且页脚不再有第二个源码入口。
-    expect(headerActions?.textContent).toContain(t("common.exitApp.aria"));
-    expect(headerActions?.querySelector(".app-exit-button")).not.toBeNull();
+    expect(headerActions?.querySelector(".app-repo-button")).toBeNull();
     expect(container.querySelector(".app-sider-footer .app-repo-button")).toBeNull();
-
-    // 点击除直跳仓库外，还要弹出 Star 提示（Modal 挂在 document.body 上）。
-    fireEvent.click(repoLink!);
-    expect(await screen.findByText(/点一个 Star/)).toBeInTheDocument();
-    // 带 href 的 antd Button 渲染成 <a>，角色是 link。
-    expect(screen.getByRole("link", { name: "去点 Star" })).toHaveAttribute("href", GITHUB_REPO);
+    // 「关闭应用」仍然在页头：它和仓库入口不是一回事。
+    expect(headerActions?.querySelector(".app-exit-button")).not.toBeNull();
   });
 
   it("shows the theme switch in the header actions", async () => {

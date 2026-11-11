@@ -21,17 +21,20 @@ export default function StarPromptModal({ open, onClose }: Props) {
           {t("appConfig.star.title", { name: t("appConfig.brand.name") })}
         </Typography.Title>
         <Typography.Text type="secondary">{t("appConfig.star.body")}</Typography.Text>
-        <div style={{ marginTop: 16 }}>
-          <Button
-            type="primary"
-            href={GITHUB_REPO}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-          >
-            {t("appConfig.star.action")}
-          </Button>
-        </div>
+        {/* 没有配置仓库地址时不给按钮：`href` 为空的链接点了没反应，比不显示更糟。 */}
+        {GITHUB_REPO ? (
+          <div style={{ marginTop: 16 }}>
+            <Button
+              type="primary"
+              href={GITHUB_REPO}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onClose}
+            >
+              {t("appConfig.star.action")}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </Modal>
   );
