@@ -44,7 +44,7 @@ const navigation = {
 
   /** Sidebar brand area and header. */
   "navigation.shell.title": "Zhitu Zhipei",
-  "navigation.shell.brandCaption": "Career agent demo",
+  "navigation.shell.brandCaption": "Resume to offer",
   "navigation.shell.versionTooltip": "Current version",
   "navigation.shell.scrollTop": "Back to top",
   "navigation.shell.collapse": "Collapse sidebar",

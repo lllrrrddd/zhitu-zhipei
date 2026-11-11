@@ -34,6 +34,9 @@ export const darkPalette = {
   surfaceAlt: "#15181d",
   /** 浮起面：下拉、Tooltip、Popover。 */
   surfaceElevated: "#22272f",
+  /** 活力色（与浅色同键）：深色下表头底要"比卡片略亮一点"才看得出分区。 */
+  vividTealSoft: "#1d2f2c",
+  vividCoral: "#f0805a",
   /** 外壳（页头/侧栏）专用底色：比次级面再深一点点，压住边界。 */
   shell: "#171a20",
   /** 正文。 */

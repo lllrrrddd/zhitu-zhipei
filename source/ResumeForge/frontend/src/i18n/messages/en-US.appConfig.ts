@@ -11,8 +11,8 @@
 const appConfig = {
   // ── Brand ───────────────────────────────────────────────────
   /** Single source of truth for the app name (header, document title, star prompt, source link). */
-  "appConfig.brand.name": "ZhiTuZhiPei",
-  "appConfig.brand.legacyNames": "ZhiTuZhiPei|ResumeForge",
+  "appConfig.brand.name": "Zhiyin",
+  "appConfig.brand.legacyNames": "ZhiTuZhiPei|Zhiyin|ResumeForge",
 
   // ── Model presets (fill Base URL and model name) ─────────────
   "appConfig.preset.deepseek": "DeepSeek",

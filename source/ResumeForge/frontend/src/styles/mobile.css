@@ -194,16 +194,15 @@
   }
 }
 
-/* 窄屏提示条：正文与右侧动作按钮并排时，正文被压成竖排。
-   允许换行，让动作按钮掉到下一行——文字读得顺比"省一行高度"重要。 */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+  /* 窄屏提示条：正文与动作按钮并排时，正文会被压成竖排——允许换行，
+     让按钮掉到下一行。文字读得顺比"省一行高度"重要。 */
   .ant-alert {
     flex-wrap: wrap;
     row-gap: 8px;
   }
 
-  /* antd v6 的内容容器是 `.ant-alert-section`（不是 v5 的 content/action）：
-     它被挤到几十像素宽时，正文会变成竖排。给它整行宽度，按钮自然换到下一行。 */
+  /* antd v6 的内容容器是 `.ant-alert-section`（不是 v5 的 content/action）。 */
   .ant-alert .ant-alert-section {
     min-width: 0;
     flex: 1 1 100%;

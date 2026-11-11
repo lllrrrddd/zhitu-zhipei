@@ -22,6 +22,9 @@ export const palette = {
   brandWash: "#f7faff",
   /** 应用底色（侧栏外的主区背景）。 */
   surfaceAlt: "#f6f8fb",
+  /** 活力色（与 design-tokens.css 的 --rf-vivid-* 同值）：表头底、强调面。 */
+  vividTealSoft: "#e4f5f2",
+  vividCoral: "#e2552b",
   /** 卡片白。 */
   surface: "#ffffff",
   /** 一级文字（近黑）。 */

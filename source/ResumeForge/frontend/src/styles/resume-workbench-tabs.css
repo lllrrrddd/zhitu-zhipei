@@ -110,7 +110,7 @@
   left: 0;
   height: 2px;
   border-radius: 1px;
-  background: var(--rf-brand);
+  background: var(--rf-vivid-coral);
   pointer-events: none;
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),

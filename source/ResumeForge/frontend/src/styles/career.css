@@ -205,7 +205,7 @@
   position: relative;
   overflow: hidden;
   padding: 22px 24px;
-  border: 1px solid rgb(22 54 92 / 8%);
+  border: 1px solid var(--rf-border-hero);
   border-radius: 16px;
   background: var(--rf-wash-hero);
 }
@@ -219,7 +219,7 @@
   width: 240px;
   height: 240px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(226 85 43 / 14%), transparent 68%);
+  background: var(--rf-glow-hero);
   pointer-events: none;
 }
 
@@ -229,7 +229,7 @@
   gap: 6px;
   padding: 3px 10px 3px 8px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 78%);
+  background: var(--rf-on-image);
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -293,7 +293,7 @@
 /* 拖拽区：这里是页面唯一"邀请你动手"的地方，给它浅青渐变 + 大圆角 + 彩色图标；
    悬停时底色加深一点、描边变成青绿。虚线保留——它是"可以放进来"的语义。 */
 .career-drop .ant-upload-drag {
-  border: 1.5px dashed rgb(14 147 132 / 35%);
+  border: 1.5px dashed var(--rf-border-accent);
   border-radius: 12px;
   background: linear-gradient(160deg, var(--rf-vivid-teal-soft) 0%, #f7fbfa 100%);
   transition:
@@ -317,7 +317,7 @@
   font-size: 24px;
   color: #fff;
   background: linear-gradient(135deg, var(--rf-vivid-teal) 0%, #12a89a 100%);
-  box-shadow: 0 6px 16px rgb(14 147 132 / 24%);
+  box-shadow: var(--rf-avatar-shadow);
 }
 
 .career-drop .ant-upload-drag-icon {

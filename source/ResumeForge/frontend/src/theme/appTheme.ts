@@ -38,7 +38,8 @@ export const appTheme: ThemeConfig = {
     // 卡片圆角从 16 收到 8：16px 是"营销卡片"的比例，列表页连续多卡时显得松。
     Card: { headerFontSize: 15, headerHeight: 48, borderRadiusLG: 8 },
     Table: {
-      headerBg: palette.surfaceAlt,
+      // 表头淡青：与内容同色时，扫表格找不到"哪里是表头"。
+      headerBg: palette.vividTealSoft,
       headerColor: palette.brand,
       rowHoverBg: palette.brandWash,
       // 选中行底色：原先由 `styles/modules.css` 里一条 `!important` 硬压（审计 §P1-3），

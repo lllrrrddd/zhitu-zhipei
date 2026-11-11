@@ -219,3 +219,25 @@
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: #4a5666;
 }
+
+/* 活力强调色（V2 视觉）在深色下的取值：同色系压暗一档，
+   浅底改成"深底 + 低饱和"，避免深色界面上出现发光的色块。 */
+:root[data-theme="dark"],
+.dark {
+  --rf-vivid-coral: #f0805a;
+  --rf-vivid-coral-soft: #3a221a;
+  --rf-vivid-teal: #2bb3a3;
+  --rf-vivid-teal-soft: #1d2f2c;
+  --rf-vivid-amber: #e0a355;
+  --rf-vivid-amber-soft: #352a1c;
+  --rf-wash-hero: linear-gradient(135deg, #1b2028 0%, #1a2a28 58%, #2b241d 100%);
+  --rf-fill-primary: linear-gradient(135deg, #d1502a 0%, #e57248 100%);
+  --rf-fill-primary-hover: linear-gradient(135deg, #e2603a 0%, #f0855c 100%);
+  --rf-shadow-primary: 0 2px 8px rgb(0 0 0 / 40%);
+  --rf-shadow-card-hover: 0 8px 20px rgb(0 0 0 / 45%);
+  --rf-border-accent: rgb(43 179 163 / 45%);
+  --rf-border-hero: rgb(255 255 255 / 8%);
+  --rf-glow-hero: radial-gradient(circle, rgb(240 128 90 / 12%), transparent 68%);
+  --rf-avatar-shadow: 0 6px 16px rgb(0 0 0 / 45%);
+  --rf-on-image: rgb(255 255 255 / 12%);
+}

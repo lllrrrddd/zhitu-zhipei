@@ -56,8 +56,19 @@
   --rf-vivid-amber-soft: #fdf1e2;
   /* 页头渐变：三段极浅的蓝-青-米，压在白底上只留下一点温度，不抢内容。 */
   --rf-wash-hero: linear-gradient(135deg, #eef4fb 0%, #e8f6f2 58%, #fdf2e8 100%);
-  /* 主按钮渐变：深蓝到偏亮的蓝，悬停时提亮而不是加投影。 */
-  --rf-fill-primary: linear-gradient(135deg, #16365c 0%, #245a8d 100%);
+  /* 主按钮渐变：珊瑚橙。深蓝留给文字与图标——按钮是"要你点"的东西，
+     页面里只该有它一处是暖色，视线自然落上去。 */
+  --rf-fill-primary: linear-gradient(135deg, #e2552b 0%, #f07a4a 100%);
+  --rf-fill-primary-hover: linear-gradient(135deg, #c9481f 0%, #e86a3a 100%);
+  /* 主按钮投影、卡片悬停描边与投影、页头描边与光斑：都收成 token，
+     业务 CSS 里不写字面色（颜色守卫会拦）。 */
+  --rf-shadow-primary: 0 2px 8px rgb(226 85 43 / 22%);
+  --rf-shadow-card-hover: 0 8px 20px rgb(22 54 92 / 8%);
+  --rf-border-accent: rgb(14 147 132 / 35%);
+  --rf-border-hero: rgb(22 54 92 / 8%);
+  --rf-glow-hero: radial-gradient(circle, rgb(226 85 43 / 14%), transparent 68%);
+  --rf-avatar-shadow: 0 6px 16px rgb(14 147 132 / 24%);
+  --rf-on-image: rgb(255 255 255 / 78%);
   /* 求职进度的阶段色（T9）：**随主题变化**，所以只存在于 CSS——`tokens.ts` 不带它们。
      深色对应值见 dark-tokens.css（同名同序）。这六档是"图形/色块"用色，
      对比度门槛 3:1（不是正文的 4.5），实测值见 theme/contrast.test.ts。 */

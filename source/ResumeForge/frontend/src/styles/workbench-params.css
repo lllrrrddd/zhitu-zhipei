@@ -84,6 +84,8 @@
   min-height: 0;
   overflow: hidden;
   border-right: 0;
+  /* 画布区退成浅灰蓝：中间的"纸"是白的，底必须比纸暗一档，否则看不出边界。 */
+  background: var(--rf-surface-alt);
 }
 
 /* ===== 分隔条（拖动改宽） ===== */

@@ -37,14 +37,35 @@
   border-color: transparent;
 }
 
-/* 主按钮：深蓝→亮蓝的轻渐变，悬停提亮。比纯色更有质感，也不至于像"营销按钮"。 */
+/* antd-override: 私有形态 —— 主按钮要"暖色渐变 + 同色系投影"，antd 的 token
+   只能给实色背景与通用阴影，渐变与色系投影没有对应 token，所以在这一层覆写。 */
+/* 主按钮：珊瑚→浅橘的轻渐变，悬停加深。页面里只有它在用暖色，视线自然落上去。 */
 .ant-btn-primary:not(:disabled) {
   background-image: var(--rf-fill-primary);
   border-color: transparent;
 }
 
+/* antd-override: 私有形态 —— 悬停态要用更深的暖色渐变（无对应 token）。 */
 .ant-btn-primary:not(:disabled):hover {
-  background-image: linear-gradient(135deg, #1c4677 0%, #2f6aa3 100%);
+  background-image: var(--rf-fill-primary-hover);
+}
+
+/* 主按钮的投影也换成珊瑚色，让它"浮"在自己的色系里，而不是压一圈黑灰。 */
+.ant-btn-primary:not(:disabled) {
+  box-shadow: var(--rf-shadow-primary);
+}
+
+/* antd-override: 私有形态 —— 页签选中条与选中文字要跟品牌暖色一致；
+   antd 的 colorPrimary 控制的是全站链接色（导航、文本链），这里不能动，
+   所以只覆写页签这两处内部类。 */
+/* 页签选中条：珊瑚色。深蓝的下划线在浅底上偏"系统默认"，暖色更像产品自己的语言。 */
+.ant-tabs-ink-bar {
+  background: var(--rf-vivid-coral);
+}
+
+/* antd-override: 私有形态 —— 选中页签的文字色跟暖色一致（colorPrimary 管全站链接，不能动）。 */
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--rf-vivid-coral);
 }
 
 /* 列表卡悬停：上浮 2px + 淡影。只在有指针的设备上做，触屏不跟着"跳"。 */
@@ -62,11 +83,13 @@
   .career-start-grid .ant-card:hover,
   .career-results-grid .ant-card:hover {
     transform: translateY(-2px);
-    border-color: rgb(14 147 132 / 35%);
-    box-shadow: 0 8px 20px rgb(22 54 92 / 8%);
+    border-color: var(--rf-border-accent);
+    box-shadow: var(--rf-shadow-card-hover);
   }
 }
 
+/* antd-override: 私有形态 —— 卡片标题左侧的 3px 色条是纯装饰，antd 的
+   Card token 没有伪元素位，只能用 ::before 画在标题容器上。 */
 /* 卡片标题：左侧 3px 色条 + 14px/600。纯文字标题在浅底上会"飘"，色条给一个锚点。 */
 .ant-card-head-title {
   position: relative;
@@ -75,6 +98,7 @@
   font-weight: 600;
 }
 
+/* antd-override: 私有形态 —— 标题前的装饰色条只能画在伪元素上。 */
 .ant-card-head-title::before {
   content: "";
   position: absolute;

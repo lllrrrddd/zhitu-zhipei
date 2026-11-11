@@ -46,7 +46,7 @@ const navigation = {
 
   /** 侧栏品牌区与页头。 */
   "navigation.shell.title": "职途智配",
-  "navigation.shell.brandCaption": "就业智能体原型",
+  "navigation.shell.brandCaption": "简历到 offer",
   "navigation.shell.versionTooltip": "当前版本",
   "navigation.shell.scrollTop": "回到当前页面顶部",
   "navigation.shell.collapse": "收起侧栏",
