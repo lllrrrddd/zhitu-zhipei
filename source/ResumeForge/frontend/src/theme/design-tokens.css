@@ -69,6 +69,9 @@
   --rf-glow-hero: radial-gradient(circle, rgb(226 85 43 / 14%), transparent 68%);
   --rf-avatar-shadow: 0 6px 16px rgb(14 147 132 / 24%);
   --rf-on-image: rgb(255 255 255 / 78%);
+  /* 上传拖拽区的底：浅色是浅青渐变，深色必须换成深底（否则深色页里出现一块白板）。 */
+  --rf-drop-bg: linear-gradient(160deg, #e4f5f2 0%, #f7fbfa 100%);
+  --rf-drop-bg-hover: linear-gradient(160deg, #d7f0ec 0%, #f2faf8 100%);
   /* 求职进度的阶段色（T9）：**随主题变化**，所以只存在于 CSS——`tokens.ts` 不带它们。
      深色对应值见 dark-tokens.css（同名同序）。这六档是"图形/色块"用色，
      对比度门槛 3:1（不是正文的 4.5），实测值见 theme/contrast.test.ts。 */

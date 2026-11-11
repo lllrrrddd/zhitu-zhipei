@@ -237,7 +237,9 @@
   --rf-shadow-card-hover: 0 8px 20px rgb(0 0 0 / 45%);
   --rf-border-accent: rgb(43 179 163 / 45%);
   --rf-border-hero: rgb(255 255 255 / 8%);
-  --rf-glow-hero: radial-gradient(circle, rgb(240 128 90 / 12%), transparent 68%);
+  --rf-glow-hero: radial-gradient(circle, rgb(240 128 90 / 7%), transparent 62%);
   --rf-avatar-shadow: 0 6px 16px rgb(0 0 0 / 45%);
   --rf-on-image: rgb(255 255 255 / 12%);
+  --rf-drop-bg: linear-gradient(160deg, #182623 0%, #151b21 100%);
+  --rf-drop-bg-hover: linear-gradient(160deg, #1d302c 0%, #182028 100%);
 }

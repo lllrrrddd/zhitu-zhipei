@@ -295,7 +295,7 @@
 .career-drop .ant-upload-drag {
   border: 1.5px dashed var(--rf-border-accent);
   border-radius: 12px;
-  background: linear-gradient(160deg, var(--rf-vivid-teal-soft) 0%, #f7fbfa 100%);
+  background: var(--rf-drop-bg);
   transition:
     border-color 0.16s ease,
     background 0.16s ease;
@@ -303,7 +303,7 @@
 
 .career-drop .ant-upload-drag:hover {
   border-color: var(--rf-vivid-teal);
-  background: linear-gradient(160deg, #d7f0ec 0%, #f2faf8 100%);
+  background: var(--rf-drop-bg-hover);
 }
 
 /* 上传图标做成品牌色的圆形徽标，而不是一枚灰色线稿。 */
