@@ -44,7 +44,8 @@ export function register(input: {
   account: string;
   password: string;
   displayName: string;
-  invite: string;
+  /** 可选：留空即开放注册，填了必须有效。 */
+  invite?: string;
 }): Promise<{ user: AuthUser }> {
   return call("/register", {
     method: "POST",
@@ -52,7 +53,7 @@ export function register(input: {
       account: input.account,
       password: input.password,
       display_name: input.displayName,
-      invite: input.invite,
+      invite: input.invite ?? "",
     }),
   });
 }

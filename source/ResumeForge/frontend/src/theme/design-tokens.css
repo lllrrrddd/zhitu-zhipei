@@ -70,6 +70,10 @@
   --rf-avatar-shadow: 0 6px 16px rgb(14 147 132 / 24%);
   --rf-on-image: rgb(255 255 255 / 78%);
   /* 上传拖拽区的底：浅色是浅青渐变，深色必须换成深底（否则深色页里出现一块白板）。 */
+  /* 登录页背景的三团缓慢漂移的光斑：颜色同品牌三档，但只在这里用低透明度。 */
+  --rf-aurora-a: rgb(14 147 132 / 26%);
+  --rf-aurora-b: rgb(226 85 43 / 20%);
+  --rf-aurora-c: rgb(201 118 26 / 16%);
   --rf-auth-dots: radial-gradient(circle at 1px 1px, rgb(22 54 92 / 6%) 1px, transparent 0) 0 0
     / 22px 22px;
   --rf-auth-panel: radial-gradient(circle at 78% 8%, rgb(240 128 90 / 26%), transparent 42%),

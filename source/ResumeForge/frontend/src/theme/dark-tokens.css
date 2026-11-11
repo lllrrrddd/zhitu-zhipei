@@ -240,6 +240,9 @@
   --rf-glow-hero: radial-gradient(circle, rgb(240 128 90 / 7%), transparent 62%);
   --rf-avatar-shadow: 0 6px 16px rgb(0 0 0 / 45%);
   --rf-on-image: rgb(255 255 255 / 12%);
+  --rf-aurora-a: rgb(43 179 163 / 22%);
+  --rf-aurora-b: rgb(240 128 90 / 18%);
+  --rf-aurora-c: rgb(224 163 85 / 14%);
   --rf-auth-dots: radial-gradient(circle at 1px 1px, rgb(255 255 255 / 5%) 1px, transparent 0) 0 0
     / 22px 22px;
   --rf-auth-panel: radial-gradient(circle at 82% 12%, rgb(240 128 90 / 30%), transparent 46%),

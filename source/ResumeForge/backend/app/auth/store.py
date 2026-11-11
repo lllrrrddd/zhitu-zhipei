@@ -175,9 +175,13 @@ def _row_to_user(row: sqlite3.Row) -> User:
 
 
 def register_user(
-    db_path: Path, account: str, password: str, display_name: str, invite_code: str
+    db_path: Path, account: str, password: str, display_name: str, invite_code: str = ""
 ) -> User:
-    """用邀请码注册。邀请码一次性：成功注册即标记 used（失败的尝试不消耗）。
+    """注册账号。
+
+    ``invite_code`` 现在**可选**：留空就是开放注册（产品已改成"注册就能用"）；
+    填了就必须有效——邀请码仍然是一次性的，成功注册才标记 used，失败的尝试不消耗。
+    这样既能开放注册，也能在需要的场合用邀请码限流，不必改代码。
 
     ``account`` 是用户填的"邮箱或手机号"，注册时按类型分别落到 email / phone 列。
     手机号注册的用户 email 存空串（老表 email 是 NOT NULL，空串可重复）。
@@ -190,11 +194,13 @@ def register_user(
     code = invite_code.strip().upper()
 
     with _connect(db_path) as conn:
-        invite = conn.execute("SELECT * FROM invites WHERE code = ?", (code,)).fetchone()
-        if invite is None:
-            raise ValueError("邀请码无效")
-        if invite["used_by"] is not None:
-            raise ValueError("邀请码已被使用")
+        invite = None
+        if code:
+            invite = conn.execute("SELECT * FROM invites WHERE code = ?", (code,)).fetchone()
+            if invite is None:
+                raise ValueError("邀请码无效")
+            if invite["used_by"] is not None:
+                raise ValueError("邀请码已被使用")
         if kind == "email":
             taken = conn.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone()
         else:
@@ -208,10 +214,11 @@ def register_user(
             (email, phone, hash_password(password), display_name.strip(), _now_iso()),
         )
         user_id = int(cursor.lastrowid)
-        conn.execute(
-            "UPDATE invites SET used_by = ?, used_at = ? WHERE code = ?",
-            (user_id, _now_iso(), code),
-        )
+        if invite is not None:
+            conn.execute(
+                "UPDATE invites SET used_by = ?, used_at = ? WHERE code = ?",
+                (user_id, _now_iso(), code),
+            )
         row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
     return _row_to_user(row)

@@ -91,7 +91,7 @@ class RegisterRequest(BaseModel):
     account: str = Field(max_length=254)
     password: str = Field(min_length=1, max_length=200)
     display_name: str = Field(default="", max_length=60)
-    invite: str = Field(max_length=32)
+    invite: str = Field(default="", max_length=32)
 
 
 class LoginRequest(BaseModel):

@@ -4,12 +4,93 @@
 /* 移动优先：默认竖排（品牌条在上、表单在下）。宽屏才在下面切成左右两栏——
    反过来写（默认横排、窄屏再改竖排）会在窄屏漏掉 flex 方向，卡片被挤出屏幕。 */
 .auth-gate {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   min-height: 100vh;
+  overflow: hidden;
   /* 底：三层极浅的蓝-青-米，比纯白有温度；再叠一层网格点，避免大面积纯色显空。 */
   background: var(--rf-auth-dots), var(--rf-wash-hero);
+}
+
+/* ── 背景：三团漂移光斑 ────────────────────────────────────────
+   静态渐变看久了像"一张图"，加三团极慢的位移就有了呼吸感。
+   动效刻意做得很慢（26–34s 一个来回）、幅度只占屏宽的 6–10%：
+   快到能看见"在动"、慢到不会在打字时分心。 */
+
+.auth-aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-blob {
+  position: absolute;
+  display: block;
+  width: 44vmax;
+  height: 44vmax;
+  border-radius: 50%;
+  filter: blur(64px);
+  will-change: transform;
+}
+
+.auth-blob-a {
+  top: -14vmax;
+  left: 38%;
+  background: var(--rf-aurora-a);
+  animation: auth-drift-a 28s ease-in-out infinite alternate;
+}
+
+.auth-blob-b {
+  right: -12vmax;
+  bottom: -16vmax;
+  background: var(--rf-aurora-b);
+  animation: auth-drift-b 34s ease-in-out infinite alternate;
+}
+
+.auth-blob-c {
+  left: -16vmax;
+  bottom: 6vmax;
+  width: 34vmax;
+  height: 34vmax;
+  background: var(--rf-aurora-c);
+  animation: auth-drift-c 31s ease-in-out infinite alternate;
+}
+
+@keyframes auth-drift-a {
+  from {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 4%, 0) scale(1.08);
+  }
+}
+
+@keyframes auth-drift-b {
+  from {
+    transform: translate3d(3%, 3%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+@keyframes auth-drift-c {
+  from {
+    transform: translate3d(-3%, 2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(5%, -5%, 0) scale(1.1);
+  }
+}
+
+/* 系统里开了"减少动态效果"就完全停掉：有人会因为位移头晕。 */
+@media (prefers-reduced-motion: reduce) {
+  .auth-blob {
+    animation: none;
+  }
 }
 
 .auth-gate-loading {
@@ -22,6 +103,7 @@
 
 .auth-panel {
   position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   overflow: hidden;
   padding: 18px 20px;
@@ -110,6 +192,8 @@
 /* ── 右侧表单卡 ───────────────────────────────────────────────── */
 
 .auth-card {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;

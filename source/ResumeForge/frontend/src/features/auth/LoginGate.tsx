@@ -67,7 +67,6 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
               account: values.account ?? "",
               password: values.password ?? "",
               displayName: values.displayName ?? "",
-              invite: values.invite ?? "",
             });
       setUser(result.user);
     } catch (err) {
@@ -87,6 +86,13 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="auth-gate">
+      {/* 背景的三团缓慢漂移光斑：纯装饰，读屏与键盘都跳过。 */}
+      <div className="auth-aurora" aria-hidden="true">
+        <span className="auth-blob auth-blob-a" />
+        <span className="auth-blob auth-blob-b" />
+        <span className="auth-blob auth-blob-c" />
+      </div>
+
       <aside className="auth-panel">
         <div className="auth-panel-inner">
           <div className="auth-panel-brand">
@@ -99,7 +105,6 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
             <li>{t("auth.brand.point2")}</li>
             <li>{t("auth.brand.point3")}</li>
           </ul>
-          <p className="auth-panel-footnote">{t("auth.brand.footnote")}</p>
         </div>
       </aside>
 
@@ -128,17 +133,6 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
                   autoComplete="nickname"
                 />
               </Form.Item>
-              <Form.Item
-                name="invite"
-                label={t("auth.login.invite")}
-                rules={[{ required: true, message: t("auth.login.requiredInvite") }]}
-              >
-                <Input
-                  placeholder={t("auth.login.invitePlaceholder")}
-                  autoComplete="off"
-                  inputMode="numeric"
-                />
-              </Form.Item>
             </>
           )}
 
@@ -146,7 +140,7 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
             <Form.Item
               name="code"
               label={t("auth.login.resetCode")}
-              rules={[{ required: true, message: t("auth.login.requiredInvite") }]}
+              rules={[{ required: true, message: t("auth.login.requiredCode") }]}
             >
               <Input
                 placeholder={t("auth.login.resetCodePlaceholder")}
@@ -161,7 +155,7 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
             label={t("auth.login.email")}
             rules={[{ required: true, message: t("auth.login.requiredEmail") }]}
           >
-            <Input placeholder={t("auth.login.accountPlaceholder")} autoComplete="username" />
+            <Input autoComplete="username" />
           </Form.Item>
 
           {mode === "reset" ? (
