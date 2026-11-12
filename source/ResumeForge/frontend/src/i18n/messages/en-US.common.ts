@@ -116,6 +116,7 @@ const common = {
   "auth.brand.point3": "Application tracking: one record per application",
   "auth.brand.footnote": "Every account keeps its own data; nobody sees anyone else's",
   "auth.login.requiredCode": "Enter the reset code",
+  "auth.login.serverError": "Service is unavailable, please retry shortly",
 } as const;
 
 export default common;

@@ -94,16 +94,45 @@ def init_auth_db(db_path: Path) -> None:
 
 
 def _migrate_users_table(conn: sqlite3.Connection) -> None:
-    """老库兼容：补 `phone` 列。
+    """把老库的 users 表升级到"邮箱与手机号二选一"的形态。
 
-    SQLite 不支持"把 NOT NULL 改成可空"，但**保留 email NOT NULL 也没关系**——
-    手机号注册的用户把 email 写成空字符串即可（唯一索引允许多个空串），
-    查询时按"空串不算邮箱"处理。这样不必重建表，也就不用搬数据。
+    老表的 email 是 ``NOT NULL UNIQUE``。手机号用户只能拿空串占位，**第二个手机号用户
+    就会撞上"空串唯一"**（线上真炸过：`UNIQUE constraint failed: users.email`）。
+    SQLite 又不能 ALTER 掉 NOT NULL，只能重建表：
+
+    1. 新建 email 可空的表；
+    2. 把老数据搬过去（空串 email 变成 NULL，这样多行 NULL 不互斥）；
+    3. 删旧表、改名、补唯一索引。
+
+    整个过程在一个事务里，失败就是没发生。
     """
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)")}
+    info = list(conn.execute("PRAGMA table_info(users)"))
+    columns = {row["name"] for row in info}
+    email_notnull = any(row["name"] == "email" and row["notnull"] for row in info)
+
     if "phone" not in columns:
         conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
         conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone)")
+
+    if not email_notnull:
+        return
+
+    conn.executescript(
+        """
+        CREATE TABLE users_new (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            email         TEXT UNIQUE,
+            phone         TEXT UNIQUE,
+            password_hash TEXT NOT NULL,
+            display_name  TEXT NOT NULL DEFAULT '',
+            created_at    TEXT NOT NULL
+        );
+        INSERT INTO users_new (id, email, phone, password_hash, display_name, created_at)
+        SELECT id, NULLIF(email, ''), phone, password_hash, display_name, created_at FROM users;
+        DROP TABLE users;
+        ALTER TABLE users_new RENAME TO users;
+        """
+    )
 
 
 def hash_password(password: str) -> str:
@@ -187,7 +216,8 @@ def register_user(
     手机号注册的用户 email 存空串（老表 email 是 NOT NULL，空串可重复）。
     """
     kind, value = parse_account(account)
-    email = value if kind == "email" else ""
+    # 手机号注册：email 存 NULL。存空串会让第二个手机号用户撞上"空串唯一约束"。
+    email = value if kind == "email" else None
     phone = value if kind == "phone" else None
     if len(password) < 8:
         raise ValueError("密码至少 8 位")
@@ -208,11 +238,16 @@ def register_user(
         if taken:
             raise ValueError("这个账号已经注册过了")
 
-        cursor = conn.execute(
-            "INSERT INTO users (email, phone, password_hash, display_name, created_at)"
-            " VALUES (?, ?, ?, ?, ?)",
-            (email, phone, hash_password(password), display_name.strip(), _now_iso()),
-        )
+        try:
+            cursor = conn.execute(
+                "INSERT INTO users (email, phone, password_hash, display_name, created_at)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (email, phone, hash_password(password), display_name.strip(), _now_iso()),
+            )
+        except sqlite3.IntegrityError as exc:
+            # 并发注册同一账号时，前面的 SELECT 可能都查不到；这里兜住唯一约束，
+            # 报"已注册过"（400），而不是让用户看到 500。
+            raise ValueError("这个账号已经注册过了") from exc
         user_id = int(cursor.lastrowid)
         if invite is not None:
             conn.execute(

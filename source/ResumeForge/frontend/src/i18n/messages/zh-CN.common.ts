@@ -114,6 +114,7 @@ const common = {
   "auth.brand.point3": "投递跟进：一次投递一条记录，进度不再靠记忆",
   "auth.brand.footnote": "每个账号的数据各自独立，互不可见",
   "auth.login.requiredCode": "请填写重置码",
+  "auth.login.serverError": "服务暂时不可用，请稍后重试",
 } as const;
 
 export default common;

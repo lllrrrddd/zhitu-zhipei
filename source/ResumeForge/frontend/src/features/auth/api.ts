@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Auth API: same-origin cookie session; the client never handles tokens.
+import { t } from "../../i18n";
 
-// SPDX-License-Identifier: Apache-2.0
+
 /** 账号接口：同源 cookie 会话，前端不需要处理 token。 */
 
 export interface AuthUser {
@@ -19,6 +20,11 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const text = await resp.text();
   const data = text ? (JSON.parse(text) as unknown) : null;
   if (!resp.ok) {
+    // 5xx 的 detail 常常是框架默认文案（"请查看后端日志"那类），对用户没有意义；
+    // 统一换成"稍后再试"，具体原因留在后端日志里。
+    if (resp.status >= 500) {
+      throw new Error(t("auth.login.serverError"));
+    }
     const detail =
       data && typeof data === "object" && "detail" in data
         ? String((data as { detail: unknown }).detail)
