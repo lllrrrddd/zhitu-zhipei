@@ -29,7 +29,8 @@
     "smoke:headed": "playwright test --headed",
     "format": "prettier --write src vite.config.ts vitest.config.ts eslint.config.js package.json index.html",
     "format:check": "prettier --check src vite.config.ts vitest.config.ts eslint.config.js package.json index.html",
-    "smoke:ui": "node scripts/smoke-ui.mjs"
+    "smoke:ui": "node scripts/smoke-ui.mjs",
+    "audit:features": "node scripts/feature-audit.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",

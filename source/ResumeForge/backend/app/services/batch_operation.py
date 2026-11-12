@@ -12,6 +12,7 @@ import json
 import logging
 from typing import Any, Literal, overload
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..models.profile import utcnow
@@ -137,12 +138,24 @@ def _save_section(
     payload = _read_payload(db)
     payload[section] = {**config.model_dump(), "updated_at": utcnow().isoformat()}
     serialized = json.dumps(payload, ensure_ascii=False)
+    # 幂等写入：页面上切页签会连着发 PUT（甚至两个请求并行），"先查后插"在这种
+    # 情况下会双双查到空、双双插入，第二个直接撞主键（线上见过：
+    # `UNIQUE constraint failed: app_setting.key`）。这里撞了就回滚重读再改成更新。
     row = db.get(AppSetting, _KEY)
-    if row is None:
-        db.add(AppSetting(key=_KEY, value=serialized))
-    else:
+    if row is not None:
         row.value = serialized
-    db.commit()
+        db.commit()
+    else:
+        try:
+            db.add(AppSetting(key=_KEY, value=serialized))
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            row = db.get(AppSetting, _KEY)
+            if row is None:
+                raise
+            row.value = serialized
+            db.commit()
     if section == "generation":
         return _section_out(payload["generation"], BatchGenerationConfig, BatchGenerationConfigOut)
     return _section_out(payload["export"], BatchExportConfig, BatchExportConfigOut)
