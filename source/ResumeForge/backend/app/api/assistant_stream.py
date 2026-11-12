@@ -299,6 +299,19 @@ async def _stream_message_events(
         update_message_context(assistant_message_id, dict(assistant_context), factory=factory)
 
         content = "".join(parts)
+        # 有的本地模型（实测 zt-zhipei-qwen3.5:4b-cpu）把整段回答写进 reasoning，
+        # content 只回一两个字——用户在界面上看到的是一句"投投"这样的残句。
+        # 这种情况用它实际写出来的内容兜住，并在日志里留痕，而不是把残句当答案。
+        if len(content.strip()) < 8 and reasoning_parts:
+            fallback = "".join(reasoning_parts).strip()
+            if len(fallback) > len(content.strip()):
+                logger.warning(
+                    "模型正文过短（%d 字），改用思考内容作答（%d 字）：请检查模型是否把回答写进了 reasoning",
+                    len(content.strip()),
+                    len(fallback),
+                )
+                content = fallback
+                yield format_sse({"type": "delta", "text": fallback})
         if not content.strip():
             if tool_records:
                 # 只调了工具、没输出正文：把做过的事说清楚，而不是报错。
