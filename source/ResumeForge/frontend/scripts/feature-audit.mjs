@@ -25,6 +25,20 @@ const RESUME = args.get("resume") ?? "";
 const SHOTS = args.get("shots") ?? "";
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
+/** 语言是服务端持久化设置：跑测试前钉死中文，避免上一轮的英文残留把选择器全废掉。 */
+async function setLocale(target) {
+  await page.evaluate(async (locale) => {
+    await fetch("/api/settings/locale", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+    });
+  }, target);
+  await page.reload({ waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+}
+
+
 const results = [];
 const browser = await chromium.launch({ channel: "chrome", args: ["--no-sandbox"] });
 const context = await browser.newContext({ viewport: { width: 1440, height: 1200 } });
@@ -111,6 +125,8 @@ if (await page.locator(".auth-card").count()) {
     exit(1);
   }
 }
+
+await setLocale("zh-CN");
 
 // ── 探针清单 ────────────────────────────────────────────────────────────
 
