@@ -171,53 +171,114 @@ if (want("backup")) {
         break;
       }
     }
-    // 按钮文案可能是「导出」也可能带空格（"导 出"），用包含匹配
-    const exp = page.locator('.app-main button:has-text("导出")').first();
-    if (!(await exp.count())) throw new Error("数据页没有「导出」按钮");
-    const wait = page.waitForEvent("download", { timeout: 90_000 }).catch(() => null);
-    await exp.click();
-    await page.waitForTimeout(2000);
-    const confirm = page.getByRole("button", { name: /导出|确定/ }).last();
-    if (await confirm.count()) await confirm.click().catch(() => {});
+    // 「导出」是下拉：必须先选「导出当前数据集」，再在弹窗里确认
+    const trigger = page.locator('.app-main button:has-text("导出")').first();
+    if (!(await trigger.count())) throw new Error("数据页没有「导出」入口");
+    await trigger.click();
+    await page.waitForTimeout(1000);
+    const item = page.locator(".ant-dropdown-menu-item").first();
+    if (!(await item.count())) throw new Error("「导出」下拉没有菜单项");
+    await item.click();
+    await page.waitForTimeout(1500);
+    // 确认按钮是「导 出」（中间有空格），用正则匹配，别用包含匹配
+    const confirm = page.getByRole("button", { name: /^导\s*出$/ }).last();
+    if (!(await confirm.count())) throw new Error("导出弹窗里没有确认按钮");
+    const wait = page.waitForEvent("download", { timeout: 120_000 }).catch(() => null);
+    await confirm.click();
     const dl = await wait;
-    if (!dl) {
-      throw new Error(
-        "导出没有产生浏览器下载：接口只调了 export-save-location（写到服务端目录），局域网/远程用户拿不到文件",
-      );
-    }
+    if (!dl) throw new Error("点了确认但没有产生下载");
     return `下载 ${dl.suggestedFilename()}`;
   });
 }
 
 // ── 面试一轮 ────────────────────────────────────────────────────────────
 if (want("interview")) {
-  await probe("面试 · 开始并答一轮", async () => {
+  await probe("面试 · 选材料并答一轮", async () => {
     await goto("/interview");
+    // 材料来源是 Radio.Group（按钮样式 .ant-radio-button-wrapper），
+    // 不是 .ant-radio-wrapper、也不是 Segmented——三种都试过才定下来。
+    const seg = page.locator('.interview-material-source .ant-radio-button-wrapper:has-text("从记录选")');
+    const segCount = await seg.count();
+    if (!segCount) throw new Error("材料来源没有「从记录选」切换项");
+    for (let i = 0; i < segCount; i += 1) {
+      await seg.nth(i).click();
+      await page.waitForTimeout(700);
+    }
+    // 岗位与简历的下拉有稳定 id（jobId / resumeId），比按占位文字点更可靠
+    for (const id of ["jobId", "resumeId"]) {
+      const field = page.locator(`#${id}`).first();
+      if (!(await field.count())) continue;
+      await field.click({ force: true }).catch(() => {});
+      await page.waitForTimeout(1600);
+      const option = page
+        .locator(".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option")
+        .first();
+      if (await option.count()) {
+        await option.click();
+        await page.waitForTimeout(1000);
+      } else {
+        await page.keyboard.press("Escape");
+      }
+    }
     const start = page.getByRole("button", { name: /开始面试/ }).first();
     if (!(await start.count())) throw new Error("没有「开始面试」");
-    if (!(await start.isEnabled())) throw new Error("「开始面试」是置灰的（缺材料/岗位）");
     await start.click();
-    await page.waitForTimeout(4000);
+    await page.waitForTimeout(2500);
+    // 点「开始面试」后还有一道"准备好了吗"的确认（ReadyGate），不点它不会出题
+    const ready = await (async () => {
+      const btns = page.locator("button");
+      const total = await btns.count();
+      for (let i = 0; i < total; i += 1) {
+        const b = btns.nth(i);
+        const label = (await b.innerText().catch(() => "")).replace(/\s+/g, "");
+        if (/^(准备好了|我已准备好|开始作答|确认开始)$/.test(label) && (await b.isVisible().catch(() => false))) {
+          return b;
+        }
+      }
+      return null;
+    })();
+    if (ready) {
+      await ready.click();
+      await page.waitForTimeout(2000);
+    }
     let body = await text();
-    // 等题目出现（模型要时间）
-    for (let i = 0; i < 12; i += 1) {
-      if (/第\s*1\s*题|请先介绍|自我介绍|题目/.test(body)) break;
+    let asked = false;
+    for (let i = 0; i < 18; i += 1) {
+      if (/第\s*1\s*题|请先做个自我介绍|自我介绍|面试题/.test(body) && (await page.locator("textarea").count()) > 0) {
+        asked = true;
+        break;
+      }
       await page.waitForTimeout(5000);
       body = await text();
     }
-    await expect(async () => body.length > 300, "开始面试后没有出现题目内容");
+    await expect(async () => asked, "开始面试后没有出题（可能是没选材料或确认弹窗没点）");
     const answer = page.locator(".app-main textarea").first();
-    if (!(await answer.count())) throw new Error("面试页没有作答输入框");
+    if (!(await answer.count())) throw new Error("没有作答输入框");
     await answer.fill(
-      "我在实习期负责 200 台服务器的自动化巡检，用 Prometheus 重建了告警规则，把误报率从 35% 降到 8%，并写了值班手册交给团队。",
+      "实习时我负责 200 台服务器的自动化巡检，用 Prometheus 重写告警规则，把误报率从 35% 降到 8%。",
     );
-    const submit = page.getByRole("button", { name: /提交|下一题|发送/ }).first();
-    if (!(await submit.count())) throw new Error("没有提交按钮");
+    // 按钮文案可能带空格（"发 送"/"提 交"），按去空白后的文本匹配
+    const submit = await (async () => {
+      const btns = page.locator("button");
+      const total = await btns.count();
+      for (let i = 0; i < total; i += 1) {
+        const b = btns.nth(i);
+        const label = (await b.innerText().catch(() => "")).replace(/\s+/g, "");
+        if (/^(提交|提交回答|发送|发送回答|下一题|继续)$/.test(label)) {
+          if (await b.isVisible().catch(() => false)) return b;
+        }
+      }
+      return null;
+    })();
+    if (!submit) {
+      const labels = (await page.locator("button").allInnerTexts()).map((x) => x.trim()).filter(Boolean);
+      throw new Error(`没有提交按钮；现有：${labels.slice(0, 12).join("/")}`);
+    }
     await submit.click();
-    await page.waitForTimeout(20000);
+    await page.waitForTimeout(25000);
     const after = await text();
     await expect(async () => after.length >= body.length, "提交后内容反而变少");
-    return "题目 → 作答 → 提交，链路通";
+    return "选材料 → 开始 → 作答 → 提交 全通";
   });
 }
 
