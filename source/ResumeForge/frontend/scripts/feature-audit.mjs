@@ -212,26 +212,27 @@ await probe("简历中心 · 导入简历并识别", async () => {
 
 await probe("简历检查 · 四个页签", async () => {
   await goto("/resumes");
-  const first = page.locator('.app-main tbody tr:not([aria-hidden="true"])').first();
-  if (!(await first.count())) throw new Error("没有简历可检查");
-  await first.click();
-  await page.waitForTimeout(1500);
-  const check = page.getByRole("button", { name: /检\s*查/ }).first();
-  if (!(await check.count())) throw new Error("详情页没有「检查」");
+  // 「检查」不在行内动作里，要先点「预览 / 导出」把该行展开
+  const preview = page.getByRole("button", { name: /预览/ }).first();
+  if (!(await preview.count())) throw new Error("列表里没有简历（先建一份）");
+  await preview.click();
+  await page.waitForTimeout(2500);
+  const check = page.locator('button:has-text("检查")').first();
+  if (!(await check.count())) throw new Error("展开后没有「检查」入口");
   await check.click();
-  await page.waitForTimeout(4000);
-  const tabs = page.locator(".ant-modal [role=tab]");
+  await page.waitForTimeout(5000);
+  const tabs = page.locator('.ant-modal [role=tab], .ant-drawer [role=tab]');
   const n = await tabs.count();
-  await expect(async () => n >= 3, `检查弹窗只有 ${n} 个页签`);
+  await expect(async () => n >= 4, `检查弹窗只有 ${n} 个页签`);
   const names = [];
   for (let i = 0; i < n; i += 1) {
     names.push((await tabs.nth(i).innerText()).trim());
     await tabs.nth(i).click();
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(1800);
   }
   await closeDialog();
   return `${n} 个页签：${names.join("/")}`;
-}, { optional: true });
+});
 
 await probe("投递台 · 页签切换", async () => {
   await goto("/apply");
