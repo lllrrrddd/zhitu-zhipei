@@ -126,6 +126,10 @@ const common = {
   "interview.voice.micUnsupported": "This browser cannot transcribe speech; please type",
   "interview.voice.listening": "Listening… it will fill the box; review before sending",
   "interview.voice.failed": "Speech recognition failed (network may be restricted); please type",
+  "interview.voice.transcribing": "Transcribing…",
+  "interview.voice.unavailable": "Local ASR model is not installed; please type (or set ZY_ASR_MODEL_DIR)",
+  "interview.voice.denied": "Microphone permission denied; allow it in the address bar and retry",
+  "interview.voice.tooShort": "Recording too short, please speak then stop",
 } as const;
 
 export default common;

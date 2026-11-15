@@ -5,50 +5,16 @@
  * The two capabilities have completely different availability and must be treated separately:
  *
  * - TTS uses `speechSynthesis`: works offline, Windows ships zh voices, so this is the stable base.
- * - STT uses `webkitSpeechRecognition`: Chrome/Edge only, and it uploads audio for cloud
- *   recognition, which often fails on restricted networks. Typing always stays available;
- *   when STT is missing or fails we hide the button or explain why, never block the answer.
+ * - STT records here and sends a WAV to our own backend, which runs sherpa-onnx + Paraformer
+ *   locally. Audio never leaves the machine and no cloud service is involved, so it works
+ *   offline. Typing always stays available; when the model is not installed we say so
+ *   instead of showing a button that does nothing.
  *
  * Two rules:/n * 1. Transcripts are appended to the box, never auto-submitted (recognition errors are normal);
  * 2. Speech can be interrupted at any time (next question, leaving the room), no queueing.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-
-// The Web Speech API is not in lib.dom; declare only what we use instead of sprinkling any.
-interface SpeechRecognitionAlternative {
-  transcript: string;
-}
-interface SpeechRecognitionResult {
-  isFinal: boolean;
-  length: number;
-  [index: number]: SpeechRecognitionAlternative;
-}
-interface SpeechRecognitionEventLike {
-  resultIndex: number;
-  results: { length: number; [index: number]: SpeechRecognitionResult };
-}
-interface SpeechRecognitionLike {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start(): void;
-  stop(): void;
-  abort(): void;
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: ((event: { error?: string }) => void) | null;
-  onend: (() => void) | null;
-}
-type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
-
-function recognitionCtor(): SpeechRecognitionCtor | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: SpeechRecognitionCtor;
-    webkitSpeechRecognition?: SpeechRecognitionCtor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
 
 /** TTS capability: when unsupported, `supported` is false and speak() is a no-op. */
 export function useSpeechSynthesis() {
@@ -106,54 +72,147 @@ export function useSpeechSynthesis() {
   return { supported, speaking, speak, stop };
 }
 
-/** Dictation: emit final results only; interim ones would make the box flicker. */
-export function useDictation(onFinal: (text: string) => void) {
-  const Ctor = recognitionCtor();
-  const supported = Ctor !== null;
-  const [listening, setListening] = useState(false);
-  const [error, setError] = useState("");
-  const recRef = useRef<SpeechRecognitionLike | null>(null);
+/** Encode mono float32 samples (any rate) as 16-bit PCM WAV. */
+function encodeWav(samples: Float32Array, sampleRate: number): Blob {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+  const writeText = (offset: number, text: string) => {
+    for (let i = 0; i < text.length; i += 1) view.setUint8(offset + i, text.charCodeAt(i));
+  };
+  writeText(0, "RIFF");
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeText(8, "WAVE");
+  writeText(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeText(36, "data");
+  view.setUint32(40, samples.length * 2, true);
+  let offset = 44;
+  for (let i = 0; i < samples.length; i += 1) {
+    const clamped = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff, true);
+    offset += 2;
+  }
+  return new Blob([view], { type: "audio/wav" });
+}
 
-  const stop = useCallback(() => {
-    recRef.current?.stop();
-    recRef.current = null;
-    setListening(false);
+export type DictationState = "idle" | "recording" | "transcribing";
+
+/**
+ * Local dictation: record with getUserMedia, encode WAV in the page, POST to
+ * /api/interview/transcribe. The backend runs an offline Chinese ASR model.
+ *
+ * No MediaRecorder: it would produce webm/opus which the server cannot decode without
+ * ffmpeg. Capturing raw samples with a ScriptProcessor and writing a WAV header is
+ * ~30 lines and removes that whole dependency chain.
+ */
+export function useLocalDictation(onText: (text: string) => void) {
+  const supported =
+    typeof navigator !== "undefined" &&
+    Boolean(navigator.mediaDevices?.getUserMedia) &&
+    typeof window !== "undefined" &&
+    "AudioContext" in window;
+  const [state, setState] = useState<DictationState>("idle");
+  const [error, setError] = useState("");
+  const ctxRef = useRef<AudioContext | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Float32Array[]>([]);
+
+  const cleanup = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    void ctxRef.current?.close().catch(() => {});
+    ctxRef.current = null;
+    chunksRef.current = [];
   }, []);
 
-  const start = useCallback(() => {
-    if (!Ctor) {
+  const start = useCallback(async () => {
+    if (!supported) {
       setError("unsupported");
       return;
     }
     setError("");
-    const rec = new Ctor();
-    rec.lang = "zh-CN";
-    rec.continuous = false; // one sentence per tap: continuous mode turns noise into text
-    rec.interimResults = false;
-    rec.onresult = (event) => {
-      let text = "";
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        if (result.isFinal) text += result[0]?.transcript ?? "";
-      }
-      if (text.trim()) onFinal(text.trim());
-    };
-    rec.onerror = (event) => {
-      setError(event.error ?? "unknown");
-      setListening(false);
-    };
-    rec.onend = () => setListening(false);
-    recRef.current = rec;
+    chunksRef.current = [];
     try {
-      rec.start();
-      setListening(true);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
+      streamRef.current = stream;
+      // Ask for 16 kHz directly; if the browser ignores it the server resamples.
+      const ctx = new AudioContext({ sampleRate: 16000 });
+      ctxRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const processor = ctx.createScriptProcessor(4096, 1, 1);
+      processor.onaudioprocess = (event) => {
+        const channel = event.inputBuffer.getChannelData(0);
+        chunksRef.current.push(new Float32Array(channel));
+      };
+      source.connect(processor);
+      processor.connect(ctx.destination);
+      setState("recording");
     } catch {
-      // Double-click throws InvalidStateError; treat it as "already listening".
-      setListening(false);
+      // Permission denied or no microphone: say so instead of silently doing nothing.
+      setError("denied");
+      cleanup();
+      setState("idle");
     }
-  }, [Ctor, onFinal]);
+  }, [cleanup, supported]);
 
-  useEffect(() => stop, [stop]);
+  const stop = useCallback(async () => {
+    const ctx = ctxRef.current;
+    if (!ctx) {
+      setState("idle");
+      return;
+    }
+    const rate = ctx.sampleRate;
+    const chunks = chunksRef.current;
+    cleanup();
+    setState("transcribing");
+    const total = chunks.reduce((sum, item) => sum + item.length, 0);
+    const merged = new Float32Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      merged.set(chunk, offset);
+      offset += chunk.length;
+    }
+    if (total < rate * 0.3) {
+      setError("tooShort");
+      setState("idle");
+      return;
+    }
+    try {
+      const body = new FormData();
+      body.append("audio", encodeWav(merged, rate), "answer.wav");
+      const response = await fetch("/api/interview/transcribe", { method: "POST", body });
+      if (response.status === 503) {
+        setError("unavailable");
+        setState("idle");
+        return;
+      }
+      const data = (await response.json().catch(() => null)) as
+        | { text?: string; detail?: string }
+        | null;
+      if (!response.ok) {
+        setError(data?.detail ?? "failed");
+        setState("idle");
+        return;
+      }
+      const text = (data?.text ?? "").trim();
+      if (text) onText(text);
+      else setError("empty");
+      setState("idle");
+    } catch {
+      setError("failed");
+      setState("idle");
+    }
+  }, [cleanup, onText]);
 
-  return { supported, listening, error, start, stop };
+  useEffect(() => cleanup, [cleanup]);
+
+  return { supported, state, error, start, stop };
 }

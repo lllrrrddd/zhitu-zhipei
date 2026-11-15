@@ -43,3 +43,7 @@ python-docx==1.2.0
 # Pinyin collation for A->Z sorting (rf_pinyin, see app/services/text_sort.py).
 # Pure Python, MIT, no transitive dependencies: safe for the first-run installer.
 pypinyin==0.55.0
+# 离线语音识别（面试语音作答）
+sherpa-onnx>=1.10
+# sherpa-onnx 的波形处理
+numpy>=1.26

@@ -18,7 +18,7 @@ import { Button, Input, Tooltip, Typography } from "antd";
 import { useCallback } from "react";
 import { t } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
-import { useDictation } from "../../features/speech/useSpeech";
+import { useLocalDictation } from "../../features/speech/useSpeech";
 
 export function Composer({
   value,
@@ -42,7 +42,7 @@ export function Composer({
     (text: string) => onChange(value ? `${value}\n${text}` : text),
     [onChange, value],
   );
-  const dictation = useDictation(appendDictation);
+  const dictation = useLocalDictation(appendDictation);
   return (
     <div className="interview-composer">
       <Input.TextArea
@@ -61,14 +61,23 @@ export function Composer({
       <div className="interview-composer-actions">
         <div className="interview-composer-left">
           <Typography.Text type="secondary">{t("interview.hint.dontKnow")}</Typography.Text>
-          {dictation.listening && (
+          {dictation.state === "recording" && (
             <Typography.Text type="danger">{t("interview.voice.listening")}</Typography.Text>
           )}
-          {!dictation.listening && dictation.error && (
+          {dictation.state === "transcribing" && (
+            <Typography.Text type="secondary">{t("interview.voice.transcribing")}</Typography.Text>
+          )}
+          {dictation.state !== "recording" && dictation.state !== "transcribing" && dictation.error && (
             <Typography.Text type="warning">
               {dictation.error === "unsupported"
                 ? t("interview.voice.micUnsupported")
-                : t("interview.voice.failed")}
+                : dictation.error === "unavailable"
+                  ? t("interview.voice.unavailable")
+                  : dictation.error === "denied"
+                    ? t("interview.voice.denied")
+                    : dictation.error === "tooShort"
+                      ? t("interview.voice.tooShort")
+                      : t("interview.voice.failed")}
             </Typography.Text>
           )}
         </div>
@@ -83,17 +92,25 @@ export function Composer({
             {dictation.supported && (
               <Tooltip
                 title={
-                  dictation.listening ? t("interview.voice.micStop") : t("interview.voice.mic")
+                  dictation.state === "recording" ? t("interview.voice.micStop") : t("interview.voice.mic")
                 }
               >
                 <Button
-                  className={dictation.listening ? "interview-mic interview-mic--on" : "interview-mic"}
+                  className={dictation.state === "recording" ? "interview-mic interview-mic--on" : "interview-mic"}
                   aria-label={
-                    dictation.listening ? t("interview.voice.micStop") : t("interview.voice.mic")
+                    dictation.state === "recording" ? t("interview.voice.micStop") : t("interview.voice.mic")
                   }
-                  aria-pressed={dictation.listening}
-                  icon={dictation.listening ? <LoadingOutlined /> : <AudioOutlined />}
-                  onClick={() => (dictation.listening ? dictation.stop() : dictation.start())}
+                  aria-pressed={dictation.state === "recording"}
+                  icon={
+                    dictation.state === "recording" || dictation.state === "transcribing" ? (
+                      <LoadingOutlined />
+                    ) : (
+                      <AudioOutlined />
+                    )
+                  }
+                  loading={dictation.state === "transcribing"}
+                  disabled={dictation.state === "transcribing"}
+                  onClick={() => (dictation.state === "recording" ? void dictation.stop() : void dictation.start())}
                 />
               </Tooltip>
             )}

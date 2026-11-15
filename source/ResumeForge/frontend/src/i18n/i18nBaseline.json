@@ -1837,7 +1837,7 @@
     }
   },
   "productCopy": {
-    "total": 128,
+    "total": 135,
     "files": {
       "api/aiTasks.ts": {
         "count": 0,
@@ -6700,8 +6700,14 @@
         "fingerprints": {}
       },
       "features/speech/useSpeech.ts": {
-        "count": 2,
+        "count": 9,
         "fingerprints": {
+          "273f28ca40d3d746b129280f120e7b8ebcb50d91dea38842325d5064ff15fe2a": 1,
+          "35507585dcdb5f469fca147fa18625ac2271cc80d11f75eecdb899a79d630f1a": 2,
+          "6eba1cc761878575f1448682f074cd0d875b4145bad327e6b412d73fbbe90603": 1,
+          "96b19955a863d60b80dc066c8d219b20e0cfe711352210ebe96b94a2f19abc9a": 1,
+          "e543fde5cf12b8e01fb08f6e5e7cdf6f76a784cc12e7aa4c274e2ee2ca413e5f": 1,
+          "f50933e3fcb30e4e96616bde02c041ddf2e91d7ab3be1102fcf7daa045986c8f": 1,
           "3264e2ba4812d899cba72c52f94554b54b6cc7960361a37906f6080eedfff488": 1,
           "ca917c398ba03c2d9f5b61c1e6a16b73bd3024da3204d5326070b219d9692b1a": 1
         }

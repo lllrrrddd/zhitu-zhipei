@@ -124,6 +124,10 @@ const common = {
   "interview.voice.micUnsupported": "当前浏览器不支持语音输入，请用打字作答",
   "interview.voice.listening": "正在听……说完自动填入输入框，核对后再提交",
   "interview.voice.failed": "语音识别没成功（可能是网络受限），请改用打字",
+  "interview.voice.transcribing": "正在转写……",
+  "interview.voice.unavailable": "本地识别模型未安装，请改用打字（或让管理员配置 ZY_ASR_MODEL_DIR）",
+  "interview.voice.denied": "麦克风没拿到权限，请在地址栏允许后重试",
+  "interview.voice.tooShort": "录音太短，请说完再停",
 } as const;
 
 export default common;

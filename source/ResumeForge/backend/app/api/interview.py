@@ -13,7 +13,7 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -34,7 +34,7 @@ from ..schemas.interview import (
     InterviewDurationUpdate,
 )
 from ..schemas.material import MaterialCreate, MaterialOut
-from ..services import trash
+from ..services import asr, trash
 from ..services.interview import interview_questions as interview_questions_service  # noqa: F401
 from ..services.interview.interview import (
     add_message,
@@ -388,3 +388,25 @@ register_question_routes(
 # 完全一致；两块的校验与错误文案各自留在自己的模块里（见模块文档）。
 register_material_routes(router, lambda db: _require_provider(db))
 register_followup_routes(router, lambda db: _require_provider(db))
+
+
+@router.post("/transcribe")
+async def transcribe_answer(request: Request, audio: UploadFile = File(...)) -> dict[str, object]:
+    """把一段 WAV 转成文字（离线识别，音频不出本机）。
+
+    前端用 MediaRecorder 录完先转成 16k 单声道 WAV 再传——浏览器录出来的 webm/opus
+    在服务端要额外装解码器，而转 WAV 在浏览器里只有几十行，省掉整条 ffmpeg 依赖。
+    """
+    # 写操作已经由 LoopbackOrigin 中间件与登录门禁统一把关，这里不重复加规则；
+    # 参数名保留 request 是为了将来接审计时不必改签名。
+    del request
+    payload = await audio.read()
+    if len(payload) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="录音太长，请分次说")
+    try:
+        return asr.transcribe_wav(payload)
+    except asr.AsrUnavailable as exc:
+        # 503：前端据此退回"只能打字"，不要显示成"识别失败"让人反复重试。
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
