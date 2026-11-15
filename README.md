@@ -121,6 +121,28 @@ uvicorn 收到空参数直接退出（`Option '--port' requires an argument`）�
 
 ---
 
+## 语音（面试作答）
+
+面试支持「面试官念题」与「说代替打字」，全部本地运行、音频不出机器：
+
+| 能力 | 实现 | 依赖 |
+|---|---|---|
+| 念题 | 浏览器 `speechSynthesis`（优先中文音色） | 无，离线可用 |
+| 作答 | 页面录音 → 16k 单声道 WAV → `POST /api/interview/transcribe` | sherpa-onnx 模型 |
+
+**模型安装**（不随仓库分发，约 160MB）：
+
+```bash
+# SenseVoice（默认，中英粤日韩，带 ITN；对带口音的普通话更稳）
+curl -L -o sv.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2025-09-09.tar.bz2
+tar -xjf sv.tar.bz2 -C D://AgentFiles//models//asr
+```
+
+然后设 `ZY_ASR_MODEL_DIR` 指向解压目录。目录名里含 `sense-voice` 走 SenseVoice，
+否则按 Paraformer 处理；两者都缺时接口返回 **503**，界面提示「请改用打字」。
+
+实测（CPU int8，2 线程）：5 秒音频约 0.2 秒解码，首次调用多约 1 秒加载模型。
+
 ## 三、数据目录
 
 `RF_DATA_DIR` 下大致长这样：

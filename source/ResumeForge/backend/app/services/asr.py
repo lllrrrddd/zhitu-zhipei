@@ -2,8 +2,11 @@
 """离线语音识别（面试作答的"说代替打字"）。
 
 **为什么不用浏览器听写**：`webkitSpeechRecognition` 把音频送到云端，国内网络常失败，
-而且面试回答属于个人经历，不该出机器。这里用 sherpa-onnx + Paraformer 中文模型，
-纯本地推理：模型加载约 1 秒，一句 5 秒的话解码 0.2 秒左右（CPU int8）。
+而且面试回答属于个人经历，不该出机器。这里用 sherpa-onnx 跑本地模型，纯离线推理。
+
+**默认 SenseVoice，Paraformer 作为兜底**（按模型目录名自动识别）：
+同一条带口音的样本上，Paraformer 把"演得/真实"听成"演的/真式"，SenseVoice 全对；
+速度基本持平（5 秒音频 0.2 秒 vs 0.2 秒）。SenseVoice 还开 ITN，数字/日期会写成阿拉伯数字。
 
 模型不放仓库（200 MB 级），由部署方放到 `ZY_ASR_MODEL_DIR`；未配置或目录不存在时
 **明确报告不可用**，前端据此退回"只能打字"，而不是让用户对着一个点了没反应的按钮。
@@ -30,6 +33,19 @@ _load_error: str | None = None
 
 class AsrUnavailable(RuntimeError):
     """模型没装/加载失败：调用方应把它翻成 503，并告诉用户改用打字。"""
+
+
+def _model_kind(model_dir: Path) -> str:
+    """按目录名认模型类型：sense_voice / paraformer。"""
+    name = model_dir.name.lower()
+    if "sense-voice" in name or "sense_voice" in name:
+        return "sense_voice"
+    return "paraformer"
+
+
+def engine_name() -> str:
+    model_dir = _model_dir()
+    return _model_kind(model_dir) if model_dir else "none"
 
 
 def _model_dir() -> Path | None:
@@ -63,15 +79,28 @@ def _build():
             import sherpa_onnx  # 延迟到用时再导入：没装 sherpa 也不该让整个服务起不来
 
             onnx = model_dir / ("model.int8.onnx" if (model_dir / "model.int8.onnx").exists() else "model.onnx")
-            _recognizer = sherpa_onnx.OfflineRecognizer.from_paraformer(
-                paraformer=str(onnx),
-                tokens=str(model_dir / "tokens.txt"),
-                num_threads=max(1, min(4, (os.cpu_count() or 2) - 1)),
-                sample_rate=SAMPLE_RATE,
-                feature_dim=80,
-                decoding_method="greedy_search",
-            )
-            logger.info("离线识别模型已加载：%s", model_dir.name)
+            threads = max(1, min(4, (os.cpu_count() or 2) - 1))
+            kind = _model_kind(model_dir)
+            if kind == "sense_voice":
+                # use_itn：把"两万"写成 20000 这类，读起来更像人写的答案。
+                _recognizer = sherpa_onnx.OfflineRecognizer.from_sense_voice(
+                    model=str(onnx),
+                    tokens=str(model_dir / "tokens.txt"),
+                    num_threads=threads,
+                    use_itn=True,
+                    language="zh",
+                    debug=False,
+                )
+            else:
+                _recognizer = sherpa_onnx.OfflineRecognizer.from_paraformer(
+                    paraformer=str(onnx),
+                    tokens=str(model_dir / "tokens.txt"),
+                    num_threads=threads,
+                    sample_rate=SAMPLE_RATE,
+                    feature_dim=80,
+                    decoding_method="greedy_search",
+                )
+            logger.info("离线识别模型已加载：%s（%s）", model_dir.name, kind)
         except Exception as exc:  # noqa: BLE001 —— 任何加载失败都归结为"不可用"
             _load_error = f"离线识别模型加载失败：{exc}"
             logger.warning(_load_error)
@@ -127,5 +156,5 @@ def transcribe_wav(payload: bytes) -> dict[str, object]:
     stream.accept_waveform(SAMPLE_RATE, samples)
     recognizer.decode_stream(stream)
     text = (stream.result.text or "").strip()
-    logger.info("离线转写完成：%.1fs 音频 → %d 字", duration, len(text))
-    return {"text": text, "durationMs": int(duration * 1000)}
+    logger.info("离线转写完成：%.1fs 音频 → %d 字（%s）", duration, len(text), engine_name())
+    return {"text": text, "durationMs": int(duration * 1000), "engine": engine_name()}
