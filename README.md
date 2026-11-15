@@ -8,6 +8,25 @@
 
 ---
 
+## 从 GitHub 拉下来能直接跑吗？
+
+**不能开箱即用，但三条命令可以。** 仓库只放源码，下面这些按设计不进仓库：
+
+| 不进仓库 | 为什么 | 怎么办 |
+|---|---|---|
+| `node_modules/`、`frontend/dist/` | 依赖与构建产物，可重建 | `setup.ps1` + `scripts\start-lan.ps1` 自动装/构建 |
+| Python venv | 同上 | `.\setup.ps1` |
+| 语音识别模型（233MB） | 模型权重不随代码分发 | `scripts\fetch-asr-model.ps1` |
+| `runtime/`（数据、日志） | 含个人简历等隐私数据 | 首次启动自动建空库 |
+| 本地 Ollama 模型 | 需本机安装 | 不装也能用：AI 功能提示未配置，规则匹配不受影响 |
+
+```powershell
+git clone <repo>; cd <repo>
+& .\setup.ps1                     # Python venv + 前端依赖
+& .\scripts\fetch-asr-model.ps1   # 可选：语音作答要它
+& .\scripts\start-lan.ps1         # 局域网可用，打印可访问地址
+```
+
 ## 一、跑起来：三种形态
 
 三种形态共用同一套代码，差别只在「端口怎么暴露」和「谁的数据」。
@@ -32,27 +51,30 @@
 
 ### 2. 局域网（同事能打开）
 
-前端要先构建，再由后端同源托管：
-
 ```powershell
-cd source\ResumeForge\frontend
-npm run build            # 产物在 frontend\dist
+& .\scripts\start-lan.ps1                       # 默认 3000、需要登录
+& .\scripts\start-lan.ps1 -Port 3010 -RequireLogin 0
 ```
 
-然后用一份发布包结构（`app/` + `migrations/` + `alembic.ini` + `ui/` + `data/` + `deploy_main.py`）起服务。关键环境变量：
+脚本做三件事，**漏任何一件都会白忙**：构建前端（首次）→ 把 `ZY_TRUSTED_ORIGIN_HOSTS`
+设成本机局域网 IP（否则所有写请求 403）→ `ZY_COOKIE_SECURE=0`（http 下否则不发 cookie）。
+启动后窗口会打印两个地址：本机 `127.0.0.1` 与同一 Wi-Fi 设备用的局域网地址。
+
+前置条件：先跑过一次 `.\setup.ps1`（建 venv 装依赖）。数据默认落 `runtime\lan-data\`，
+与演示模式互不干扰；语音模型装了会自动带上，没装则只能打字。
+
+手动起也可以，环境变量如下（完整清单见 `.env.example`）：
 
 ```powershell
-$env:PORT = 3000                      # 监听端口（deploy_main.py 绑 0.0.0.0）
-$env:RF_DATA_DIR = 'D:\...\lan-data'  # 数据目录（SQLite、附件、导出物）
+$env:PORT = 3000                      # 监听端口，绑 0.0.0.0
+$env:RF_FRONTEND_DIST = 'source\ResumeForge\frontend\dist'
+$env:RF_DATA_DIR = 'runtime\lan-data'  # 数据目录（SQLite、附件、导出物）
 $env:ZY_REQUIRE_LOGIN = 1             # 开启登录门禁
 $env:ZY_COOKIE_SECURE = 0             # http 下必须关掉 Secure，否则浏览器不发 cookie
 $env:ZY_TRUSTED_ORIGIN_HOSTS = 192.168.0.111   # 本机局域网 IP，见下方"踩坑"
 $env:ZY_INVITE_CODE = 8位数字邀请码
 $env:ZY_ADMIN_KEY = 管理员密钥        # 发邀请码/重置码要它；留空等于关闭管理接口
-python deploy_main.py
 ```
-
-**本机现成脚本**：`D:\AgentFiles\projects\start-lan.cmd`（纯 ASCII + CRLF，双击即可，窗口不能关）。它不在仓库里——脚本绑定的 IP、密钥、数据目录都是这台机器的事实。
 
 > **踩坑：`ZY_TRUSTED_ORIGIN_HOSTS` 不是可选项。** 后端的 `loopback_origin` 中间件只认
 > `127.0.0.1 / localhost / ::1` 作为浏览器 Origin。用 `http://192.168.x.x:3000` 打开时，
