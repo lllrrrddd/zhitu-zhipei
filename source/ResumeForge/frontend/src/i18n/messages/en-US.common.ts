@@ -117,6 +117,15 @@ const common = {
   "auth.brand.footnote": "Every account keeps its own data; nobody sees anyone else's",
   "auth.login.requiredCode": "Enter the reset code",
   "auth.login.serverError": "Service is unavailable, please retry shortly",
+  "interview.voice.on": "Read aloud: on",
+  "interview.voice.off": "Read aloud: off",
+  "interview.voice.replay": "Replay this question",
+  "interview.voice.unsupported": "This browser cannot read text aloud",
+  "interview.voice.mic": "Answer by voice",
+  "interview.voice.micStop": "Stop dictation",
+  "interview.voice.micUnsupported": "This browser cannot transcribe speech; please type",
+  "interview.voice.listening": "Listening… it will fill the box; review before sending",
+  "interview.voice.failed": "Speech recognition failed (network may be restricted); please type",
 } as const;
 
 export default common;

@@ -1837,7 +1837,7 @@
     }
   },
   "productCopy": {
-    "total": 126,
+    "total": 128,
     "files": {
       "api/aiTasks.ts": {
         "count": 0,
@@ -6698,6 +6698,13 @@
       "components/UserBadge.tsx": {
         "count": 0,
         "fingerprints": {}
+      },
+      "features/speech/useSpeech.ts": {
+        "count": 2,
+        "fingerprints": {
+          "3264e2ba4812d899cba72c52f94554b54b6cc7960361a37906f6080eedfff488": 1,
+          "ca917c398ba03c2d9f5b61c1e6a16b73bd3024da3204d5326070b219d9692b1a": 1
+        }
       }
     }
   }

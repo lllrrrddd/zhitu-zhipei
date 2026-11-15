@@ -5,7 +5,14 @@
  * 自 InterviewPage 拆出（0066 加计时器时顺手做的一次拆分）：页面本体已经贴着 500 行
  * 预算，头部这一段是自成一体的展示 + 两个回调，搬出来不影响任何行为。
  */
-import { ClockCircleOutlined, StopOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import {
+  AudioMutedOutlined,
+  ClockCircleOutlined,
+  ReloadOutlined,
+  SoundOutlined,
+  StopOutlined,
+  ThunderboltOutlined,
+} from "@ant-design/icons";
 import { Button, Space, Tag, Typography } from "antd";
 import type { InterviewDetail } from "../../types";
 import { t } from "../../i18n";
@@ -25,6 +32,10 @@ export function RoomHeader({
   showTimer,
   onEndEarly,
   onNew,
+  voiceOn,
+  voiceSupported,
+  onToggleVoice,
+  onReplay,
 }: {
   session: InterviewDetail;
   finished: boolean;
@@ -35,6 +46,13 @@ export function RoomHeader({
   timerLabel: string;
   showTimer: boolean;
   onEndEarly: () => void;
+  /** Whether questions are read aloud. */
+  voiceOn?: boolean;
+  /** Whether the browser supports TTS; hide the toggle instead of showing a dead button. */
+  voiceSupported?: boolean;
+  onToggleVoice?: () => void;
+  /** Replay the most recent question. */
+  onReplay?: () => void;
   onNew: () => void;
 }) {
   // 本卡用模块级 t()：必须订阅语言变化，否则切语言后 Tag / 进度不重渲染。
@@ -73,6 +91,20 @@ export function RoomHeader({
           <Typography.Text type="secondary" className="interview-timer">
             <ClockCircleOutlined /> {t("interviewPage.timer.label")} {timerLabel}
           </Typography.Text>
+        ) : null}
+        {voiceSupported ? (
+          <Button
+            size="small"
+            className="interview-voice-toggle"
+            aria-pressed={Boolean(voiceOn)}
+            icon={voiceOn ? <SoundOutlined /> : <AudioMutedOutlined />}
+            onClick={onToggleVoice}
+          >
+            {voiceOn ? t("interview.voice.on") : t("interview.voice.off")}
+          </Button>
+        ) : null}
+        {voiceSupported && voiceOn && onReplay ? (
+          <Button size="small" type="text" aria-label={t("interview.voice.replay")} icon={<ReloadOutlined />} onClick={onReplay} />
         ) : null}
         {!finished && (
           <Button

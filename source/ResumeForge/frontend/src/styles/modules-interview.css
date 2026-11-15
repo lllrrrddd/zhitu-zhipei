@@ -473,3 +473,48 @@
   margin-top: 8px;
   font-size: 12px;
 }
+
+/* ── Voice: mic in the composer, replay on messages ─────────────
+   Recording must be visible at a glance (coral pulse), otherwise users
+   keep waiting after speaking, unsure if it was captured. */
+
+.interview-composer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.interview-mic--on {
+  color: var(--rf-vivid-coral);
+  border-color: var(--rf-vivid-coral);
+  animation: interview-mic-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes interview-mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(226 85 43 / 35%);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgb(226 85 43 / 0%);
+  }
+}
+
+/* Replay stays dim until hover, so a long transcript is not noisy. */
+.interview-message-speak {
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+.interview-message:hover .interview-message-speak,
+.interview-message-speak:focus-visible {
+  opacity: 1;
+}
+
+/* Respect reduced-motion: no pulsing. */
+@media (prefers-reduced-motion: reduce) {
+  .interview-mic--on {
+    animation: none;
+  }
+}

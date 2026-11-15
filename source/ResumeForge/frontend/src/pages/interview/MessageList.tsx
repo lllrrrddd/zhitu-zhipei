@@ -13,8 +13,8 @@
  * 回答，不会写出第二条消息。
  */
 import type { RefObject } from "react";
-import { Button, Space, Typography } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { Button, Space, Tooltip, Typography } from "antd";
+import { ReloadOutlined, SoundOutlined } from "@ant-design/icons";
 import LoadingBlock from "../../components/common/LoadingBlock";
 import type { InterviewMessage } from "../../types";
 import { formatDateTime } from "../../utils/format";
@@ -53,6 +53,7 @@ export function InterviewMessageList({
   finishing,
   streamingQuestion,
   endRef,
+  onSpeak,
 }: {
   messages: InterviewMessage[];
   interviewerStyle: string;
@@ -72,6 +73,8 @@ export function InterviewMessageList({
   streamingQuestion: string | null;
   /** 底部锚点：新内容进来后滚到这里。 */
   endRef: RefObject<HTMLDivElement | null>;
+  /** Read one interviewer line aloud (optional; omit to hide the speaker button). */
+  onSpeak?: (text: string) => void;
 }) {
   useLocale();
   return (
@@ -105,6 +108,19 @@ export function InterviewMessageList({
               </Typography.Text>
             </div>
             <div className="interview-message-body">{item.content}</div>
+            {/* Anything the interviewer said can be replayed — no need to scroll back. */}
+            {item.role === "interviewer" && onSpeak ? (
+              <Tooltip title={t("interview.voice.replay")}>
+                <Button
+                  size="small"
+                  type="text"
+                  className="interview-message-speak"
+                  aria-label={t("interview.voice.replay")}
+                  icon={<SoundOutlined />}
+                  onClick={() => onSpeak(item.content)}
+                />
+              </Tooltip>
+            ) : null}
             {item.context.feedback ? (
               <div className="interview-feedback">
                 <b>{t("interview.role.comment")}</b>

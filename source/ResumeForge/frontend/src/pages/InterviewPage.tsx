@@ -30,6 +30,7 @@ import QuestionBankPanel from "../components/QuestionBankPanel";
 import { useBatchSelection } from "../hooks/useBatchSelection";
 import { useInterviewTimer } from "../features/interview/useInterviewTimer";
 import { useInterviewTurn } from "../features/interview/useInterviewTurn";
+import { useSpeechSynthesis } from "../features/speech/useSpeech";
 import { Composer } from "./interview/Composer";
 import { FollowUpCard } from "./interview/FollowUpCard";
 import { HistoryCard } from "./interview/HistoryCard";
@@ -72,6 +73,16 @@ export default function InterviewPage() {
   const [ending, setEnding] = useState(false);
   // 计时闸门：进房间/重新进房间都要用户主动点一次「准备好了 / 继续面试」。
   const [ready, setReady] = useState(false);
+  // Read questions aloud: on by default, one click to turn off. The choice lives in
+  // localStorage because it is a preference, not something to ask every time.
+  const [voiceOn, setVoiceOn] = useState(() => {
+    try {
+      return window.localStorage.getItem("interview.voice.enabled") !== "0";
+    } catch {
+      return true;
+    }
+  });
+  const voice = useSpeechSynthesis();
   const [savingReport, setSavingReport] = useState(false);
   const [activeTab, setActiveTab] = useState("session");
   const [form] = Form.useForm<SetupForm>();
@@ -140,6 +151,49 @@ export default function InterviewPage() {
   // 依赖里有 `pendingAnswer`：用户刚发的那条是本地气泡，消息数没变但它确实新增了一行。
   // 放在 turn hook 之后是因为依赖直接读它的状态（在这个位置读会踩 TDZ）。
 
+  // Auto-read the newest interviewer line: only when a NEW one arrives, so reopening a
+  // history does not replay everything from the start.
+  const spokenIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!voiceOn || !voice.supported || !active) return;
+    const lines = active.messages.filter(
+      (item) => item.role === "interviewer" && item.phase !== "followup",
+    );
+    const last = lines.length ? lines[lines.length - 1] : null;
+    if (!last || last.id === spokenIdRef.current) return;
+    spokenIdRef.current = last.id;
+    voice.speak(last.content);
+  }, [active, voiceOn, voice.supported, voice]);
+
+  // Reset on session switch, otherwise the first question of a new session stays silent.
+  useEffect(() => {
+    spokenIdRef.current = null;
+    voice.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id]);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceOn((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem("interview.voice.enabled", next ? "1" : "0");
+      } catch {
+        // 隐私模式下写不进去：不影响本次使用。
+      }
+      if (!next) voice.stop();
+      return next;
+    });
+  }, [voice]);
+
+  const replayQuestion = useCallback(() => {
+    if (!active) return;
+    const lines = active.messages.filter(
+      (item) => item.role === "interviewer" && item.phase !== "followup",
+    );
+    const last = lines.length ? lines[lines.length - 1] : null;
+    if (last) voice.speak(last.content);
+  }, [active, voice]);
+
   const activeId = active?.id ?? null;
   const finished = active?.status === "finished";
   const answered = active?.answered_rounds ?? 0;
@@ -180,6 +234,13 @@ export default function InterviewPage() {
     },
     onTurnComplete: timer.flush,
   });
+
+  // Stop speaking when the next question starts generating. Placed after `turn` because
+  // it depends on it.
+  useEffect(() => {
+    if (turn.submitting) voice.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turn.submitting]);
 
   // 「正在生成这一轮」与「正在出报告」对界面是同一件事：作答区与其它操作都该按忙处理。
   const busy = turn.submitting || ending;
@@ -417,6 +478,10 @@ export default function InterviewPage() {
             showTimer={ready}
             onEndEarly={endEarly}
             onNew={leaveRoom}
+            voiceOn={voiceOn}
+            voiceSupported={voice.supported}
+            onToggleVoice={toggleVoice}
+            onReplay={replayQuestion}
           />
 
           {/* 点「准备好了」之前不显示任何对话：这场面试还没开始，面试官也还没开口。
@@ -435,6 +500,7 @@ export default function InterviewPage() {
               finishing={turn.finishing || predictingFinish}
               streamingQuestion={turn.streamingQuestion}
               endRef={endRef}
+              onSpeak={voice.supported ? (text) => voice.speak(text) : undefined}
             />
           ) : null}
 

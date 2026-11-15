@@ -115,6 +115,15 @@ const common = {
   "auth.brand.footnote": "每个账号的数据各自独立，互不可见",
   "auth.login.requiredCode": "请填写重置码",
   "auth.login.serverError": "服务暂时不可用，请稍后重试",
+  "interview.voice.on": "语音朗读：开",
+  "interview.voice.off": "语音朗读：关",
+  "interview.voice.replay": "重听这道题",
+  "interview.voice.unsupported": "当前浏览器不支持语音朗读",
+  "interview.voice.mic": "语音作答",
+  "interview.voice.micStop": "停止语音输入",
+  "interview.voice.micUnsupported": "当前浏览器不支持语音输入，请用打字作答",
+  "interview.voice.listening": "正在听……说完自动填入输入框，核对后再提交",
+  "interview.voice.failed": "语音识别没成功（可能是网络受限），请改用打字",
 } as const;
 
 export default common;
