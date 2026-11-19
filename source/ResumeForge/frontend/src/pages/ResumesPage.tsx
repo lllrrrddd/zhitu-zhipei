@@ -401,9 +401,12 @@ export default function ResumesPage() {
           }
           style={{ marginBottom: 16 }}
         />
-      ) : (
-        <ResumeScenarioSuggestion />
-      )}
+      ) : null}
+      {/* 弹窗宿主必须**始终挂载**：筛选栏的「AI 生成」只发信号，没人登记就是无操作。
+          以前列表为空时这里被空态 Alert 顶掉了，于是新账号点「AI 生成」毫无反应。 */}
+      <ResumeScenarioSuggestion
+        hideCard={!loading && !error && data?.total === 0}
+      />
       {batch.selecting && (
         <ResumeBatchToolbar
           count={batch.selectedCount}

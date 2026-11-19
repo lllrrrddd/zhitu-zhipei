@@ -17,7 +17,12 @@ import {
   triggerResumeCenterAiGenerate,
 } from "./resumeCenterAiBus";
 
-export default function ResumeScenarioSuggestion() {
+export default function ResumeScenarioSuggestion({
+  hideCard = false,
+}: {
+  /** 列表为空时页面自己会渲染空态提示，这里只挂载弹窗宿主（否则「AI 生成」没人监听）。 */
+  hideCard?: boolean;
+} = {}) {
   useLocale();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -27,6 +32,7 @@ export default function ResumeScenarioSuggestion() {
   }, []);
   return (
     <>
+      {!hideCard && (
       <Alert
         type="info"
         showIcon
@@ -44,6 +50,7 @@ export default function ResumeScenarioSuggestion() {
           </Space>
         }
       />
+      )}
       <GenerateResumeModal job={null} open={open} onClose={() => setOpen(false)} />
     </>
   );
