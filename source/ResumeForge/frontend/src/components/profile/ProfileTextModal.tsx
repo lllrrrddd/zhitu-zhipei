@@ -13,6 +13,7 @@
  */
 
 import { FileSearchOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 import { Alert, Button, Input, Modal, Progress, Space, Spin, Typography } from "antd";
 import type { MessageKey } from "../../i18n";
 import { t } from "../../i18n";
@@ -114,6 +115,23 @@ export default function ProfileTextModal({
   // 关闭（X / ESC）在校对阶段等价于"放弃这次结果"，不能静默留下半份草稿。
   const handleCancel = reviewing ? (onDiscard ?? onClose) : onClose;
 
+  // 空输入点「识别并填入」：toast 一闪就没了（何况视线在输入框上），
+  // 改成输入框下方的常驻提示；一旦有内容或文件就自动消失。
+  const [emptyHint, setEmptyHint] = useState(false);
+  useEffect(() => {
+    if (text.trim() || files.length > 0) setEmptyHint(false);
+  }, [text, files]);
+  const handleParse = () => {
+    if (!text.trim() && files.length === 0) {
+      setEmptyHint(true);
+      return;
+    }
+    setEmptyHint(false);
+    onParse();
+  };
+
+  // 正文限高：1080p + 125% 缩放时弹窗会高过视口，底部按钮被切掉一半，点了像没反应。
+  // 正文限高：1080p + 125% 缩放时弹窗会高过视口，底部按钮被切掉一半，点了像没反应。
   return (
     <Modal
       title={t(copy.titleKey)}
@@ -121,6 +139,10 @@ export default function ProfileTextModal({
       onCancel={handleCancel}
       destroyOnHidden
       width={760}
+      // 窗口不高（1080p + 125% 缩放很常见）时，弹窗会高过视口，
+      // 底部的「识别并填入」被切掉一半，用户点了像没反应。这里限制正文高度并滚动，
+      // footer 永远留在视口内。
+      style={{ top: 24 }}
       footer={
         reviewing
           ? [
@@ -141,13 +163,13 @@ export default function ProfileTextModal({
                   {t("profileTextModal.action.cancelRecognize")}
                 </Button>
               ) : (
-                <Button key="parse" type="primary" icon={<FileSearchOutlined />} onClick={onParse}>
+                <Button key="parse" type="primary" icon={<FileSearchOutlined />} onClick={handleParse}>
                   {t("profileTextModal.action.recognize")}
                 </Button>
               ),
             ]
       }
-      styles={{ body: { paddingRight: 8 } }}
+      styles={{ body: { paddingRight: 8, maxHeight: "calc(100vh - 210px)", overflowY: "auto" } }}
     >
       {reviewing ? (
         <>
@@ -182,6 +204,14 @@ export default function ProfileTextModal({
             placeholder={t(copy.placeholderKey)}
             autoSize={{ minRows: 14, maxRows: 24 }}
           />
+          {emptyHint ? (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginTop: 8 }}
+              title={t("profileTextModal.warning.emptyInput")}
+            />
+          ) : null}
           <MaxLengthHint value={text} maxLength={100_000} />
           {/* 文件暂存区紧跟输入框下缘，补 12px 呼吸空隙，避免「添加截图或文档」按钮贴住边框。 */}
           <div style={{ marginTop: 12 }}>
