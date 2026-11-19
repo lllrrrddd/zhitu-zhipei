@@ -64,6 +64,37 @@ def oom_kind(body: str) -> str | None:
     return "gpu" if ("cuda" in text or "cublas" in text) else "cpu"
 
 
+_CONTEXT_SIGNATURES = (
+    "exceeds the available context size",
+    "context length",
+    "maximum context length",
+    "too many tokens",
+    "reduce the length of the messages",
+)
+
+
+def context_overflow(body: str) -> bool:
+    """上游是否在说"输入超过上下文窗口"。
+
+    本地 Ollama 默认 8192，而助手会带一堆工具定义进去，很容易撞上这条；
+    撞上之后重试、降级都不会成功，必须让用户改配置（调大 num_ctx）或新开会话。
+    """
+    text = (body or "").lower()
+    return any(sig in text for sig in _CONTEXT_SIGNATURES)
+
+
+def context_overflow_message(body: str) -> str:
+    """尽量把上游给的 token 数带上，让提示可验证（只取数字，不回显正文）。"""
+    import re
+
+    match = re.search(r"exceeds the available context size \((\d+) tokens\)", body or "", re.I)
+    limit = f"（当前上限 {match.group(1)} tokens）" if match else ""
+    return (
+        f"对话内容超出该模型的上下文窗口{limit}。"
+        "请新开一轮对话，或在 Ollama 里把 num_ctx 调大（如 32768）后重试"
+    )
+
+
 def oom_message(kind: str) -> str:
     """内存不足时给用户**能照做**的提示，而不是"稍后重试"。"""
     if kind == "gpu":

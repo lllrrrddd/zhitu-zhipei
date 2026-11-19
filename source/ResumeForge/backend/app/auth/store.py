@@ -204,7 +204,13 @@ def _row_to_user(row: sqlite3.Row) -> User:
 
 
 def register_user(
-    db_path: Path, account: str, password: str, display_name: str, invite_code: str = ""
+    db_path: Path,
+    account: str,
+    password: str,
+    display_name: str,
+    invite_code: str = "",
+    *,
+    require_invite: bool = False,
 ) -> User:
     """注册账号。
 
@@ -222,6 +228,10 @@ def register_user(
     if len(password) < 8:
         raise ValueError("密码至少 8 位")
     code = invite_code.strip().upper()
+    # 部署方可以要求"必须持邀请码"（公网/给别人用时防止陌生人白用一个模型额度）。
+    # 默认不要求，与"注册就能用"的产品口径一致；具体要不要开由 ZY_REQUIRE_INVITE 决定。
+    if require_invite and not code:
+        raise ValueError("注册需要邀请码，请向管理员索取")
 
     with _connect(db_path) as conn:
         invite = None

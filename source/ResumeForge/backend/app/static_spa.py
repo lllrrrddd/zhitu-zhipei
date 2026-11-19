@@ -122,12 +122,13 @@ def _install_spa_404_fallback(app: FastAPI, dist_dir: Path) -> None:
                 media_type="text/html",
                 headers={"Cache-Control": "no-cache"},
             )
+        # 框架自带的英文 detail（404/405）换成中文：同一个服务不该一半中文一半英文，
+        # 前端也没法按文案做分支。业务异常自带的 detail 原样透传。
+        detail = _FRAMEWORK_DETAILS.get(str(exc.detail), exc.detail)
         headers = getattr(exc, "headers", None)
         if headers:
-            return JSONResponse(
-                {"detail": exc.detail}, status_code=exc.status_code, headers=headers
-            )
-        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+            return JSONResponse({"detail": detail}, status_code=exc.status_code, headers=headers)
+        return JSONResponse({"detail": detail}, status_code=exc.status_code)
 
     app.add_exception_handler(StarletteHTTPException, spa_404_handler)
 
@@ -215,6 +216,13 @@ def _mount_dist_root_files(app: FastAPI, dist_dir: Path) -> None:
             include_in_schema=False,
             name=f"spa_root_file_{item.stem}",
         )
+
+
+_FRAMEWORK_DETAILS = {
+    "Not Found": "接口不存在",
+    "Method Not Allowed": "该接口不支持此请求方法",
+    "Internal Server Error": "服务器内部错误",
+}
 
 
 def mount_static_spa(app: FastAPI, dist_dir: Path) -> None:

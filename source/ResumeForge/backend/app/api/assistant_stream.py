@@ -367,18 +367,23 @@ async def _stream_message_events(
             usage=budget.usage_summary(),
         )
         raise
-    except LLMError:
-        logger.warning("AI 助手模型调用失败（用户可见错误已固定脱敏）")
+    except LLMError as exc:
+        # actionable = 我们自己分类后写的文案（内存不足 / 上下文超限），可以直接展示；
+        # 其余一律用固定脱敏文案，避免把上游正文透出去。
+        message = (
+            str(exc) if getattr(exc, "actionable", False) else "模型服务暂时无法处理本次请求，请稍后重试"
+        )
+        logger.warning("AI 助手模型调用失败（actionable=%s）", getattr(exc, "actionable", False))
         budget.record_round(provider)
         finish_assistant_message(
             assistant_message_id,
             content="".join(parts),
             status="error",
-            error="模型服务暂时无法处理本次请求，请稍后重试",
+            error=message,
             factory=factory,
             usage=budget.usage_summary(),
         )
-        yield format_sse({"type": "error", "message": "模型服务暂时无法处理本次请求，请稍后重试"})
+        yield format_sse({"type": "error", "message": message})
     except Exception:  # noqa: BLE001 - 流式响应必须转换内部异常
         logger.exception("AI 助手流式回复发生内部错误")
         message = "回复过程中发生内部错误，请查看后端日志"

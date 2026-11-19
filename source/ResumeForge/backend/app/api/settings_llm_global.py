@@ -36,6 +36,7 @@ from ..schemas.setting import (
     LLMConfigOut,
     LLMGlobalRecordOut,
 )
+from ..services.llm import payload as payload_rules
 from ..services.api_key_crypto import ApiKeyEncryptionError
 from ..services.api_key_session import get_session_key
 from ..services.global_llm_profiles import (
@@ -135,6 +136,15 @@ def write_llm_config(payload: LLMConfig, db: Session = Depends(get_db)) -> LLMCo
     密钥三条规则（与旧端点一致）：留空 = 保留原密钥；`"__clear__"` = 显式清空；
     其余按真实密钥或引用占位符解析。
     """
+    # 保存和"测试连接"必须同一套校验：否则用户先保存一个 http://远程 或空模型名的配置，
+    # 界面上一切正常，直到所有 AI 功能都失效才发现——而那时配置已经落盘了。
+    try:
+        payload_rules.validated_base_url(payload.base_url)
+    except payload_rules.LLMError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if not (payload.model or "").strip():
+        raise HTTPException(status_code=400, detail="请先选择或填写模型名称")
+
     existing = read_global_llm()
     incoming = payload.api_key
     if incoming == "__clear__":

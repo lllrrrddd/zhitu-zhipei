@@ -67,6 +67,11 @@ def test_session_key_is_used_for_llm_config_and_never_persisted(client, db_sessi
 
 def test_session_key_placeholder_roundtrip_does_not_persist_it(client, db_session):
     """占位符解析到临时密钥时，落库为空而不是把内存态写进数据库。"""
+    # 先落一份**有效**配置：保存接口现在会校验 base_url 与 model（防止把空配置存成
+    # "看起来配置好了"），所以不能像以前那样从空配置起步。
+    base = LLMConfig(base_url="https://api.example.com/v1", model="test-model")
+    assert client.put("/api/settings/llm", json=base.model_dump()).status_code == 200
+
     client.put("/api/settings/llm/session-key", json={"api_key": "sk-session-only"})
     masked = client.get("/api/settings/llm").json()
     assert masked["api_key"] == API_KEY_MASK

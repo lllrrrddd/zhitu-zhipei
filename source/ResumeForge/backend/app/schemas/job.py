@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """岗位 Schema。"""
 
+import re
 from datetime import datetime
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
@@ -13,6 +14,9 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from .date_format import normalize_partial_date
+
+_DATE_LIKE = re.compile(r"^(\d{4})(-\d{2})?(-\d{2})?$|^至今$")
 
 from ..models.job import JOB_STATUSES
 from .extraction import (
@@ -115,6 +119,28 @@ class JobCreate(BaseModel):
     source_url: str = Field(default="", max_length=512)
     posted_at: str = Field(default="", max_length=32)
     status: str = Field(default="开放中", max_length=16)
+
+    @field_validator("title")
+    @classmethod
+    def title_must_not_be_blank(cls, value: str) -> str:
+        # min_length=1 只能挡住空串，"   " 这种纯空白照样能过，列表里就会出现看不见标题的行。
+        cleaned = (value or "").strip()
+        if not cleaned:
+            raise ValueError("岗位标题不能为空")
+        return cleaned
+
+    @field_validator("posted_at")
+    @classmethod
+    def posted_at_must_be_a_date(cls, value: str) -> str:
+        # 以前这里只限长度，随便写"不是日期"也能入库，排序与展示都会错乱。
+        # 允许空（未填写），其余必须是可识别的日期格式。
+        raw = (value or "").strip()
+        if not raw:
+            return ""
+        normalized = normalize_partial_date(raw)
+        if normalized == raw and not _DATE_LIKE.match(raw):
+            raise ValueError("发布日期格式不正确，请用 2026-03-01 这样的格式")
+        return normalized
     note: str = Field(default="", max_length=2000)
     note_images: list[str] = Field(default_factory=list, max_length=MAX_JOB_NOTE_IMAGES)
     recognition_source: str = Field(default="", max_length=32)
@@ -313,6 +339,18 @@ class JobOut(JobCreate):
     """
 
     model_config = ConfigDict(from_attributes=True)
+
+    # 读取侧必须屏蔽输入校验：库里按旧规则写入的历史值（如 "2026-1-5"）不该让
+    # 列表逐行构造时抛错。同名覆盖 = 用透传替换 JobCreate 的校验器。
+    @field_validator("title")
+    @classmethod
+    def title_must_not_be_blank(cls, value: str) -> str:  # noqa: D102 - 见上
+        return value
+
+    @field_validator("posted_at")
+    @classmethod
+    def posted_at_must_be_a_date(cls, value: str) -> str:  # noqa: D102 - 见上
+        return value
     id: int
     source: str = Field(default="手动添加", max_length=64)
     keywords: list[SkillTag] = Field(default_factory=list, max_length=500)

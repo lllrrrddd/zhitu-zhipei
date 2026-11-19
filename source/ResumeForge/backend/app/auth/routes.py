@@ -174,9 +174,15 @@ def reset_with_code(payload: ResetRequest) -> dict[str, object]:
     return {"ok": True}
 
 
+def require_invite() -> bool:
+    """是否强制邀请码。默认关（开放注册）；公网部署建议打开。"""
+    return os.environ.get("ZY_REQUIRE_INVITE", "").strip().lower() in {"1", "true", "yes"}
+
+
 @router.get("/config")
 def auth_config() -> dict[str, object]:
-    return {"requireLogin": require_login()}
+    # requireInvite 给前端用：注册表单据此把邀请码标成必填并显示提示。
+    return {"requireLogin": require_login(), "requireInvite": require_invite()}
 
 
 @router.get("/me")
@@ -188,7 +194,12 @@ def me(request: Request) -> dict[str, object]:
 def register(payload: RegisterRequest, response: Response) -> dict[str, object]:
     try:
         user = register_user(
-            AUTH_DB_PATH, payload.account, payload.password, payload.display_name, payload.invite
+            AUTH_DB_PATH,
+            payload.account,
+            payload.password,
+            payload.display_name,
+            payload.invite,
+            require_invite=require_invite(),
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

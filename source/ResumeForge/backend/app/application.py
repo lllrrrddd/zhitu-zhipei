@@ -10,9 +10,11 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import JSONResponse
 
 from . import (
@@ -315,10 +317,38 @@ def _validation_message(error: dict[str, Any]) -> str:
     if type_ == "too_long":
         maximum = context.get("max_length")
         return f"最多允许 {maximum} 项" if maximum else "数量太多"
+    # 数值上下界（Query/Field 的 ge/le）：以前落到兜底文案"参数格式不正确"，
+    # 用户不知道允许范围，只能猜。这里把边界直接写出来。
+    if type_ in {"greater_than_equal", "greater_than"}:
+        bound = context.get("ge", context.get("gt"))
+        return f"数值不能小于 {bound}" if bound is not None else "数值过小"
+    if type_ in {"less_than_equal", "less_than"}:
+        bound = context.get("le", context.get("lt"))
+        return f"数值不能大于 {bound}" if bound is not None else "数值过大"
     if type_ in {"literal_error", "enum"}:
         expected = str(context.get("expected") or "").strip()
         return f"取值不在允许范围内（可选值：{expected}）" if expected else "取值不在允许范围内"
     return _VALIDATION_TYPE_MESSAGES.get(type_) or "参数格式不正确"
+
+
+
+async def _http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """让 404 / 405 也返回 {detail} JSON。
+
+    Starlette 默认对这两类返回纯文本 ``Not Found`` / ``Method Not Allowed``，
+    前端按 JSON 解析会炸，客户端也没法统一处理——同一个服务两种错误格式说不过去。
+    其余状态码原样透传（业务异常自己带 detail）。
+    """
+    assert isinstance(exc, StarletteHTTPException)
+    if exc.status_code in {404, 405} and exc.detail in {"Not Found", "Method Not Allowed"}:
+        detail = "接口不存在" if exc.status_code == 404 else "该接口不支持此请求方法"
+        response = JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": detail},
+            headers=getattr(exc, "headers", None) or None,
+        )
+        return response
+    return await http_exception_handler(request, exc)
 
 
 async def _validation_error_handler(_request: Request, exc: Exception) -> JSONResponse:
@@ -504,6 +534,7 @@ def create_app() -> FastAPI:
     install_routers(app)
     # 422 参数校验统一中文文案 + 不回显输入原文（AI 端点与其它写入端点共用）。
     app.add_exception_handler(RequestValidationError, _validation_error_handler)
+    app.add_exception_handler(StarletteHTTPException, _http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception)
     # 资料大字段/组的存储层异常（F1）：统一映射为 {detail, code, **extra}。
     # Starlette 按异常 MRO 挑最近的处理器，子类（ValidationError / RevisionConflict…）

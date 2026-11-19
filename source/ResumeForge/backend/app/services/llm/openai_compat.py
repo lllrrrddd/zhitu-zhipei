@@ -309,7 +309,7 @@ class OpenAICompatProvider(BaseLLMProvider):
                     # 既有 400 降级语义原样保留：先判断是否"服务商不认参数"。
                     # 内存不足单独成文案：这类失败重试必然再失败，不该让人一直点"重试"。
                     if signal.reason and signal.status != 400:
-                        final = LLMError(payload_rules.oom_message(signal.reason))
+                        final = LLMError(payload_rules.oom_message(signal.reason), actionable=True)
                     else:
                         final = _status_error(signal.status)
                     drop_tools, drop_thinking = self._degrade_for_rejected_parameter(
@@ -404,6 +404,11 @@ class OpenAICompatProvider(BaseLLMProvider):
                             await response.aread()
                         except Exception:  # noqa: BLE001
                             pass
+                        if payload_rules.context_overflow(response.text):
+                            raise LLMError(
+                                payload_rules.context_overflow_message(response.text),
+                                actionable=True,
+                            )
                         raise StatusRetrySignal(
                             response.status_code,
                             response.headers.get("retry-after"),
@@ -576,9 +581,13 @@ class OpenAICompatProvider(BaseLLMProvider):
         # 上游正文可能回显请求或敏感资料，所以**不把正文带进错误消息**。
         # 但"内存不足"这一类必须单独识别：本地跑模型时它是最常见的失败，
         # 报成"模型服务内部错误，请稍后重试"会让人一直重试同一个必然失败的操作。
-        reason = payload_rules.oom_kind(response.text)
+        body = response.text or ""
+        if payload_rules.context_overflow(body):
+            logger.warning("LLM 调用失败 status=%s 原因=上下文超限", status)
+            return LLMError(payload_rules.context_overflow_message(body), actionable=True)
+        reason = payload_rules.oom_kind(body)
         if reason is not None:
             logger.warning("LLM 调用失败 status=%s 原因=内存不足(%s)", status, reason)
-            return LLMError(payload_rules.oom_message(reason))
+            return LLMError(payload_rules.oom_message(reason), actionable=True)
         logger.warning("LLM 调用失败 status=%s", status)
         return payload_rules.status_error(status)

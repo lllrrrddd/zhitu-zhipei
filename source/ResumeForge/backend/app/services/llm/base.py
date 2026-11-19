@@ -49,9 +49,14 @@ class LLMError(Exception):
     "余额不足"这类硬错误重复烧两遍钱。
     """
 
-    def __init__(self, message: str, *, retryable: bool = False) -> None:
+    def __init__(
+        self, message: str, *, retryable: bool = False, actionable: bool = False
+    ) -> None:
         super().__init__(message)
         self.retryable = retryable
+        # actionable=True 表示这条文案**是我们自己分类后写的**（如"内存不足""上下文超限"），
+        # 不含上游正文，可以直接展示给用户；否则上层一律用固定脱敏文案兜底。
+        self.actionable = actionable
 
 
 def log_llm_failure(category: str, detail: str) -> None:
