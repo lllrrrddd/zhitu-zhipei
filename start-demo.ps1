@@ -117,8 +117,19 @@ try {
     @{ backend_pid = $backend.Id; frontend_pid = $frontend.Id; backend_port = $BackendPort; frontend_port = $FrontendPort } |
         ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding utf8
     $url = "http://127.0.0.1:$FrontendPort/"
+    Write-Host ""
     Write-Host "职引已启动：$url"
     Write-Host "停止演示：& '$projectRoot/stop-demo.ps1'"
+    Write-Host ""
+    # 第一次用最容易困惑的两件事，直接打在窗口里——不要让人去猜为什么没有登录页、
+    # 为什么点「AI 生成」没反应。
+    Write-Host "说明（第一次用请看）"
+    Write-Host "  1) 当前是【单机演示模式】：不显示登录页，打开就是自己的数据。"
+    Write-Host "     要让别人用 / 要登录页：改用 scripts\start-lan.ps1（会要求账号登录）。"
+    Write-Host "  2) AI 功能（生成简历 / 面试 / 识别）需要先配模型："
+    Write-Host "     打开 $url" + "settings 填 Base URL 与模型名；本机不用模型就只能用规则匹配。"
+    Write-Host "     没配模型时点「AI 生成」会提示「尚未配置大模型 API」，这是预期行为，不是坏了。"
+    Write-Host ""
     if (-not $NoBrowser) {
         Start-Process $url
     }
