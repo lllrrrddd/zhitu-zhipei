@@ -20,7 +20,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.api import resumes as _api  # patch 锚点：调用期从包命名空间读取
 
@@ -393,6 +393,11 @@ def start_resume_generation(payload: GenerateRequest, db: Session = Depends(get_
             task.id,
             generation_snapshot=frozen,
             snapshot_id=int(snapshot_row.id),
+            # 把**本次请求所用的库**交给线程：托管模式下是用户库，与任务所在库必须一致，
+            # 否则线程在全局库里找不到这条任务，静默退出、任务永挂 pending。
+            session_factory=sessionmaker(
+                bind=db.get_bind(), autoflush=False, expire_on_commit=False
+            ),
         )
     except ResumeGenerateRunnerError as exc:
         # 启动失败（极端竞态：恰好有另一条任务刚被创建）：回滚这条空任务与空快照，

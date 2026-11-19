@@ -103,8 +103,15 @@ class ResumeGenerateRunner:
         *,
         generation_snapshot: GenerationSnapshot | None = None,
         snapshot_id: int | None = None,
+        session_factory: Callable[[], Any] | None = None,
     ) -> None:
-        """启动后台生成任务；generation_snapshot=创建时冻结的消费快照（F3 §1）。"""
+        """启动后台生成任务；generation_snapshot=创建时冻结的消费快照（F3 §1）。
+
+        ``session_factory`` 是**调用方所在那份库**的工厂（多用户模式下是 users/<id>/resume_forge.db）。
+        不传时退回数据集租约的 engine——单用户/单数据集下两者是同一个库，托管模式下不是：
+        任务写在用户库、线程却去全局库找它，`session.get()` 返回 None 后线程静默退出，
+        任务永远停在 pending（线上表现就是"点生成没反应、进度条不动"）。
+        """
         with self._lock:
             if self._thread is not None and self._thread.is_alive():
                 raise ResumeGenerateRunnerError("已有简历生成任务正在进行中")
@@ -114,12 +121,10 @@ class ResumeGenerateRunner:
             except DatasetScopeError as exc:
                 raise ResumeGenerateRunnerError(str(exc)) from exc
             self._lease = lease
-            self._frozen_factory = (
-                self._session_factory
-                if self._session_factory is not None
-                else sessionmaker(
-                    bind=lease.identity.engine, autoflush=False, expire_on_commit=False
-                )
+            # 优先级：测试注入 > 调用方（请求所在库）> 租约 engine。
+            # 注入排在最前是为了让测试的 spy 工厂仍然生效——它观察的就是 runner 的提交。
+            self._frozen_factory = self._session_factory or session_factory or sessionmaker(
+                bind=lease.identity.engine, autoflush=False, expire_on_commit=False
             )
             self._stop.clear()
             self._current_task_id = task_id
