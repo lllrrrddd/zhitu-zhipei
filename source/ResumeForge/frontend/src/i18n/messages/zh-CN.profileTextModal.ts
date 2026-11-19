@@ -4,6 +4,9 @@
  * 上传与解析状态、校对提示、动作按钮，以及多条警告之间的分隔符。
  */
 const profileTextModal = {
+  /** 空输入点「识别并填入」时的提示：以前是静默返回，用户以为按钮坏了。 */
+  "profileTextModal.warning.emptyInput":
+    "请先粘贴资料、上传文档或截图，再点「识别并填入」",
   /** 简历资料宿主：弹窗标题。 */
   "profileTextModal.profile.title": "粘贴个人资料并识别",
   /** 简历资料宿主：输入框占位示例（保留用户粘贴时的分行形态）。 */

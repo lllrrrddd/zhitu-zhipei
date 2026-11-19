@@ -5,6 +5,8 @@
  * notices, action buttons, and the separator that joins several warnings.
  */
 const profileTextModal = {
+  "profileTextModal.warning.emptyInput":
+    "Paste some text, upload a document or a screenshot first, then click Recognize.",
   "profileTextModal.profile.title": "Paste Profile details and recognize",
   "profileTextModal.profile.placeholder":
     "e.g.\nName: Alex Chen\nEducation\nExample University | Marketing | Bachelor's degree | 2022.09-2026.06\nProjects\nCampus job fair planning | Lead | Event planning, partner outreach",

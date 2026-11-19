@@ -227,7 +227,12 @@ export function useProfileRecognition({
 
   const parse = async () => {
     const content = text.trim();
-    if (!content && files.length === 0) return;
+    if (!content && files.length === 0) {
+      // 以前这里直接 return：按钮点下去什么都不发生，用户以为坏了。
+      // 空输入是最常见的误点场景，必须明确告诉他缺什么。
+      message.warning(t("profileTextModal.warning.emptyInput"));
+      return;
+    }
     const controller = new AbortController();
     abortRef.current = controller;
     setParsing(true);
