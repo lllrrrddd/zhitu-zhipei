@@ -258,9 +258,12 @@ class JobImportRequest(BaseModel):
 
 
 class JobImportResult(BaseModel):
-    """CSV 导入的账目：成功多少、逐行失败原因（含重复跳过）。"""
+    """CSV 导入的账目：成功多少、跳过多少、逐行失败原因。"""
 
-    imported: int = 0
+    imported: int
+    # 与广场已有岗位重复的行：**跳过不是失败**，混在 failed 里会让界面显示成
+    # "导入失败"，用户以为数据坏了。
+    skipped: list[dict[str, object]] = Field(default_factory=list)
     failed: list[dict[str, object]] = Field(default_factory=list)
 
 

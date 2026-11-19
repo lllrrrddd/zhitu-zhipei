@@ -289,6 +289,11 @@ export interface JobImportPreview {
 
 export interface JobImportResult {
   imported: number;
+  /**
+   * 与广场已有岗位重复、被跳过的行。
+   * 这些**不是失败**：后端以前混在 failed 里，界面只能靠"已跳过"这几个字反推。
+   */
+  skipped?: { line: number; message: string }[];
   failed: { line: number; message: string }[];
 }
 

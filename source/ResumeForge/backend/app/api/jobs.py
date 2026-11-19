@@ -413,6 +413,7 @@ def import_jobs_csv(payload: JobImportRequest, db: Session = Depends(get_db)):
     """提交导入：逐行建岗、逐行容错；与岗位广场已有岗位重复的行跳过并说明。"""
     imported = 0
     failed: list[dict[str, object]] = []
+    skipped: list[dict[str, object]] = []
     for item in payload.rows:
         try:
             clean = row_to_payload(item.data)
@@ -420,14 +421,14 @@ def import_jobs_csv(payload: JobImportRequest, db: Session = Depends(get_db)):
             company = str(clean.get("company") or "")
             source_url = str(clean.get("source_url") or "")
             if find_job_by_identity(db, title=title, company=company, source_url=source_url):
-                failed.append({"line": item.line, "message": "岗位广场已有这个岗位，已跳过"})
+                skipped.append({"line": item.line, "message": "岗位广场已有这个岗位，已跳过"})
                 continue
             create_job_record(db, JobCreate(**clean))
             imported += 1
         except Exception as exc:  # noqa: BLE001 - 单行失败不拖垮整批，逐行给原因
             db.rollback()
             failed.append({"line": item.line, "message": str(exc) or "这一行导入失败"})
-    return JobImportResult(imported=imported, failed=failed)
+    return JobImportResult(imported=imported, failed=failed, skipped=skipped)
 
 
 @router.get("/{job_id}", response_model=JobOut)

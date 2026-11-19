@@ -77,12 +77,14 @@ def test_import_commit_creates_jobs_and_skips_duplicates(client):
 
     first = client.post("/api/jobs/import", json={"rows": preview["rows"]})
     assert first.status_code == 200
-    assert first.json() == {"imported": 1, "failed": []}
+    assert first.json() == {"imported": 1, "failed": [], "skipped": []}
 
+    # 重复导入是"跳过"而不是"失败"：塞进 failed 会让界面显示成导入失败。
     again = client.post("/api/jobs/import", json={"rows": preview["rows"]})
     assert again.json() == {
         "imported": 0,
-        "failed": [{"line": 2, "message": "岗位广场已有这个岗位，已跳过"}],
+        "failed": [],
+        "skipped": [{"line": 2, "message": "岗位广场已有这个岗位，已跳过"}],
     }
 
     listing = client.get("/api/jobs", params={"keyword": "后端开发"}).json()

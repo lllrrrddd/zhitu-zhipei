@@ -102,13 +102,20 @@ def declared_mime(value: str) -> str:
 
 def decode_data_url(data: str) -> tuple[str, bytes]:
     """解析 data URL 为 (MIME 类型, 原始字节)；非 base64 或格式非法抛 ValueError。"""
-    match = _DATA_URL_RE.fullmatch(data)
+    raw = (data or "").strip()
+    # 空文件经前端编码后就是一个没有载荷的 data URL。以前它会掉进"必须使用 base64 编码"，
+    # 用户以为是格式问题，其实是文件本身是 0 字节——提示必须指向真因。
+    if not raw or raw in {"data:", "data:;base64,"} or raw.endswith(";base64,"):
+        raise ValueError("附件是空文件（0 字节），请重新选择")
+    match = _DATA_URL_RE.fullmatch(raw)
     if match is None:
-        raise ValueError("附件 data URL 必须使用 base64 编码")
+        raise ValueError("附件内容格式不正确，请重新选择文件")
     try:
         decoded = base64.b64decode(match.group(2), validate=True)
     except (binascii.Error, ValueError) as exc:
         raise ValueError("附件不是有效的 base64 数据") from exc
+    if not decoded:
+        raise ValueError("附件是空文件（0 字节），请重新选择")
     return match.group(1).casefold(), decoded
 
 
