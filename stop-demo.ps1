@@ -18,4 +18,4 @@ foreach ($entry in @(
     }
 }
 Remove-Item -LiteralPath $pidFile
-Write-Host '职途智配演示已停止。'
+Write-Host '职引演示已停止。'

@@ -2,6 +2,10 @@
     [ValidateRange(1024, 65535)][int]$BackendPort = 8005,
     [ValidateRange(1024, 65535)][int]$FrontendPort = 5173,
     [switch]$NoBrowser,
+    # 默认启动后灌一份演示岗位（否则岗位列表是空的，README 里的"177 条"对不上）。
+    # 抓取要好网；离线或不想等就加 -NoSeed，自己再刷新岗位。
+    [switch]$NoSeed,
+    # 兼容旧调用：等价于默认行为（灌数据），保留这个名字免得外部脚本报参数错误。
     [switch]$LegacySamples
 )
 
@@ -84,16 +88,18 @@ try {
     if (-not $ready) {
         throw "启动未就绪。请检查 $runtimeDir 下的 backend.err.log 和 frontend.err.log。"
     }
-    if ($LegacySamples) {
+    if (-not $NoSeed) {
+        Write-Host '正在导入演示岗位（首次约 1–2 分钟，可 Ctrl+C 后加 -NoSeed 跳过）…'
         & $python (Join-Path $projectRoot 'scripts/seed_official_jobs.py') $BackendPort (Join-Path $runtimeDir 'data/official-seed-state.json')
         if ($LASTEXITCODE -ne 0) {
-            throw '旧版样本导入失败，请检查后端日志。'
+            # 不抛异常：种子失败通常是网络问题，页面本身是可用的，让用户自己点"刷新岗位"。
+            Write-Warning '演示岗位导入失败（多为网络原因）。页面仍可使用，进首页点「刷新岗位」重试。'
         }
     }
     @{ backend_pid = $backend.Id; frontend_pid = $frontend.Id; backend_port = $BackendPort; frontend_port = $FrontendPort } |
         ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding utf8
     $url = "http://127.0.0.1:$FrontendPort/"
-    Write-Host "职途智配已启动：$url"
+    Write-Host "职引已启动：$url"
     Write-Host "停止演示：& '$projectRoot/stop-demo.ps1'"
     if (-not $NoBrowser) {
         Start-Process $url

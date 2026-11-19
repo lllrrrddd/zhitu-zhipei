@@ -1,6 +1,6 @@
 samples/private/
 evaluation/graduate_benchmark_v0/private_trials/
-runtime/
+/runtime/
 requirements/
 submission/
 source/SyntheticResumeData/
