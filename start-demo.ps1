@@ -39,17 +39,35 @@ if (Test-Path -LiteralPath $pidFile) {
         $null -ne $process -and $process.CommandLine -like "*$($_.marker)*"
     }
     if ($activeDemo.Count -gt 0) {
-        throw "已有演示进程正在运行。请先运行 stop-demo.ps1。"
+        # 只有一半活着（后端挂了、前端还开着）是最常见的情况：以前这里直接抛
+        # "已有演示进程正在运行"，用户去 stop-demo 又因为端口没释放而卡住。
+        # 这些进程是我们自己的（按命令行 marker 认过），直接清掉继续启动更省事。
+        foreach ($item in $activeDemo) {
+            try {
+                Stop-Process -Id $item.id -Force -ErrorAction Stop
+                Write-Host "已结束后台上残留的演示进程 PID=$($item.id)（$($item.marker)）"
+            } catch {
+                Write-Warning "残留进程 PID=$($item.id) 结束失败，请手动处理后再试。"
+            }
+        }
+        Start-Sleep -Milliseconds 800
     }
-    Remove-Item -LiteralPath $pidFile
-    Write-Host '发现上次演示的失效进程记录，已清理。'
+    try { Remove-Item -LiteralPath $pidFile -Force -ErrorAction Stop } catch { }
+    Write-Host '已清理上次演示的进程记录。'
 }
 if ($BackendPort -eq $FrontendPort) {
     throw '前后端端口不能相同。'
 }
 foreach ($port in @($BackendPort, $FrontendPort)) {
     if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
-        throw "端口 $port 已被占用，请换一个端口。"
+        $owner = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+        $name = ''
+        if ($null -ne $owner) {
+            $proc = Get-Process -Id $owner.OwningProcess -ErrorAction SilentlyContinue
+            if ($null -ne $proc) { $name = "（PID=$($proc.Id) $($proc.ProcessName)）" }
+        }
+        throw "端口 $port 已被占用$name。要么结束该进程，要么换端口：start-demo.ps1 -BackendPort 8010 -FrontendPort 5180"
     }
 }
 
