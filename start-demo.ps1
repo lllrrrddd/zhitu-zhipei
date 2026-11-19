@@ -89,7 +89,7 @@ try {
         throw "启动未就绪。请检查 $runtimeDir 下的 backend.err.log 和 frontend.err.log。"
     }
     if (-not $NoSeed) {
-        Write-Host '正在导入演示岗位（首次约 1–2 分钟，可 Ctrl+C 后加 -NoSeed 跳过）…'
+        Write-Host '正在导入演示岗位（读本地样例，几秒完成；不想导入可加 -NoSeed）…'
         & $python (Join-Path $projectRoot 'scripts/seed_official_jobs.py') $BackendPort (Join-Path $runtimeDir 'data/official-seed-state.json')
         if ($LASTEXITCODE -ne 0) {
             # 不抛异常：种子失败通常是网络问题，页面本身是可用的，让用户自己点"刷新岗位"。

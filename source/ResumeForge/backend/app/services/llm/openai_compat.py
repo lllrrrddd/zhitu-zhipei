@@ -175,6 +175,12 @@ class OpenAICompatProvider(BaseLLMProvider):
                             if response.status_code != 200:
                                 # 429/5xx 只发生在 body 之前（安全点规则：首个 delta 之前）。
                                 # 重试编排（计数/退避/终态文案）在 retry.StatusRetryGate。
+                                # 错误响应体很小，先读进来**仅用于分类**（例如识别"内存不足"），
+                                # 正文永远不进用户可见的错误消息。
+                                try:
+                                    await response.aread()
+                                except Exception:  # noqa: BLE001 —— 读不到就退回状态码文案
+                                    pass
                                 delay = gate.next_delay(
                                     response.status_code, response.headers.get("retry-after")
                                 )
@@ -301,8 +307,13 @@ class OpenAICompatProvider(BaseLLMProvider):
                         await retry.retry_sleep(delay)
                         continue
                     # 既有 400 降级语义原样保留：先判断是否"服务商不认参数"。
+                    # 内存不足单独成文案：这类失败重试必然再失败，不该让人一直点"重试"。
+                    if signal.reason and signal.status != 400:
+                        final = LLMError(payload_rules.oom_message(signal.reason))
+                    else:
+                        final = _status_error(signal.status)
                     drop_tools, drop_thinking = self._degrade_for_rejected_parameter(
-                        gate.final_error(signal.status, _status_error(signal.status)),
+                        gate.final_error(signal.status, final),
                         tools,
                         drop_tools=drop_tools,
                         drop_thinking=drop_thinking,
@@ -387,8 +398,16 @@ class OpenAICompatProvider(BaseLLMProvider):
                     if response.status_code != 200:
                         # 状态码阶段（尚未产出任何 delta）：交给 stream_chat_events 的重试
                         # 循环决定退避重试或按既有语义转成 LLMError（含 400 降级）。
+                        # 错误响应体很小，读进来只用于分类（例如识别"内存不足"），
+                        # 正文不会进入用户可见的文案。
+                        try:
+                            await response.aread()
+                        except Exception:  # noqa: BLE001
+                            pass
                         raise StatusRetrySignal(
-                            response.status_code, response.headers.get("retry-after")
+                            response.status_code,
+                            response.headers.get("retry-after"),
+                            payload_rules.oom_kind(response.text),
                         )
                     total_chars = 0
                     pending: dict[int, dict] = {}
@@ -554,6 +573,12 @@ class OpenAICompatProvider(BaseLLMProvider):
     @staticmethod
     def _http_error(response: httpx.Response) -> LLMError:
         status = response.status_code
-        # 上游正文可能回显请求或敏感资料，只记录状态码。
+        # 上游正文可能回显请求或敏感资料，所以**不把正文带进错误消息**。
+        # 但"内存不足"这一类必须单独识别：本地跑模型时它是最常见的失败，
+        # 报成"模型服务内部错误，请稍后重试"会让人一直重试同一个必然失败的操作。
+        reason = payload_rules.oom_kind(response.text)
+        if reason is not None:
+            logger.warning("LLM 调用失败 status=%s 原因=内存不足(%s)", status, reason)
+            return LLMError(payload_rules.oom_message(reason))
         logger.warning("LLM 调用失败 status=%s", status)
         return payload_rules.status_error(status)

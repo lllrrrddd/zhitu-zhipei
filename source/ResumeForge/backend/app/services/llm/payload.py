@@ -42,6 +42,38 @@ def status_error(status: int) -> LLMError:
     return LLMError(f"{http_error_message(status)}（HTTP {status}）")
 
 
+# 内存不足的**特征串**：只做分类，不回显上游正文（正文可能含请求内容）。
+_OOM_SIGNATURES = (
+    "out-of-memory",
+    "out of memory",
+    "failed to allocate buffer",
+    "ggml_backend_cpu_buffer_type_alloc_buffer",
+    "cuda out of memory",
+    "cublas_status_alloc_failed",
+    "insufficient memory",
+)
+
+
+def oom_kind(body: str) -> str | None:
+    """上游错误里是否在喊内存不足。返回 ``cpu`` / ``gpu`` / None（仅用于选择文案）。"""
+    text = (body or "").lower()
+    if not text:
+        return None
+    if not any(sig in text for sig in _OOM_SIGNATURES):
+        return None
+    return "gpu" if ("cuda" in text or "cublas" in text) else "cpu"
+
+
+def oom_message(kind: str) -> str:
+    """内存不足时给用户**能照做**的提示，而不是"稍后重试"。"""
+    if kind == "gpu":
+        return "模型服务显存不足，加载失败。请关闭占用显存的程序，或换更小的模型后重试"
+    return (
+        "模型服务内存不足，加载失败（本机内存或页面文件已接近上限）。"
+        "请关闭一些程序后重试，或在「设置」里换更小的模型"
+    )
+
+
 def looks_like_rejected_parameter(error: LLMError) -> bool:
     """判断这次失败是否像"服务商不认某个可选参数"（tools 或思考参数）。
 

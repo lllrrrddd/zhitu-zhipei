@@ -50,9 +50,14 @@ class StatusRetrySignal(Exception):
     拒绝降级"语义在那里原样保留。
     """
 
-    def __init__(self, status: int, retry_after: str | None = None):
+    def __init__(
+        self, status: int, retry_after: str | None = None, reason: str | None = None
+    ):
         super().__init__(f"HTTP {status}")
         self.status = status
+        # 只放**分类结果**（如 "cpu" 表示内存不足），不放上游正文：
+        # 正文可能回显请求内容，而分类结果足以让终态文案变得可操作。
+        self.reason = reason
         self.retry_after = retry_after
 
 
