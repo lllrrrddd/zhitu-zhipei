@@ -1,4 +1,4 @@
-param([ValidateRange(1, 4)][int]$Workers = 2)
+﻿param([ValidateRange(1, 4)][int]$Workers = 2)
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent

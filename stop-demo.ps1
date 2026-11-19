@@ -17,5 +17,10 @@ foreach ($entry in @(
         Stop-Process -Id $entry.id -Force
     }
 }
-Remove-Item -LiteralPath $pidFile
+# 进程已经停了，删记录文件只是收尾：被占用/被杀软拦下时不该让用户看到一堆报错。
+try {
+    Remove-Item -LiteralPath $pidFile -Force -ErrorAction Stop
+} catch {
+    Write-Warning "演示已停止，但进程记录文件没删掉：$pidFile（可手动删除，不影响使用）"
+}
 Write-Host '职引演示已停止。'
