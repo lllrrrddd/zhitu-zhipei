@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import ErrorState from "../components/common/ErrorState";
+import { useAutoOpenOnce } from "../hooks/useAutoOpenOnce";
 import PageSkeleton from "../components/common/PageSkeleton";
 import ProfilePageHeader from "../components/profile/ProfilePageHeader";
 import ProfileEditActionBar from "../components/profile/ProfileEditActionBar";
@@ -65,26 +66,24 @@ export default function ProfilePage() {
   const handleStartEditing = useCallback(() => {
     if (!profile.loading && !profile.loadError) profileSetEditing(true);
   }, [profile.loadError, profile.loading, profileSetEditing]);
-  // 只允许自动打开**一次**。
-  // 以前的写法把 `profile.recognition` 这个每渲染都新建的对象放进依赖里，导致 effect
-  // 每渲染重跑一次：用户点关闭 → open 变 false → 重渲染 → effect 又调 openModal()，
-  // 弹窗立刻回来，看起来就是"点关闭没反应"（而 Console 里明明打印了收到关闭请求）。
-  const autoImportOpened = useRef(false);
-  useEffect(() => {
-    if (autoImportOpened.current) return;
-    if (profile.loading || profile.loadError || searchParams.get("import") !== "1") return;
-    autoImportOpened.current = true;
-    handleStartEditing();
-    profile.recognition.openModal();
-    setSearchParams(
-      (previous) => {
-        const next = new URLSearchParams(previous);
-        next.delete("import");
-        return next;
-      },
-      { replace: true },
-    );
-  }, [handleStartEditing, profile.loading, profile.loadError, searchParams, setSearchParams]);
+  // 只允许自动打开一次：以前把 `profile.recognition`（每渲染新建的对象）放进依赖，
+  // 导致关掉弹窗后立刻被重开（用户看到"点关闭没反应"）。语义见 useAutoOpenOnce。
+  useAutoOpenOnce(
+    searchParams.get("import") === "1",
+    !profile.loading && !profile.loadError,
+    () => {
+      handleStartEditing();
+      profile.recognition.openModal();
+      setSearchParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          next.delete("import");
+          return next;
+        },
+        { replace: true },
+      );
+    },
+  );
   const webform = useProfileWebFormBridge({
     editing: profile.editing,
     saving: profile.saving,
