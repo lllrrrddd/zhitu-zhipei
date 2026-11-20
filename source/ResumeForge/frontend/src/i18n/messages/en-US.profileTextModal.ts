@@ -20,6 +20,9 @@ const profileTextModal = {
   "profileTextModal.action.cancel": "Cancel",
   "profileTextModal.action.close": "Close",
   "profileTextModal.action.cancelRecognize": "Cancel recognition",
+  "profileTextModal.action.refine": "Refine with AI",
+  "profileTextModal.review.localOnly":
+    "Extracted by local rules (a few seconds, no model used). Click \"Refine with AI\" for higher accuracy — a local model may take 1–3 minutes.",
   "profileTextModal.action.recognize": "Recognize and fill in",
   "profileTextModal.action.apply": "Fill in {count} items",
   "profileTextModal.review.count":

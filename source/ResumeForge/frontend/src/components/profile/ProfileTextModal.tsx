@@ -71,6 +71,8 @@ interface Props {
   /** 非 null 即进入校对阶段（内容就是识别结果的行）。 */
   rows?: RecognitionReviewRow[] | null;
   onRowsChange?: (rows: RecognitionReviewRow[]) => void;
+  /** 「AI 精修」：用模型把本地规则的结果再排一遍（长文本默认先本地秒出）。 */
+  onRefine?: () => void;
   /** 「确认填入」：把校对后的清单写进表单。 */
   onApply?: () => void;
   /** 「取消」：放弃这次识别结果，不写表单。 */
@@ -98,6 +100,7 @@ export default function ProfileTextModal({
   mode = "profile",
   rows = null,
   onRowsChange,
+  onRefine,
   onApply,
   onDiscard,
   onCancelParse,
@@ -176,6 +179,13 @@ export default function ProfileTextModal({
       footer={
         reviewing
           ? [
+              // 本地规则的结果先给用户，想更准再花时间精修——不要让"导入"这一个动作
+              // 绑死在模型上等三分钟（实测本机 CPU 模型 180s，且常常回退本地）。
+              recognitionSource === "local" && onRefine ? (
+                <Button key="refine" onClick={onRefine} disabled={parsing} loading={parsing}>
+                  {t("profileTextModal.action.refine")}
+                </Button>
+              ) : null,
               <Button key="discard" onClick={onDiscard}>
                 {t("profileTextModal.action.cancel")}
               </Button>,
@@ -218,6 +228,14 @@ export default function ProfileTextModal({
               title={warnings.join(t("profileTextModal.separator.warning"))}
             />
           )}
+          {recognitionSource === "local" ? (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 8 }}
+              title={t("profileTextModal.review.localOnly")}
+            />
+          ) : null}
           <RecognitionReviewList rows={rows} onChange={onRowsChange ?? (() => undefined)} />
           <RecognitionOutcome source={recognitionSource} text={recognizedText} />
         </>

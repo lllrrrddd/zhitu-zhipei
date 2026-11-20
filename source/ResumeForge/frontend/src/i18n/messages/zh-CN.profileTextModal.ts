@@ -30,6 +30,11 @@ const profileTextModal = {
   /** 识别中替代主按钮：中止请求。 */
   "profileTextModal.action.cancelRecognize": "取消识别",
   /** 输入阶段主按钮：开始识别并填入。 */
+  /** 校对阶段：用模型把本地规则的结果再排一遍。 */
+  "profileTextModal.action.refine": "AI 精修",
+  /** 校对阶段提示：这份结果是本地规则出的，没占用模型。 */
+  "profileTextModal.review.localOnly":
+    "当前结果由本地规则提取（几秒完成，未使用模型）。想要更准可点「AI 精修」，本机模型可能需要 1–3 分钟。",
   "profileTextModal.action.recognize": "识别并填入",
   /** 校对阶段主按钮：{count} 是将写入表单的条目数。 */
   "profileTextModal.action.apply": "确认填入 {count} 项",

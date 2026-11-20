@@ -31,11 +31,21 @@ interface Options {
   activateResumeWorkspace?: () => void;
 }
 
+/**
+ * 超过这个字数就先走本地规则。
+ *
+ * 600 字大约是"一页简历"的量；再长模型解析在本机 CPU 上就会分钟级，而结果往往
+ * 和本地规则一样（模型超时后回退）。短文本仍然直接走模型，质量更好也够快。
+ */
+const LOCAL_FIRST_CHARS = 600;
+
 export interface ProfileRecognitionApi {
   parsing: boolean;
   modal: ComponentProps<typeof ProfileTextModal>;
   openModal: () => void;
   close: () => void;
+  /** 用模型把本地规则的结果再排一遍（长文本默认先本地秒出）。 */
+  refine: () => Promise<void>;
 }
 
 /** 服务端新目录草稿（与 backend/app/api/profile.py 的 ProfileDraft*Out 对齐）。 */
@@ -225,14 +235,14 @@ export function useProfileRecognition({
     abortRef.current = null;
   };
 
-  const parse = async () => {
+  /**
+   * 真正发识别请求。
+   *
+   * `localOnly` = 只走本地规则（秒级返回，不调模型）；`keepRowsOnError` = 精修失败时
+   * 保留已经拿到的本地结果，而不是把用户的清单清空。
+   */
+  const runParse = async ({ localOnly, keepRowsOnError }: { localOnly: boolean; keepRowsOnError: boolean }) => {
     const content = text.trim();
-    if (!content && files.length === 0) {
-      // 以前这里直接 return：按钮点下去什么都不发生，用户以为坏了。
-      // 空输入是最常见的误点场景，必须明确告诉他缺什么。
-      message.warning(t("profileTextModal.warning.emptyInput"));
-      return;
-    }
     const controller = new AbortController();
     abortRef.current = controller;
     setParsing(true);
@@ -249,6 +259,7 @@ export function useProfileRecognition({
           if (requestId === requestIdRef.current) setUploadPercent(percent);
         },
         controller.signal,
+        localOnly ? { localOnly: true } : undefined,
       )) as ParseDraftResult;
       if (requestId !== requestIdRef.current) return;
       setWarnings(parsed.warnings);
@@ -259,7 +270,7 @@ export function useProfileRecognition({
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
       if (!isCancellation(err)) {
-        setRows(null);
+        if (!keepRowsOnError) setRows(null);
         message.error(err instanceof Error ? err.message : t("profileLibrary.error.unknown"));
       }
     } finally {
@@ -269,6 +280,30 @@ export function useProfileRecognition({
       }
       if (abortRef.current === controller) abortRef.current = null;
     }
+  };
+
+  /**
+   * 入口：长文本/带附件时**先本地规则秒出**，再让用户决定要不要 AI 精修。
+   *
+   * 原因（实测）：一份真实简历在本机 CPU 4B 模型上要 180 秒，而且最后往往还是回退到
+   * 本地规则（模型超时）。让用户干等三分钟换一个同样的结果没有意义——先把能用的清单
+   * 给他，想要更准再点一次「AI 精修」。
+   */
+  const parse = async () => {
+    const content = text.trim();
+    if (!content && files.length === 0) {
+      // 以前这里直接 return：按钮点下去什么都不发生，用户以为坏了。
+      // 空输入是最常见的误点场景，必须明确告诉他缺什么。
+      message.warning(t("profileTextModal.warning.emptyInput"));
+      return;
+    }
+    const heavy = content.length > LOCAL_FIRST_CHARS || files.length > 0;
+    await runParse({ localOnly: heavy, keepRowsOnError: false });
+  };
+
+  /** 「AI 精修」：显式再跑一次带模型的识别；失败保留本地结果。 */
+  const refine = async () => {
+    await runParse({ localOnly: false, keepRowsOnError: true });
   };
 
   const apply = () => {
@@ -310,7 +345,8 @@ export function useProfileRecognition({
     onPasteFiles: onPaste,
     onClose: close,
     onParse: () => void parse(),
+    onRefine: () => void refine(),
   } satisfies ComponentProps<typeof ProfileTextModal>;
 
-  return { parsing, modal, openModal, close };
+  return { parsing, modal, openModal, close, refine };
 }
