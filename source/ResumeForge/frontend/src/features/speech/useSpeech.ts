@@ -114,26 +114,42 @@ export type DictationState = "idle" | "recording" | "transcribing";
 /**
  * 去掉首尾静音。
  *
- * 用户点"开始说话"到真正开口之间常有一两秒空白，结尾也常拖一截。这段静音不影响
- * 识别，但会把整段音频拉长、让模型更容易在开头"猜"出几个字。按 20ms 帧的 RMS
- * 判断，保留一点余量（前后各 100ms），避免把字头削掉。
+ * **阈值必须相对这段音频自己的电平**，不能写死：麦克风增益、离麦距离、是否开 AGC
+ * 都会让整体电平差一个数量级。写死阈值时，一段音量偏低的正常说话会被整段判成静音，
+ * 结果只剩末尾零点几秒——表现就是"只识别出一个字"（真实踩过）。
+ *
+ * 两道保险：
+ * 1. 整段峰值过低（< 0.02）→ 不动，直接送原始音频；
+ * 2. 裁完不足原长 30% 或不足 0.8 秒 → 放弃裁剪，用原始音频。
  */
-function trimSilence(samples: Float32Array, rate: number): Float32Array {
+export function trimSilence(samples: Float32Array, rate: number): Float32Array {
   const frame = Math.max(1, Math.round(rate * 0.02));
-  const threshold = 0.008; // 约 -42 dBFS：安静房间底噪在它下面
+
+  let peak = 0;
+  for (let i = 0; i < samples.length; i += 1) {
+    const value = Math.abs(samples[i]);
+    if (value > peak) peak = value;
+  }
+  if (peak < 0.02) return samples; // 安静到没法判断"哪里在说话"
+
+  const threshold = Math.max(0.008, peak * 0.12);
   const isLoud = (start: number) => {
     let sum = 0;
     const end = Math.min(start + frame, samples.length);
     for (let i = start; i < end; i += 1) sum += samples[i] * samples[i];
     return Math.sqrt(sum / Math.max(1, end - start)) > threshold;
   };
+
   let first = 0;
   while (first + frame < samples.length && !isLoud(first)) first += frame;
   let last = samples.length;
   while (last - frame > first && !isLoud(last - frame)) last -= frame;
-  if (first === 0 && last === samples.length) return samples;
+
   const pad = Math.round(rate * 0.1);
-  return samples.slice(Math.max(0, first - pad), Math.min(samples.length, last + pad));
+  const trimmed = samples.slice(Math.max(0, first - pad), Math.min(samples.length, last + pad));
+  // 保险二：裁得太狠就认为判错了，用原始音频（宁可留着静音，也不能把话裁没）。
+  if (trimmed.length < Math.max(rate * 0.8, samples.length * 0.3)) return samples;
+  return trimmed;
 }
 
 export function useLocalDictation(onText: (text: string) => void) {
@@ -234,6 +250,22 @@ export function useLocalDictation(onText: (text: string) => void) {
         setState("idle");
         return;
       }
+      // 留一行可核对的日志：只识别出一个字这类问题，看这两秒数就能判断是"录短了"
+      // 还是"裁没了"（真实排查时靠它定位过一次）。
+      // eslint-disable-next-line no-console
+      console.info(
+        "[语音] 录音 %.1fs → 送识别 %.1fs",
+        merged.length / rate,
+        trimmed.length / rate,
+      );
+      // 留一行可核对的日志：只识别出一个字这类问题，看这两秒数就能判断是"录短了"
+      // 还是"裁没了"（真实排查时靠它定位过一次）。
+      // eslint-disable-next-line no-console
+      console.info(
+        "[语音] 录音 %.1fs → 送识别 %.1fs",
+        merged.length / rate,
+        trimmed.length / rate,
+      );
       const body = new FormData();
       body.append("audio", encodeWav(trimmed, rate), "answer.wav");
       const response = await fetch("/api/interview/transcribe", { method: "POST", body });
