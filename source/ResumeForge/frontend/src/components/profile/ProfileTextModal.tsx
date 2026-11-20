@@ -13,8 +13,9 @@
  */
 
 import { FileSearchOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Input, Modal, Progress, Space, Spin, Typography } from "antd";
+import type { TextAreaRef } from "antd/es/input/TextArea";
 import type { MessageKey } from "../../i18n";
 import { t } from "../../i18n";
 import { useLocale } from "../../i18n/i18nContext";
@@ -121,9 +122,17 @@ export default function ProfileTextModal({
   useEffect(() => {
     if (text.trim() || files.length > 0) setEmptyHint(false);
   }, [text, files]);
+  // 空输入时把焦点送回输入框：用户常常以为"粘了"，其实焦点不在框里，
+  // Ctrl+V 落到了页面别处。聚焦后提示与下一次粘贴都更顺。
+  const textareaRef = useRef<TextAreaRef | null>(null);
   const handleParse = () => {
+    // 用户报"点了没反应"时，这行能立刻区分三种情况：没粘进来（0 字）、
+    // 粘进来了但没触发（>0 却没有任何请求）、或确实在跑。只打长度，不打内容。
+    // eslint-disable-next-line no-console
+    console.info("[识别] 点击识别：文本长度=%d，文件数=%d", text.trim().length, files.length);
     if (!text.trim() && files.length === 0) {
       setEmptyHint(true);
+      textareaRef.current?.focus();
       return;
     }
     setEmptyHint(false);
@@ -195,6 +204,7 @@ export default function ProfileTextModal({
         <>
           <Typography.Paragraph type="secondary">{t(copy.introKey)}</Typography.Paragraph>
           <Input.TextArea
+            ref={textareaRef}
             aria-label={t("profileTextModal.input.textAria")}
             value={text}
             disabled={parsing}
