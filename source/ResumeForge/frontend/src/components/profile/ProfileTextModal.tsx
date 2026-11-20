@@ -114,7 +114,13 @@ export default function ProfileTextModal({
   // 新字段只有在勾选后才计入"将写入 N 项"，所以这个数字就是用户眼前真正会发生的变化量。
   const confirmCount = rows ? rows.filter((row) => !row.isNew || row.selected).length : 0;
   // 关闭（X / ESC）在校对阶段等价于"放弃这次结果"，不能静默留下半份草稿。
-  const handleCancel = reviewing ? (onDiscard ?? onClose) : onClose;
+  // 「关闭 / ×」也打一行日志：如果点了这里 Console 没有这行，说明点击根本没到组件，
+  // 是被页面上的浮层或浏览器扩展截走了（这跟"识别"逻辑无关）。
+  const handleCancel = () => {
+    // eslint-disable-next-line no-console
+    console.info("[识别] 收到关闭请求");
+    (reviewing ? (onDiscard ?? onClose) : onClose)();
+  };
 
   // 空输入点「识别并填入」：toast 一闪就没了（何况视线在输入框上），
   // 改成输入框下方的常驻提示；一旦有内容或文件就自动消失。
