@@ -13,6 +13,8 @@ const common = {
   /** Abort button of every "click once, wait for the result" panel (`AbortButton`). */
   "common.action.stop": "Stop",
   "common.retry": "Retry",
+  "common.errorBoundary.home": "Back to home",
+  "common.errorBoundary.updating": "Updating to the latest version…",
   "common.errorBoundary.title.moduleLoad": "Part of the page code could not be loaded",
   "common.errorBoundary.title.generic": "This page is temporarily unavailable",
   "common.errorBoundary.body.moduleLoad":

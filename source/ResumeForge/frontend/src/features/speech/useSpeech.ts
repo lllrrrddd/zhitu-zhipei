@@ -111,6 +111,31 @@ export type DictationState = "idle" | "recording" | "transcribing";
  * ffmpeg. Capturing raw samples with a ScriptProcessor and writing a WAV header is
  * ~30 lines and removes that whole dependency chain.
  */
+/**
+ * 去掉首尾静音。
+ *
+ * 用户点"开始说话"到真正开口之间常有一两秒空白，结尾也常拖一截。这段静音不影响
+ * 识别，但会把整段音频拉长、让模型更容易在开头"猜"出几个字。按 20ms 帧的 RMS
+ * 判断，保留一点余量（前后各 100ms），避免把字头削掉。
+ */
+function trimSilence(samples: Float32Array, rate: number): Float32Array {
+  const frame = Math.max(1, Math.round(rate * 0.02));
+  const threshold = 0.008; // 约 -42 dBFS：安静房间底噪在它下面
+  const isLoud = (start: number) => {
+    let sum = 0;
+    const end = Math.min(start + frame, samples.length);
+    for (let i = start; i < end; i += 1) sum += samples[i] * samples[i];
+    return Math.sqrt(sum / Math.max(1, end - start)) > threshold;
+  };
+  let first = 0;
+  while (first + frame < samples.length && !isLoud(first)) first += frame;
+  let last = samples.length;
+  while (last - frame > first && !isLoud(last - frame)) last -= frame;
+  if (first === 0 && last === samples.length) return samples;
+  const pad = Math.round(rate * 0.1);
+  return samples.slice(Math.max(0, first - pad), Math.min(samples.length, last + pad));
+}
+
 export function useLocalDictation(onText: (text: string) => void) {
   const supported =
     typeof navigator !== "undefined" &&
@@ -139,8 +164,18 @@ export function useLocalDictation(onText: (text: string) => void) {
     setError("");
     chunksRef.current = [];
     try {
+      // 录音约束按"听写"而不是"打电话"来配：
+      // - echoCancellation / noiseSuppression 是为通话做的，会削掉字头、压掉气声，
+      //   对识别是净损失（实测：打开时"五十五元"常被听成"五十五圆"或整段吞字）；
+      // - autoGainControl 保留：离麦远近不同时音量差太多，识别模型更需要稳定电平；
+      // - 仍然只要单声道。
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+        audio: {
+          channelCount: 1,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: true,
+        },
       });
       streamRef.current = stream;
       // Ask for 16 kHz directly; if the browser ignores it the server resamples.
@@ -153,7 +188,13 @@ export function useLocalDictation(onText: (text: string) => void) {
         chunksRef.current.push(new Float32Array(channel));
       };
       source.connect(processor);
-      processor.connect(ctx.destination);
+      // ScriptProcessor 必须连到 destination 才会持续触发 onaudioprocess，
+      // 但**不能直接连**：那会把麦克风原声从扬声器放出来（自听 + 回声），
+      // 通话降噪再和这股回声互相抵消，字就被"吃"掉了。中间串一个 0 增益节点。
+      const mute = ctx.createGain();
+      mute.gain.value = 0;
+      processor.connect(mute);
+      mute.connect(ctx.destination);
       setState("recording");
     } catch {
       // Permission denied or no microphone: say so instead of silently doing nothing.
@@ -186,8 +227,15 @@ export function useLocalDictation(onText: (text: string) => void) {
       return;
     }
     try {
+      // 只裁首尾静音；中间停顿保留（那是说话节奏，不是噪声）。
+      const trimmed = trimSilence(merged, rate);
+      if (trimmed.length < rate * 0.3) {
+        setError("tooShort");
+        setState("idle");
+        return;
+      }
       const body = new FormData();
-      body.append("audio", encodeWav(merged, rate), "answer.wav");
+      body.append("audio", encodeWav(trimmed, rate), "answer.wav");
       const response = await fetch("/api/interview/transcribe", { method: "POST", body });
       if (response.status === 503) {
         setError("unavailable");

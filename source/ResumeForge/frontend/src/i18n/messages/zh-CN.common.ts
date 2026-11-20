@@ -12,6 +12,10 @@ const common = {
   "common.action.batchSelect": "批量选择",
   "common.action.stop": "停止",
   "common.retry": "重试",
+  /** 路由级错误页：回首页（列表页出错时，回首页是唯一确定能用的出口）。 */
+  "common.errorBoundary.home": "回首页",
+  /** 前端产物刚更新、旧页面还在引用旧文件名时的过渡文案。 */
+  "common.errorBoundary.updating": "正在更新到最新版本…",
   "common.errorBoundary.title.moduleLoad": "页面代码没能加载完整",
   "common.errorBoundary.title.generic": "页面暂时无法显示",
   "common.errorBoundary.body.moduleLoad":
