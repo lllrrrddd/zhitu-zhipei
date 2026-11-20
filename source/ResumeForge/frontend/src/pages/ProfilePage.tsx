@@ -65,8 +65,15 @@ export default function ProfilePage() {
   const handleStartEditing = useCallback(() => {
     if (!profile.loading && !profile.loadError) profileSetEditing(true);
   }, [profile.loadError, profile.loading, profileSetEditing]);
+  // 只允许自动打开**一次**。
+  // 以前的写法把 `profile.recognition` 这个每渲染都新建的对象放进依赖里，导致 effect
+  // 每渲染重跑一次：用户点关闭 → open 变 false → 重渲染 → effect 又调 openModal()，
+  // 弹窗立刻回来，看起来就是"点关闭没反应"（而 Console 里明明打印了收到关闭请求）。
+  const autoImportOpened = useRef(false);
   useEffect(() => {
+    if (autoImportOpened.current) return;
     if (profile.loading || profile.loadError || searchParams.get("import") !== "1") return;
+    autoImportOpened.current = true;
     handleStartEditing();
     profile.recognition.openModal();
     setSearchParams(
@@ -77,14 +84,7 @@ export default function ProfilePage() {
       },
       { replace: true },
     );
-  }, [
-    handleStartEditing,
-    profile.loading,
-    profile.loadError,
-    profile.recognition,
-    searchParams,
-    setSearchParams,
-  ]);
+  }, [handleStartEditing, profile.loading, profile.loadError, searchParams, setSearchParams]);
   const webform = useProfileWebFormBridge({
     editing: profile.editing,
     saving: profile.saving,
