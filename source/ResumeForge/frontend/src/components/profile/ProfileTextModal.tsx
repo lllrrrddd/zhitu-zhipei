@@ -131,6 +131,21 @@ export default function ProfileTextModal({
   // 空输入时把焦点送回输入框：用户常常以为"粘了"，其实焦点不在框里，
   // Ctrl+V 落到了页面别处。聚焦后提示与下一次粘贴都更顺。
   const textareaRef = useRef<TextAreaRef | null>(null);
+  // 解析耗时可能到分钟级（本机 CPU 模型实测 180 秒）。一个不动的转圈会让人以为卡死，
+  // 所以把"已经等了多少秒"显出来，并提示本地模型较慢——用户至少知道系统在干活。
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!parsing) {
+      setElapsed(0);
+      return;
+    }
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [parsing]);
+
   const handleParse = () => {
     // 用户报"点了没反应"时，这行能立刻区分三种情况：没粘进来（0 字）、
     // 粘进来了但没触发（>0 却没有任何请求）、或确实在跑。只打长度，不打内容。
@@ -258,7 +273,13 @@ export default function ProfileTextModal({
               <Spin size="small" />
               <Typography.Text type="secondary">
                 {t("profileTextModal.upload.parsing")}
+                {elapsed > 0 ? ` · ${t("profileTextModal.upload.elapsed", { seconds: elapsed })}` : ""}
               </Typography.Text>
+              {elapsed >= 30 ? (
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {t("profileTextModal.upload.slowHint")}
+                </Typography.Text>
+              ) : null}
             </Space>
           )}
           {warnings.length > 0 && (

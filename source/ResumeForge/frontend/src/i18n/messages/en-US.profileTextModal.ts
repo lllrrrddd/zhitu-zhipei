@@ -29,6 +29,8 @@ const profileTextModal = {
   "profileTextModal.input.textAria": "Profile text",
   "profileTextModal.upload.progressAria": "Attachment upload progress",
   "profileTextModal.upload.parsing": "Parsing the details…",
+  "profileTextModal.upload.elapsed": "{seconds}s elapsed",
+  "profileTextModal.upload.slowHint": "A local model can take 1–3 minutes. Please keep this window open.",
   "profileTextModal.separator.warning": "; ",
 } as const;
 

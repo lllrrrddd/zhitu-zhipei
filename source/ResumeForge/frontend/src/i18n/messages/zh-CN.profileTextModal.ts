@@ -44,6 +44,10 @@ const profileTextModal = {
   "profileTextModal.upload.progressAria": "附件上传进度",
   /** 字节已发完、服务端解析中的不确定态提示。 */
   "profileTextModal.upload.parsing": "正在解析资料…",
+  /** 已等待秒数：解析可能要一两分钟，光转圈会像卡死。 */
+  "profileTextModal.upload.elapsed": "已用 {seconds} 秒",
+  /** 超过 30 秒后的安抚说明。 */
+  "profileTextModal.upload.slowHint": "本机模型较慢时通常需要 1–3 分钟，请勿关闭窗口。",
   /** 多条警告合成一句时的分隔符（中文全角分号，英文用 "; "）。 */
   "profileTextModal.separator.warning": "；",
 } as const;
